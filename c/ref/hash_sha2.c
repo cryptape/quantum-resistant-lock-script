@@ -120,13 +120,11 @@ void gen_message_random(unsigned char *R, const unsigned char *sk_prf,
  * Outputs the message digest and the index of the leaf. The index is split in
  * the tree index and the leaf index, for convenient copying to an address.
  */
-int g_test_hash_msg = 0;
 void hash_message(unsigned char *digest, uint64_t *tree, uint32_t *leaf_idx,
                   const unsigned char *R, const unsigned char *pk,
                   const unsigned char *m, unsigned long long mlen,
                   const spx_ctx *ctx)
 {
-    printf("hash mssg: %d\n", ++g_test_hash_msg);
     (void)ctx;
 #define SPX_TREE_BITS (SPX_TREE_HEIGHT * (SPX_D - 1))
 #define SPX_TREE_BYTES ((SPX_TREE_BITS + 7) / 8)

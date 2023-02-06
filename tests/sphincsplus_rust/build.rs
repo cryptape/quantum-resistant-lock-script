@@ -31,7 +31,7 @@ fn get_hash_info() -> (&'static str, Vec<&'static str>) {
 
     (
         "haraka",
-        vec!["ref/haraka.c" "ref/hash_haraka.c",thash_file ],
+        vec!["ref/haraka.c", "ref/hash_haraka.c", thash_file ],
     )
 }
 #[cfg(feature = "sha2")]
@@ -41,7 +41,7 @@ fn get_hash_info() -> (&'static str, Vec<&'static str>) {
     #[cfg(feature = "thashes_simple")]
     let thash_file = "ref/thash_sha2_simple.c";
 
-    ("shake", vec!["ref/sha2.c", "ref/hash_sha2.c", thash_file])
+    ("sha2", vec!["ref/sha2.c", "ref/hash_sha2.c", thash_file])
 }
 #[cfg(feature = "shake")]
 fn get_hash_info() -> (&'static str, Vec<&'static str>) {
