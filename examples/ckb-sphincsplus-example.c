@@ -12,14 +12,14 @@
 #include "ckb-sphincsplus.h"
 #include "ckb_vm_dbg.h"
 
-#define MAX_WITNESS_SIZE 32768
+#define MAX_WITNESS_SIZE 1024 * 64
 #define BLAKE2B_BLOCK_SIZE 32
-#define ONE_BATCH_SIZE 32768
+#define ONE_BATCH_SIZE 1024 * 64
 
 #define SPHINCSPLUS_PUBKEY_SIZE SPX_PK_BYTES
 #define SPHINCSPLUS_SIGN_SIZE (SPX_BYTES + SPX_MLEN)
 
-#define SCRIPT_SIZE 1024 * 32  // 32k
+#define SCRIPT_SIZE 1024 * 64  // 32k
 
 #undef ASSERT
 // #define ASSERT(s)
@@ -29,7 +29,6 @@
 #define CHECK2(cond, code)                              \
   do {                                                  \
     if (!(cond)) {                                      \
-      printf("is check2: %s:%d\n", __FILE__, __LINE__); \
       err = code;                                       \
       ASSERT(0);                                        \
       goto exit;                                        \
@@ -41,7 +40,6 @@
   do {                                                 \
     int code = (_code);                                \
     if (code != 0) {                                   \
-      printf("is check: %s:%d\n", __FILE__, __LINE__); \
       err = code;                                      \
       ASSERT(0);                                       \
       goto exit;                                       \

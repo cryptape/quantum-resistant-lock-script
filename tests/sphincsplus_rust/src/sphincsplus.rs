@@ -1,5 +1,14 @@
 #[link(name = "sphincsplus", kind = "static")]
 extern "C" {
+    // uint32_t get_pk_size();
+    fn get_pk_size() -> u32;
+
+    // uint32_t get_sk_size();
+    fn get_sk_size() -> u32;
+
+    // uint32_t get_sign_size();
+    pub fn get_sign_size() -> u32;
+
     // int crypto_sign_keypair(unsigned char *pk, unsigned char *sk)
     fn crypto_sign_keypair(pk: *mut u8, sk: *mut u8) -> i32;
     // int crypto_sign(unsigned char *sm, unsigned long long *smlen,
@@ -20,19 +29,24 @@ extern "C" {
 }
 
 pub struct SphincsPlus {
-    pub pk: [u8; 128],
-    pub sk: [u8; 128],
+    pub pk: Vec<u8>,
+    pub sk: Vec<u8>,
 }
 
 impl SphincsPlus {
     pub fn new() -> Self {
         let mut s = Self {
-            pk: [0u8; 128],
-            sk: [0u8; 128],
+            pk: Vec::new(),
+            sk: Vec::new(),
         };
+        unsafe {
+            s.pk.resize(get_pk_size() as usize, 0);
+            s.sk.resize(get_sk_size() as usize, 0);
+        }
+
         let ret = unsafe { crypto_sign_keypair(s.pk.as_mut_ptr(), s.sk.as_mut_ptr()) };
         if ret != 0 {
-          panic!("gen keypair failed");
+            panic!("gen keypair failed");
         }
 
         s
@@ -40,7 +54,9 @@ impl SphincsPlus {
 
     pub fn sign(&self, msg: &[u8]) -> Vec<u8> {
         let mut s = Vec::new();
-        s.resize(29792 + 32, 0);
+        unsafe {
+            s.resize(get_sign_size() as usize, 0);
+        };
         let mut sm_len = s.len() as u64;
 
         let ret = unsafe {

@@ -20,8 +20,6 @@ lazy_static! {
         Bytes::from(&include_bytes!("../../../build/sphincsplus_example")[..]);
 }
 
-pub const LOCK_WITNESS_SIZE: usize = 29824;
-
 pub struct TestConfig {
     pub key: sphincsplus_rust::SphincsPlus,
 }
@@ -35,7 +33,7 @@ impl TestConfig {
 }
 
 pub fn gen_tx(dummy: &mut DummyDataLoader, config: &mut TestConfig) -> TransactionView {
-    let lock_args = Bytes::from(config.key.pk[..64].to_vec());
+    let lock_args = Bytes::from(config.key.pk.clone());
     gen_tx_with_grouped_args(dummy, vec![(lock_args, 1)], config)
 }
 
@@ -139,6 +137,7 @@ pub fn sign_tx_by_input_group(
     config: &TestConfig,
 ) -> TransactionView {
     let tx_hash = tx.hash();
+    let witness_len = unsafe { sphincsplus_rust::sphincsplus::get_sign_size() as usize };
 
     let mut signed_witnesses: Vec<packed::Bytes> = tx
         .inputs()
@@ -154,7 +153,7 @@ pub fn sign_tx_by_input_group(
 
                 let zero_lock: Bytes = {
                     let mut buf = Vec::new();
-                    buf.resize(LOCK_WITNESS_SIZE, 0);
+                    buf.resize(witness_len, 0);
                     buf.into()
                 };
 
@@ -173,7 +172,12 @@ pub fn sign_tx_by_input_group(
                     blake2b.update(&witness.raw_data());
                 });
                 blake2b.finalize(&mut message);
-                let witness_lock = { Bytes::from(config.key.sign(&message)) };
+                let witness_lock = {
+                    let start = std::time::Instant::now();
+                    let sign = Bytes::from(config.key.sign(&message));
+                    println!("sign time(native): {} us", start.elapsed().as_micros());
+                    sign
+                };
 
                 witness
                     .as_builder()

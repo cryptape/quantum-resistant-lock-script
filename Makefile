@@ -3,6 +3,9 @@ TARGET := riscv64-unknown-linux-gnu-
 CC := $(TARGET)gcc
 LD := $(TARGET)gcc
 
+PARAMS = sphincs-haraka-128f
+THASH = robust
+
 CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections
 LDFLAGS := -fdata-sections -ffunction-sections
 
@@ -29,7 +32,8 @@ SOURCES = \
 	c/$(SOURCES_DIR)/utilsx1.c \
 	c/$(SOURCES_DIR)/fors.c \
 	c/$(SOURCES_DIR)/sign.c \
-	c/$(SOURCES_DIR)/randombytes.c
+	c/$(SOURCES_DIR)/randombytes.c \
+	c/ckb-sphincsplus.c
 
 HEADERS = \
 	c/$(SOURCES_DIR)/params.h \
@@ -43,14 +47,33 @@ HEADERS = \
 	c/$(SOURCES_DIR)/api.h \
 	c/$(SOURCES_DIR)/hash.h \
 	c/$(SOURCES_DIR)/thash.h \
-	c/$(SOURCES_DIR)/randombytes.h
+	c/$(SOURCES_DIR)/randombytes.h \
+	c/ckb-sphincsplus.h
 
-# shake
-PARAMS = sphincs-shake-256s
-THASH = robust
-
-SOURCES += c/$(SOURCES_DIR)/fips202.c c/$(SOURCES_DIR)/hash_shake.c c/$(SOURCES_DIR)/thash_shake_$(THASH).c
-HEADERS += c/$(SOURCES_DIR)/fips202.h
+ifneq (,$(findstring shake,$(PARAMS)))
+	SOURCES += \
+		c/$(SOURCES_DIR)/fips202.c \
+		c/$(SOURCES_DIR)/hash_shake.c \
+		c/$(SOURCES_DIR)/thash_shake_$(THASH).c
+	HEADERS += \
+		c/$(SOURCES_DIR)/fips202.h
+endif
+ifneq (,$(findstring haraka,$(PARAMS)))
+	SOURCES += \
+		c/$(SOURCES_DIR)/haraka.c \
+		c/$(SOURCES_DIR)/hash_haraka.c \
+		c/$(SOURCES_DIR)/thash_haraka_$(THASH).c
+	HEADERS += \
+		c/$(SOURCES_DIR)/haraka.h
+endif
+ifneq (,$(findstring sha2,$(PARAMS)))
+	SOURCES += \
+		c/$(SOURCES_DIR)/sha2.c \
+		c/$(SOURCES_DIR)/hash_sha2.c \
+		c/$(SOURCES_DIR)/thash_sha2_$(THASH).c
+	HEADERS += \
+		c/$(SOURCES_DIR)/sha2.h
+endif
 
 CFLAGS := $(CFLAGS) -DPARAMS=$(PARAMS) -DCKB_DECLARATION_ONLY -DCKB_C_STDLIB_PRINTF
 

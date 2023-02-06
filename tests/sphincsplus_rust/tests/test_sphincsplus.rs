@@ -25,5 +25,6 @@ fn test_base() {
 
     verifier.set_debug_printer(debug_printer);
     let verify_result = verifier.verify(MAX_CYCLES);
-    verify_result.expect("pass verification");
+    let res = verify_result.expect("pass verification");
+    println!("cycles: {}", res);
 }

@@ -5,6 +5,22 @@ version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+default = ["shake", "hash_256", "hash_options_f", "thashes_robust"]
+haraka = []
+sha2 = []
+shake = []
+
+hash_128 = []
+hash_192 = []
+hash_256 = []
+
+hash_options_f = []
+hash_options_s = []
+
+thashes_robust = []
+thashes_simple = []
+
 [dependencies]
 ckb-chain-spec = "0.107.0"
 ckb-hash = "0.107.0"
