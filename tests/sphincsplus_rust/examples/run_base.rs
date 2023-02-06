@@ -9,8 +9,7 @@ pub fn debug_printer(_script: &Byte32, msg: &str) {
 
 pub const MAX_CYCLES: u64 = std::u64::MAX;
 
-#[test]
-fn test_base() {
+fn main() {
     let mut config = TestConfig::new();
 
     let mut dummy = DummyDataLoader::new();

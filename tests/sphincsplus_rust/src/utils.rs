@@ -1,3 +1,5 @@
+use super::dummy_data_loader::DummyDataLoader;
+use super::sphincsplus::*;
 use ckb_types::core::{
     cell::{CellMetaBuilder, ResolvedTransaction},
     TransactionView,
@@ -13,7 +15,6 @@ use ckb_types::{
 use lazy_static::lazy_static;
 use rand::prelude::Rng;
 use rand::thread_rng;
-use sphincsplus_rust::dummy_data_loader::DummyDataLoader;
 
 lazy_static! {
     pub static ref SPHINCSPLUS_EXAMPLE_BIN: Bytes =
@@ -21,13 +22,13 @@ lazy_static! {
 }
 
 pub struct TestConfig {
-    pub key: sphincsplus_rust::SphincsPlus,
+    pub key: SphincsPlus,
 }
 
 impl TestConfig {
     pub fn new() -> Self {
         Self {
-            key: sphincsplus_rust::SphincsPlus::new(),
+            key: SphincsPlus::new(),
         }
     }
 }
@@ -137,7 +138,7 @@ pub fn sign_tx_by_input_group(
     config: &TestConfig,
 ) -> TransactionView {
     let tx_hash = tx.hash();
-    let witness_len = unsafe { sphincsplus_rust::sphincsplus::get_sign_size() as usize };
+    let witness_len = unsafe { get_sign_size() as usize };
 
     let mut signed_witnesses: Vec<packed::Bytes> = tx
         .inputs()
