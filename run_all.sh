@@ -1,175 +1,24 @@
 echo "" > benchmark.log
 
-# shake f
+HASH_NAMES="shake sha2 haraka"
+HASH_SIZES="128 192 256"
+HASH_OPTIONS="f s"
+THASHS="robust simple"
+for HASH_NAME in ${HASH_NAMES[@]}; do
+    for HASH_SIZE in ${HASH_SIZES[@]}; do
+        for HASH_OPTION in ${HASH_OPTIONS[@]}; do
+            for THASH in ${THASHS[@]}; do
+                echo $HASH_NAME-$HASH_SIZE$HASH_OPTION $THASH
 
-bash ./benchmark.sh shake 128 robust f
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-bash ./benchmark.sh shake 192 robust f
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-bash ./benchmark.sh shake 256 robust f
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-# shake s
-
-bash ./benchmark.sh shake 128 robust s
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-bash ./benchmark.sh shake 192 robust s
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-bash ./benchmark.sh shake 256 robust s
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-# sha2 f
-
-bash ./benchmark.sh sha2 128 robust f
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-bash ./benchmark.sh sha2 192 robust f
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-bash ./benchmark.sh sha2 256 robust f
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-# sha2 s
-
-bash ./benchmark.sh sha2 128 robust s
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-bash ./benchmark.sh sha2 192 robust s
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-bash ./benchmark.sh sha2 256 robust s
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-# haraka f
-
-bash ./benchmark.sh haraka 128 robust f
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-bash ./benchmark.sh haraka 192 robust f
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-bash ./benchmark.sh haraka 256 robust f
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-# haraka s
-
-bash ./benchmark.sh haraka 128 robust s
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-bash ./benchmark.sh haraka 192 robust s
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
-
-bash ./benchmark.sh haraka 256 robust s
-if (( $? == 0 ))
-then
-    echo "success"
-else
-    exit 1
-fi
-echo "" >> benchmark.log
+                bash ./benchmark.sh $HASH_NAME $HASH_SIZE $THASH $HASH_OPTION
+                if (( $? == 0 ))
+                then
+                    echo "success"
+                else
+                    exit 1
+                fi
+                echo "" >> benchmark.log
+            done
+        done
+    done
+done

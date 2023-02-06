@@ -29,6 +29,7 @@ cd ../../
 
 
 echo $PARAMS >> benchmark.log
+echo $THASH >> benchmark.log
 ./tests/sphincsplus_rust/target/debug/examples/run_base >> benchmark.log
 if (( $? == 0 ))
 then
