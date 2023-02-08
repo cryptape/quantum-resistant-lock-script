@@ -78,6 +78,7 @@ endif
 CFLAGS := $(CFLAGS) -DPARAMS=$(PARAMS) -DCKB_DECLARATION_ONLY -DCKB_C_STDLIB_PRINTF
 
 build/sphincsplus_example: examples/ckb-sphincsplus-example.c $(SOURCES) $(HEADERS)
+	mkdir -p build
 	$(CC) $(CFLAGS) -o $@ $(SOURCES) $<
 
 clean:
