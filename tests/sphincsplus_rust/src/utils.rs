@@ -8,12 +8,13 @@ use ckb_types::{
     bytes::Bytes,
     core::{Capacity, DepType, ScriptHashType, TransactionBuilder},
     packed::{
-        self, CellDep, CellInput, CellOutput, OutPoint, Script, WitnessArgs, WitnessArgsBuilder,
+        self, Byte32, CellDep, CellInput, CellOutput, OutPoint, Script, WitnessArgs,
+        WitnessArgsBuilder,
     },
     prelude::*,
 };
 use lazy_static::lazy_static;
-use rand::prelude::Rng;
+use rand::prelude::{Rng, ThreadRng};
 use rand::thread_rng;
 
 lazy_static! {
@@ -22,35 +23,51 @@ lazy_static! {
 }
 
 pub struct TestConfig {
-    pub key: SphincsPlus,
+    key: SphincsPlus,
+    pub sign_error: bool,
+    pub pubkey_error: bool,
+    pub message_error: bool,
+    rng: ThreadRng,
 }
 
 impl TestConfig {
     pub fn new() -> Self {
         Self {
             key: SphincsPlus::new(),
+            sign_error: false,
+            pubkey_error: false,
+            message_error: false,
+            rng: thread_rng(),
         }
+    }
+
+    pub fn gen_rand_buf(&mut self, len: usize) -> Vec<u8> {
+        let mut buf = Vec::<u8>::with_capacity(len);
+        buf.resize(len, 0);
+
+        self.rng.fill(buf.as_mut_slice());
+
+        buf
     }
 }
 
 pub fn gen_tx(dummy: &mut DummyDataLoader, config: &mut TestConfig) -> TransactionView {
-    let lock_args = Bytes::from(config.key.pk.clone());
+    let lock_args = Bytes::from(if config.pubkey_error {
+        config.gen_rand_buf(config.key.pk.len())
+    } else {
+        config.key.pk.clone()
+    });
     gen_tx_with_grouped_args(dummy, vec![(lock_args, 1)], config)
 }
 
 pub fn gen_tx_with_grouped_args(
     dummy: &mut DummyDataLoader,
     grouped_args: Vec<(Bytes, usize)>,
-    _config: &mut TestConfig,
+    config: &mut TestConfig,
 ) -> TransactionView {
-    let mut rng = thread_rng();
     // setup sighash_all dep
     let sighash_all_out_point = {
-        let contract_tx_hash = {
-            let mut buf = [0u8; 32];
-            rng.fill(&mut buf);
-            buf.pack()
-        };
+        let contract_tx_hash = Byte32::from_slice(&config.gen_rand_buf(32)).unwrap();
         OutPoint::new(contract_tx_hash.clone(), 0)
     };
     // dep contract code
@@ -82,11 +99,7 @@ pub fn gen_tx_with_grouped_args(
     for (args, inputs_size) in grouped_args {
         // setup dummy input unlock script
         for _ in 0..inputs_size {
-            let previous_tx_hash = {
-                let mut buf = [0u8; 32];
-                rng.fill(&mut buf);
-                buf.pack()
-            };
+            let previous_tx_hash = Byte32::from_slice(&config.gen_rand_buf(32)).unwrap();
             let previous_out_point = OutPoint::new(previous_tx_hash, 0);
             let script = Script::new_builder()
                 .args(args.pack())
@@ -101,12 +114,9 @@ pub fn gen_tx_with_grouped_args(
                 previous_out_point.clone(),
                 (previous_output_cell.build(), Bytes::new()),
             );
-            let mut random_extra_witness = Vec::<u8>::new();
             let witness_len = 32;
             let witness_len = witness_len;
-
-            random_extra_witness.resize(witness_len, 0);
-            rng.fill(&mut random_extra_witness[..]);
+            let random_extra_witness = config.gen_rand_buf(witness_len);
 
             let witness_args = WitnessArgsBuilder::default()
                 .input_type(Some(Bytes::copy_from_slice(&random_extra_witness[..])).pack())
@@ -135,7 +145,7 @@ pub fn sign_tx_by_input_group(
     tx: TransactionView,
     begin_index: usize,
     len: usize,
-    config: &TestConfig,
+    config: &mut TestConfig,
 ) -> TransactionView {
     let tx_hash = tx.hash();
     let witness_len = unsafe { get_sign_size() as usize };
@@ -174,9 +184,16 @@ pub fn sign_tx_by_input_group(
                 });
                 blake2b.finalize(&mut message);
                 let witness_lock = {
-                    let start = std::time::Instant::now();
-                    let sign = Bytes::from(config.key.sign(&message));
-                    println!("sign time(native): {} us", start.elapsed().as_micros());
+                    if config.message_error {
+                        config.rng.fill(&mut message);
+                    }
+                    // let start = std::time::Instant::now();
+                    let sign = Bytes::from(if config.sign_error {
+                        config.gen_rand_buf(unsafe { get_sign_size() as usize })
+                    } else {
+                        config.key.sign(&message)
+                    });
+                    // println!("sign time(native): {} us", start.elapsed().as_micros());
                     sign
                 };
 
