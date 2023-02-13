@@ -1,3 +1,6 @@
+# note: run in root dir
+
+
 echo "" > benchmark.log
 
 HASH_NAMES="shake sha2 haraka"
@@ -10,7 +13,7 @@ for HASH_NAME in ${HASH_NAMES[@]}; do
             for THASH in ${THASHS[@]}; do
                 echo $HASH_NAME-$HASH_SIZE$HASH_OPTION $THASH
 
-                bash ./benchmark.sh $HASH_NAME $HASH_SIZE $THASH $HASH_OPTION
+                bash ./tools/benchmark.sh $HASH_NAME $HASH_SIZE $THASH $HASH_OPTION
                 if (( $? == 0 ))
                 then
                     echo "success"

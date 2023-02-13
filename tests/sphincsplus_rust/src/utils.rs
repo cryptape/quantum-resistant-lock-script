@@ -18,7 +18,7 @@ use rand::thread_rng;
 
 lazy_static! {
     pub static ref SPHINCSPLUS_EXAMPLE_BIN: Bytes =
-        Bytes::from(&include_bytes!("../../../build/sphincsplus_example")[..]);
+        Bytes::from(&include_bytes!("../../../build/sphincsplus_lock")[..]);
 }
 
 pub struct TestConfig {

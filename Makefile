@@ -3,17 +3,11 @@ TARGET := riscv64-unknown-linux-gnu-
 CC := $(TARGET)gcc
 LD := $(TARGET)gcc
 
-PARAMS = sphincs-haraka-128f
+PARAMS = sphincs-shake-256f
 THASH = robust
 
-CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections
+CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections -nostdlib -Wno-nonnull-compare -DCKB_VM -DPARAMS=$(PARAMS) -DCKB_DECLARATION_ONLY
 LDFLAGS := -fdata-sections -ffunction-sections
-
-ifneq ($(TARGET), )
-	CFLAGS := $(CFLAGS) -nostdlib -Wno-nonnull-compare -DCKB_VM
-else
-	CFLAGS := -fsanitize=address -fsanitize=undefined
-endif
 
 CFLAGS := $(CFLAGS) -Wall -Werror -Wno-nonnull  -Wno-unused-function -g
 LDFLAGS := $(LDFLAGS) -Wl,-static -Wl,--gc-sections
@@ -75,11 +69,19 @@ ifneq (,$(findstring sha2,$(PARAMS)))
 		c/$(SOURCES_DIR)/sha2.h
 endif
 
-CFLAGS := $(CFLAGS) -DPARAMS=$(PARAMS) -DCKB_DECLARATION_ONLY -DCKB_C_STDLIB_PRINTF
+# CFLAGS := $(CFLAGS) -DCKB_C_STDLIB_PRINTF
 
-build/sphincsplus_example: examples/ckb-sphincsplus-example.c $(SOURCES) $(HEADERS)
+# docker pull nervos/ckb-riscv-gnu-toolchain:gnu-bionic-20191012
+BUILDER_DOCKER := nervos/ckb-riscv-gnu-toolchain@sha256:aae8a3f79705f67d505d1f1d5ddc694a4fd537ed1c7e9622420a470d59ba2ec3
+
+all: build/sphincsplus_lock
+
+all-via-docker:
+	docker run --rm -v `pwd`:/code ${BUILDER_DOCKER} bash -c "cd /code && make"
+
+build/sphincsplus_lock: c/ckb-sphincsplus-lock.c $(SOURCES) $(HEADERS)
 	mkdir -p build
 	$(CC) $(CFLAGS) -o $@ $(SOURCES) $<
 
 clean:
-	rm -rf build/sphincsplus_example
+	rm -rf build/sphincsplus_lock
