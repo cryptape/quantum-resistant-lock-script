@@ -13,5 +13,7 @@ jobs:
       run: git submodule update --init
     - name: Build contract
       run: make all-via-docker
+    - name: Run sphincs+ tests
+      run: sh ./tests/sphincsplus/run.sh
     - name: Run sphincs+ rust tests
       run: cd tests/sphincsplus_rust && cargo test
