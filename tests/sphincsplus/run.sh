@@ -3,6 +3,8 @@ workdir=$(
   pwd
 )
 
+mkdir -p build
+
 cd $workdir
 make -f tests/sphincsplus/Makefile
 if (($? == 0)); then
