@@ -14,11 +14,10 @@ int main() {
   randombytes(message, sizeof(message));
 
   uint8_t sign[SPX_BYTES + SPX_MLEN] = {0};
-  size_t sign_len = sizeof(sign);
-  ret = sphincs_plus_sign(message, prikey, sign, &sign_len);
+  ret = sphincs_plus_sign(message, prikey, sign);
   assert(ret == 0);
 
-  ret = sphincs_plus_verify(sign, sign_len, message, pubkey);
+  ret = sphincs_plus_verify(sign, message, pubkey);
   assert(ret == 0);
 
   return 0;

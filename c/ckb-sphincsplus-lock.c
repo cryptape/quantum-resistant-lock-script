@@ -26,24 +26,24 @@
 #define ASSERT(s) (void)0
 
 #undef CHECK2
-#define CHECK2(cond, code)                              \
-  do {                                                  \
-    if (!(cond)) {                                      \
-      err = code;                                       \
-      ASSERT(0);                                        \
-      goto exit;                                        \
-    }                                                   \
+#define CHECK2(cond, code) \
+  do {                     \
+    if (!(cond)) {         \
+      err = code;          \
+      ASSERT(0);           \
+      goto exit;           \
+    }                      \
   } while (0)
 
 #undef CHECK
-#define CHECK(_code)                                   \
-  do {                                                 \
-    int code = (_code);                                \
-    if (code != 0) {                                   \
-      err = code;                                      \
-      ASSERT(0);                                       \
-      goto exit;                                       \
-    }                                                  \
+#define CHECK(_code)    \
+  do {                  \
+    int code = (_code); \
+    if (code != 0) {    \
+      err = code;       \
+      ASSERT(0);        \
+      goto exit;        \
+    }                   \
   } while (0)
 
 enum SPHINCSPLUS_EXAMPLE_ERROR {
@@ -214,7 +214,7 @@ int main() {
   uint8_t sign[SPHINCSPLUS_SIGN_SIZE] = {0};
   CHECK(get_sign(sign));
 
-  err = sphincs_plus_verify(sign, sizeof(sign), message, pubkey);
+  err = sphincs_plus_verify(sign, message, pubkey);
   CHECK2(err == 0, ERROR_SPHINCSPLUS_VERIFY);
 
 exit:

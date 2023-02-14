@@ -116,9 +116,8 @@ int main() {
   randombytes(message, sizeof(message));
 
   uint8_t sign[SPX_BYTES + SPX_MLEN] = {0};
-  size_t sign_len = sizeof(sign);
 
-  if (sphincs_plus_sign(message, sk, sign, &sign_len)) {
+  if (sphincs_plus_sign(message, sk, sign)) {
     printf("sign failed\n");
     return 2;
   }
@@ -150,10 +149,10 @@ int main() {
   getchar();
 
   // for (int i = 0; i < 1000; i++) {
-    if (sphincs_plus_verify(sign, sizeof(sign), NULL, pk)) {
-      printf("verify failed\n");
-      return 2;
-    }
+  if (sphincs_plus_verify(sign, message, pk)) {
+    printf("verify failed\n");
+    return 2;
+  }
   // }
 
   printf("verify done\n");

@@ -5,7 +5,7 @@
 # CC := $(TARGET)gcc
 # LD := $(TARGET)gcc
 
-PARAMS = sphincs-haraka-256f
+PARAMS = sphincs-shake-256f
 THASH = robust
 
 CFLAGS := -fPIC -O0 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections
