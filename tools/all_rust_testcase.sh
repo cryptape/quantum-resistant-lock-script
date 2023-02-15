@@ -13,7 +13,7 @@ for HASH_NAME in ${HASH_NAMES[@]}; do
             for THASH in ${THASHS[@]}; do
                 echo $HASH_NAME-$HASH_SIZE$HASH_OPTION $THASH
 
-                bash ./tools/benchmark.sh $HASH_NAME $HASH_SIZE $THASH $HASH_OPTION
+                bash ./tools/test_case_rust.sh $HASH_NAME $HASH_SIZE $THASH $HASH_OPTION
                 if (( $? == 0 ))
                 then
                     echo "success"
