@@ -13,6 +13,8 @@
 #define CRYPTO_BYTES SPX_BYTES
 #define CRYPTO_SEEDBYTES 3 * SPX_N
 
+int crypto_init_context(crypto_type type);
+
 /*
  * Returns the length of a secret key, in bytes
  */

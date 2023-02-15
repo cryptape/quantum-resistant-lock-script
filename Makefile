@@ -18,6 +18,7 @@ CFLAGS := $(CFLAGS) -I c/ref
 SOURCES_DIR = ref
 
 SOURCES = \
+	c/$(SOURCES_DIR)/params.c \
 	c/$(SOURCES_DIR)/address.c \
 	c/$(SOURCES_DIR)/merkle.c \
 	c/$(SOURCES_DIR)/wots.c \

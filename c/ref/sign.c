@@ -13,6 +13,25 @@
 #include "utils.h"
 #include "wots.h"
 
+int crypto_init_context(crypto_type type) {
+  switch (type) {
+    case CRYPTO_TYPE_SHAKE_256F_ROBUST:
+      return init_shake_256f_robust();
+    default:
+      return 1;
+  }
+}
+
+void init_spx_ctx(spx_ctx *ctx, uint8_t *buffer, size_t buffer_len) {
+  if (buffer_len < get_spx_ctx_buf_len()) {
+    // TODO
+    return;
+  }
+  ctx->pub_seed = buffer;
+  buffer += SPX_N;
+  ctx->sk_seed = buffer;
+}
+
 /*
  * Returns the length of a secret key, in bytes
  */
@@ -45,6 +64,8 @@ unsigned long long crypto_sign_seedbytes(void) { return CRYPTO_SEEDBYTES; }
 int crypto_sign_seed_keypair(unsigned char *pk, unsigned char *sk,
                              const unsigned char *seed) {
   spx_ctx ctx;
+  uint8_t ctx_buf[get_spx_ctx_buf_len()];
+  init_spx_ctx(&ctx, ctx_buf, sizeof(ctx_buf));
 
   /* Initialize SK_SEED, SK_PRF and PUB_SEED from seed. */
   memcpy(sk, seed, CRYPTO_SEEDBYTES);
@@ -85,6 +106,8 @@ int crypto_sign_keypair(unsigned char *pk, unsigned char *sk) {
 int crypto_sign_signature(uint8_t *sig, size_t *siglen, const uint8_t *m,
                           size_t mlen, const uint8_t *sk) {
   spx_ctx ctx;
+  uint8_t ctx_buf[get_spx_ctx_buf_len()];
+  init_spx_ctx(&ctx, ctx_buf, sizeof(ctx_buf));
 
   const unsigned char *sk_prf = sk + SPX_N;
   const unsigned char *pk = sk + 2 * SPX_N;
@@ -152,6 +175,9 @@ int crypto_sign_signature(uint8_t *sig, size_t *siglen, const uint8_t *m,
 int crypto_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
                        size_t mlen, const uint8_t *pk) {
   spx_ctx ctx;
+  uint8_t ctx_buf[get_spx_ctx_buf_len()];
+  init_spx_ctx(&ctx, ctx_buf, sizeof(ctx_buf));
+  
   const unsigned char *pub_root = pk + SPX_N;
   unsigned char mhash[SPX_FORS_MSG_BYTES];
   unsigned char wots_pk[SPX_WOTS_BYTES];

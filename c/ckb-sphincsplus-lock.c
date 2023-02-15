@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include "ckb-sphincsplus.h"
+#include "api.h"
 #include "ckb_vm_dbg.h"
 
 #define MAX_WITNESS_SIZE 1024 * 64
@@ -171,7 +172,7 @@ exit:
 int get_sign(uint8_t *sign) {
   int err = CKB_SUCCESS;
 
-  uint8_t buf[SPHINCSPLUS_SIGN_SIZE + 56] = {0};
+  uint8_t buf[SPHINCSPLUS_SIGN_SIZE + 56];
   uint64_t len = sizeof(buf);
   CHECK(ckb_load_witness(buf, &len, 0, 0, CKB_SOURCE_GROUP_INPUT));
   CHECK2((len == sizeof(buf)), ERROR_SPHINCSPLUS_WITNESS);
@@ -204,14 +205,15 @@ exit:
 }
 
 int main() {
+  crypto_init_context(CRYPTO_TYPE_SHAKE_256F_ROBUST);
+
   int err = CKB_SUCCESS;
-  uint8_t message[BLAKE2B_BLOCK_SIZE] = {0};
+  uint8_t message[BLAKE2B_BLOCK_SIZE];
+  uint8_t pubkey[SPHINCSPLUS_PUBKEY_SIZE];
+  uint8_t sign[SPHINCSPLUS_SIGN_SIZE];
+
   CHECK(generate_sighash_all(message, sizeof(message)));
-
-  uint8_t pubkey[SPHINCSPLUS_PUBKEY_SIZE] = {0};
   CHECK(get_public_key(pubkey));
-
-  uint8_t sign[SPHINCSPLUS_SIGN_SIZE] = {0};
   CHECK(get_sign(sign));
 
   err = sphincs_plus_verify(sign, message, pubkey);

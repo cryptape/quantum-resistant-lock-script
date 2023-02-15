@@ -18,6 +18,7 @@ CFLAGS := $(CFLAGS) -I c/ref
 SOURCES_DIR = ref
 
 SOURCES = \
+	c/$(SOURCES_DIR)/params.c \
 	c/$(SOURCES_DIR)/address.c \
 	c/$(SOURCES_DIR)/merkle.c \
 	c/$(SOURCES_DIR)/wots.c \
@@ -74,7 +75,7 @@ all: build/test_sphincsplus
 all-via-docker:
 	docker run --rm -v `pwd`:/code ${BUILDER_DOCKER} bash -c "cd /code && make"
 
-build/test_sphincsplus: tests/sphincsplus/ckb-sphincs-plus.c $(SOURCES) $(HEADERS)
+build/test_sphincsplus: tests/sphincsplus/test-ckb-sphincs-plus.c $(SOURCES) $(HEADERS)
 	mkdir -p build
 	$(CC) $(CFLAGS) -o $@ $(SOURCES) $<
 
