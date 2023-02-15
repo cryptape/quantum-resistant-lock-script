@@ -2,19 +2,19 @@
 #define SPX_UTILS_H
 
 #include <stdint.h>
-#include "params.h"
-#include "context.h"
 
+#include "context.h"
+#include "params.h"
 
 /* To support MSVC use alloca() instead of VLAs. See #20. */
 #ifdef _MSC_VER
 /* MSVC defines _alloca in malloc.h */
-# include <malloc.h>
+#include <malloc.h>
 /* Note: _malloca(), which is recommended over deprecated _alloca,
-   requires that you call _freea(). So we stick with _alloca */ 
-# define SPX_VLA(__t,__x,__s) __t *__x = (__t*)_alloca((__s)*sizeof(__t))
+   requires that you call _freea(). So we stick with _alloca */
+#define SPX_VLA(__t, __x, __s) __t *__x = (__t *)_alloca((__s) * sizeof(__t))
 #else
-# define SPX_VLA(__t,__x,__s) __t __x[__s]
+#define SPX_VLA(__t, __x, __s) __t __x[__s]
 #endif
 
 /**
@@ -51,14 +51,12 @@ void compute_root(unsigned char *root, const unsigned char *leaf,
  * it is possible to continue counting indices across trees.
  */
 #define treehash SPX_NAMESPACE(treehash)
-void treehash(unsigned char *root, unsigned char *auth_path,
-              const spx_ctx* ctx,
+void treehash(unsigned char *root, unsigned char *auth_path, const spx_ctx *ctx,
               uint32_t leaf_idx, uint32_t idx_offset, uint32_t tree_height,
-              void (*gen_leaf)(
-                 unsigned char* /* leaf */,
-                 const spx_ctx* ctx /* ctx */,
-                 uint32_t /* addr_idx */, const uint32_t[8] /* tree_addr */),
+              void (*gen_leaf)(unsigned char * /* leaf */,
+                               const spx_ctx *ctx /* ctx */,
+                               uint32_t /* addr_idx */,
+                               const uint32_t[8] /* tree_addr */),
               uint32_t tree_addr[8]);
-
 
 #endif

@@ -11,7 +11,7 @@
 #define CRYPTO_SECRETKEYBYTES SPX_SK_BYTES
 #define CRYPTO_PUBLICKEYBYTES SPX_PK_BYTES
 #define CRYPTO_BYTES SPX_BYTES
-#define CRYPTO_SEEDBYTES 3*SPX_N
+#define CRYPTO_SEEDBYTES 3 * SPX_N
 
 /*
  * Returns the length of a secret key, in bytes
@@ -51,14 +51,14 @@ int crypto_sign_keypair(unsigned char *pk, unsigned char *sk);
 /**
  * Returns an array containing a detached signature.
  */
-int crypto_sign_signature(uint8_t *sig, size_t *siglen,
-                          const uint8_t *m, size_t mlen, const uint8_t *sk);
+int crypto_sign_signature(uint8_t *sig, size_t *siglen, const uint8_t *m,
+                          size_t mlen, const uint8_t *sk);
 
 /**
  * Verifies a detached signature and message under a given public key.
  */
-int crypto_sign_verify(const uint8_t *sig, size_t siglen,
-                       const uint8_t *m, size_t mlen, const uint8_t *pk);
+int crypto_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
+                       size_t mlen, const uint8_t *pk);
 
 /**
  * Returns an array containing the signature followed by the message.
