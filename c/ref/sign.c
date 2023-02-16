@@ -16,14 +16,28 @@
 static size_t get_spx_ctx_buf_len() { return SPX_N + SPX_N; }
 
 int crypto_init_context(crypto_type type) {
+  g_context.type = type;
+
+#define SWITCH_CASE_TYPE(HASH_NAME, hash_name, hash_size, HASH_OPTION, \
+                         hash_option, THASH, thash)                    \
+  case CRYPTO_TYPE_##HASH_NAME##_##hash_size##HASH_OPTION##_##THASH:   \
+    return init_##hash_name##_##hash_size##hash_option##_##thash();
+
+#define SWITCH_CASE_SHAKE_TYPE(size)                          \
+  SWITCH_CASE_TYPE(SHAKE, shake, size, S, s, ROBUST, robust); \
+  SWITCH_CASE_TYPE(SHAKE, shake, size, S, s, SIMPLE, simple); \
+  SWITCH_CASE_TYPE(SHAKE, shake, size, F, f, ROBUST, robust); \
+  SWITCH_CASE_TYPE(SHAKE, shake, size, F, f, SIMPLE, simple);
+
   switch (type) {
-    case CRYPTO_TYPE_SHAKE_256F_ROBUST:
-      return init_shake_256f_robust();
-    case CRYPTO_TYPE_SHAKE_256F_SIMPLE:
-      return init_shake_256f_simple();
+    SWITCH_CASE_SHAKE_TYPE(128);
+    SWITCH_CASE_SHAKE_TYPE(192);
+    SWITCH_CASE_SHAKE_TYPE(256);
     default:
       return 1;
   }
+
+#undef SWITCH_CASE_TYPE
 }
 
 void init_spx_ctx(spx_ctx *ctx, uint8_t *buffer, size_t buffer_len) {

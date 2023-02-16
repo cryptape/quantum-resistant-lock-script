@@ -15,11 +15,9 @@
 
 // #include "ckb_vm_dbg.h"
 
-#define SPX_MLEN 32
-
 uint32_t get_pk_size() { return SPX_PK_BYTES; }
 uint32_t get_sk_size() { return SPX_SK_BYTES; }
-uint32_t get_sign_size() { return SPX_BYTES + SPX_N; }
+uint32_t get_sign_size() { return SPX_BYTES + SPX_MLEN; }
 
 #ifndef CKB_VM
 

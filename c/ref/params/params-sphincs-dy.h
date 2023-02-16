@@ -7,6 +7,19 @@
 #include "context.h"
 
 typedef enum {
+
+  CRYPTO_TYPE_SHAKE_128S_ROBUST,
+  CRYPTO_TYPE_SHAKE_128S_SIMPLE,
+  CRYPTO_TYPE_SHAKE_128F_ROBUST,
+  CRYPTO_TYPE_SHAKE_128F_SIMPLE,
+
+  CRYPTO_TYPE_SHAKE_192S_ROBUST,
+  CRYPTO_TYPE_SHAKE_192S_SIMPLE,
+  CRYPTO_TYPE_SHAKE_192F_ROBUST,
+  CRYPTO_TYPE_SHAKE_192F_SIMPLE,
+
+  CRYPTO_TYPE_SHAKE_256S_ROBUST,
+  CRYPTO_TYPE_SHAKE_256S_SIMPLE,
   CRYPTO_TYPE_SHAKE_256F_ROBUST,
   CRYPTO_TYPE_SHAKE_256F_SIMPLE,
 } crypto_type;
@@ -47,8 +60,25 @@ typedef struct {
 
 extern crypto_context g_context;
 
-int init_shake_256f_robust();
-int init_shake_256f_simple();
+#define GEN_INIT_HASH_FUNC(name, size, option, thash) \
+  int init_##name##_##size##option##_##thash();
+
+GEN_INIT_HASH_FUNC(shake, 128, s, robust);
+GEN_INIT_HASH_FUNC(shake, 128, f, robust);
+GEN_INIT_HASH_FUNC(shake, 128, s, simple);
+GEN_INIT_HASH_FUNC(shake, 128, f, simple);
+
+GEN_INIT_HASH_FUNC(shake, 192, s, robust);
+GEN_INIT_HASH_FUNC(shake, 192, f, robust);
+GEN_INIT_HASH_FUNC(shake, 192, s, simple);
+GEN_INIT_HASH_FUNC(shake, 192, f, simple);
+
+GEN_INIT_HASH_FUNC(shake, 256, s, robust);
+GEN_INIT_HASH_FUNC(shake, 256, f, robust);
+GEN_INIT_HASH_FUNC(shake, 256, s, simple);
+GEN_INIT_HASH_FUNC(shake, 256, f, simple);
+
+#undef GEN_INIT_HASH_FUNC
 
 #define SPX_N g_context.spx_n
 #define SPX_FULL_HEIGHT g_context.spx_full_height

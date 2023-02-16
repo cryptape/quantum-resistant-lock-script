@@ -77,6 +77,4 @@
 
 #include "../shake_offsets.h"
 
-#define thash thash_shake_robust
-
 #endif
