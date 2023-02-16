@@ -19,6 +19,8 @@ int crypto_init_context(crypto_type type) {
   switch (type) {
     case CRYPTO_TYPE_SHAKE_256F_ROBUST:
       return init_shake_256f_robust();
+    case CRYPTO_TYPE_SHAKE_256F_SIMPLE:
+      return init_shake_256f_simple();
     default:
       return 1;
   }

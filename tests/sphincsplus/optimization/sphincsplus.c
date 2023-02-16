@@ -87,8 +87,8 @@ int load_sign(uint8_t* sign, uint8_t* message) {
 #if defined(SP_GEN_KEYPAIR)
 
 int main() {
-  uint8_t pk[SPX_PK_BYTES] = {0};
-  uint8_t sk[SPX_SK_BYTES] = {0};
+  uint8_t pk[SPX_PK_BYTES];
+  uint8_t sk[SPX_SK_BYTES];
 
   int ret = sphincs_plus_generate_keypair(pk, sk);
   if (ret) {

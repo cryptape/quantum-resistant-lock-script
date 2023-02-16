@@ -8,6 +8,7 @@
 
 typedef enum {
   CRYPTO_TYPE_SHAKE_256F_ROBUST,
+  CRYPTO_TYPE_SHAKE_256F_SIMPLE,
 } crypto_type;
 
 typedef void (*func_spx_thash)(unsigned char *out, const unsigned char *in,
@@ -47,6 +48,7 @@ typedef struct {
 extern crypto_context g_context;
 
 int init_shake_256f_robust();
+int init_shake_256f_simple();
 
 #define SPX_N g_context.spx_n
 #define SPX_FULL_HEIGHT g_context.spx_full_height
