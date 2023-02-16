@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 
+#include "thash.h"
+
 crypto_context g_context;
 
 int init_shake_256f_robust() {
@@ -53,6 +55,8 @@ int init_shake_256f_robust() {
   g_context.spx_sk_bytes = (2 * g_context.spx_n + g_context.spx_pk_bytes);
 
   g_context.crypto_seedbytes = 3 * g_context.spx_n;
+
+  g_context.func_thash = thash_shake_robust;
 
   return 0;
 }

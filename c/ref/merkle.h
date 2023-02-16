@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "context.h"
+#include "params.h"
 
 /* Generate a Merkle signature (WOTS signature followed by the Merkle */
 /* authentication path) */

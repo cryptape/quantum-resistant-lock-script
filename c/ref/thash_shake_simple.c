@@ -10,8 +10,9 @@
 /**
  * Takes an array of inblocks concatenated arrays of SPX_N bytes.
  */
-void thash(unsigned char *out, const unsigned char *in, unsigned int inblocks,
-           const spx_ctx *ctx, uint32_t addr[8]) {
+void thash_shake_simple(unsigned char *out, const unsigned char *in,
+                        unsigned int inblocks, const spx_ctx *ctx,
+                        uint32_t addr[8]) {
   SPX_VLA(uint8_t, buf, SPX_N + SPX_ADDR_BYTES + inblocks * SPX_N);
 
   memcpy(buf, ctx->pub_seed, SPX_N);

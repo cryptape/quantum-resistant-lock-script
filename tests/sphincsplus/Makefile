@@ -1,7 +1,7 @@
 CC := clang
 LD := clang
 
-PARAMS = sphincs-shake-256f
+PARAMS = sphincs-dy
 THASH = robust
 
 CFLAGS := -fPIC -O0 -fno-builtin-printf -fno-builtin-memcmp -fvisibility=hidden -fdata-sections -ffunction-sections -DPARAMS=$(PARAMS) -DCKB_DECLARATION_ONLY
@@ -45,14 +45,15 @@ HEADERS = \
 	c/$(SOURCES_DIR)/randombytes.h \
 	c/ckb-sphincsplus.h
 
-ifneq (,$(findstring shake,$(PARAMS)))
-	SOURCES += \
-		c/$(SOURCES_DIR)/fips202.c \
-		c/$(SOURCES_DIR)/hash_shake.c \
-		c/$(SOURCES_DIR)/thash_shake_$(THASH).c
-	HEADERS += \
-		c/$(SOURCES_DIR)/fips202.h
-endif
+SOURCES += \
+	c/$(SOURCES_DIR)/fips202.c \
+	c/$(SOURCES_DIR)/hash_shake.c
+HEADERS += \
+	c/$(SOURCES_DIR)/fips202.h
+
+SOURCES += c/$(SOURCES_DIR)/thash_shake_robust.c
+SOURCES += c/$(SOURCES_DIR)/thash_shake_simple.c
+
 ifneq (,$(findstring haraka,$(PARAMS)))
 	SOURCES += \
 		c/$(SOURCES_DIR)/haraka.c \

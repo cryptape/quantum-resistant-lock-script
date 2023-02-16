@@ -3,7 +3,7 @@
 
 #include <string.h>
 
-#include "context.h"
+#include "params.h"
 
 /*
  * This is here to provide an interface to the internal wots_gen_leafx1

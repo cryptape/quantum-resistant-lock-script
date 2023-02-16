@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#include "params.h"
-
 typedef struct {
   uint8_t* pub_seed;
   uint8_t* sk_seed;
@@ -24,7 +22,5 @@ typedef struct {
   uint32_t tweaked256_rc32[10][8];
 #endif
 } spx_ctx;
-
-static size_t get_spx_ctx_buf_len() { return SPX_N + SPX_N; }
 
 #endif
