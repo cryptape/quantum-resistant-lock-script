@@ -9,16 +9,15 @@
 #include <molecule/blockchain.h>
 #include <stdio.h>
 
-#include "ckb-sphincsplus.h"
 #include "api.h"
+#include "ckb-sphincsplus.h"
 #include "ckb_vm_dbg.h"
 
 #define MAX_WITNESS_SIZE 1024 * 64
 #define BLAKE2B_BLOCK_SIZE 32
 #define ONE_BATCH_SIZE 1024 * 64
 
-#define SPHINCSPLUS_PUBKEY_SIZE SPX_PK_BYTES
-#define SPHINCSPLUS_SIGN_SIZE (SPX_BYTES + SPX_MLEN)
+#define SPHINCSPLUS_PUBKEY_MAX_SIZE 1024
 
 #define SCRIPT_SIZE 1024 * 64  // 32k
 
@@ -54,6 +53,7 @@ enum SPHINCSPLUS_EXAMPLE_ERROR {
   ERROR_SPHINCSPLUS_ARGS,
   ERROR_SPHINCSPLUS_WITNESS,
   ERROR_SPHINCSPLUS_VERIFY,
+  ERROR_SPHINCSPLUS_HASH_TYPE,
 };
 
 static int extract_witness_lock(uint8_t *witness, uint64_t len,
@@ -172,17 +172,23 @@ exit:
 int get_sign(uint8_t *sign) {
   int err = CKB_SUCCESS;
 
-  uint8_t buf[SPHINCSPLUS_SIGN_SIZE + 56];
+  size_t sign_size = sphincs_plus_get_sign_size();
+  uint8_t buf[sign_size + 56];
   uint64_t len = sizeof(buf);
   CHECK(ckb_load_witness(buf, &len, 0, 0, CKB_SOURCE_GROUP_INPUT));
   CHECK2((len == sizeof(buf)), ERROR_SPHINCSPLUS_WITNESS);
 
-  memcpy(sign, buf + 20, SPHINCSPLUS_SIGN_SIZE);
+  memcpy(sign, buf + 20, sign_size);
 exit:
   return err;
 }
 
-int get_public_key(uint8_t *buf) {
+// Args data:
+// |---------------------|--------------|
+// |  hash type 4 bytes  |  public key  |
+//
+// note: different hash types have different public key lengths
+int get_public_key(uint8_t *pub_key) {
   int err = CKB_SUCCESS;
 
   uint8_t script[SCRIPT_SIZE];
@@ -196,26 +202,35 @@ int get_public_key(uint8_t *buf) {
   mol_seg_t args_seg = MolReader_Script_get_args(&script_seg);
   mol_seg_t args_bytes_seg = MolReader_Bytes_raw_bytes(&args_seg);
 
-  CHECK2((args_bytes_seg.size == SPHINCSPLUS_PUBKEY_SIZE),
+  CHECK2((args_bytes_seg.size > sizeof(uint32_t)), ERROR_SPHINCSPLUS_ARGS);
+  uint32_t hash_type = 0;
+  memcpy(&hash_type, args_bytes_seg.ptr, sizeof(uint32_t));
+  CHECK2(!sphincs_plus_init(hash_type), ERROR_SPHINCSPLUS_HASH_TYPE);
+
+  size_t pubkey_size = sphincs_plus_get_pk_size();
+  CHECK2((args_bytes_seg.size == sizeof(uint32_t)) + pubkey_size,
          ERROR_SPHINCSPLUS_ARGS);
-  memcpy(buf, args_bytes_seg.ptr, args_bytes_seg.size);
+  memcpy(pub_key, args_bytes_seg.ptr + sizeof(uint32_t), pubkey_size);
 
 exit:
   return err;
 }
 
 int main() {
-  crypto_init_context(CRYPTO_TYPE_SHAKE_256F_ROBUST);
-
   int err = CKB_SUCCESS;
+
+  // signature data size depends on args data(hash type)
+  uint8_t pubkey[SPHINCSPLUS_PUBKEY_MAX_SIZE];
+  err = get_public_key(pubkey);
+  if (err) {
+    return err;
+  }
+
   uint8_t message[BLAKE2B_BLOCK_SIZE];
-  uint8_t pubkey[SPHINCSPLUS_PUBKEY_SIZE];
-  uint8_t sign[SPHINCSPLUS_SIGN_SIZE];
-
+  uint8_t sign[sphincs_plus_get_sign_size()];
   CHECK(generate_sighash_all(message, sizeof(message)));
-  CHECK(get_public_key(pubkey));
-  CHECK(get_sign(sign));
 
+  CHECK(get_sign(sign));
   err = sphincs_plus_verify(sign, message, pubkey);
   CHECK2(err == 0, ERROR_SPHINCSPLUS_VERIFY);
 

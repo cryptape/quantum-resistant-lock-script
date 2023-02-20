@@ -1,10 +1,7 @@
 CC := clang
 LD := clang
 
-PARAMS = sphincs-dy
-THASH = robust
-
-CFLAGS := -fPIC -O0 -fno-builtin-printf -fno-builtin-memcmp -fvisibility=hidden -fdata-sections -ffunction-sections -DPARAMS=$(PARAMS) -DCKB_DECLARATION_ONLY
+CFLAGS := -fPIC -O0 -fno-builtin-printf -fno-builtin-memcmp -fvisibility=hidden -fdata-sections -ffunction-sections -DCKB_DECLARATION_ONLY
 LDFLAGS := -fdata-sections -ffunction-sections
 
 CFLAGS := $(CFLAGS) -Wall -Werror -Wno-nonnull  -Wno-unused-function -g
@@ -45,31 +42,32 @@ HEADERS = \
 	c/$(SOURCES_DIR)/randombytes.h \
 	c/ckb-sphincsplus.h
 
+# shake
 SOURCES += \
 	c/$(SOURCES_DIR)/fips202.c \
-	c/$(SOURCES_DIR)/hash_shake.c
+	c/$(SOURCES_DIR)/hash_shake.c \
+	c/$(SOURCES_DIR)/thash_shake_robust.c\
+	c/$(SOURCES_DIR)/thash_shake_simple.c
 HEADERS += \
 	c/$(SOURCES_DIR)/fips202.h
 
-SOURCES += c/$(SOURCES_DIR)/thash_shake_robust.c
-SOURCES += c/$(SOURCES_DIR)/thash_shake_simple.c
+# sha2
+SOURCES += \
+	c/$(SOURCES_DIR)/sha2.c \
+	c/$(SOURCES_DIR)/hash_sha2.c \
+	c/$(SOURCES_DIR)/thash_sha2_robust.c \
+	c/$(SOURCES_DIR)/thash_sha2_simple.c
+HEADERS += \
+	c/$(SOURCES_DIR)/sha2.h
 
-ifneq (,$(findstring haraka,$(PARAMS)))
-	SOURCES += \
-		c/$(SOURCES_DIR)/haraka.c \
-		c/$(SOURCES_DIR)/hash_haraka.c \
-		c/$(SOURCES_DIR)/thash_haraka_$(THASH).c
-	HEADERS += \
-		c/$(SOURCES_DIR)/haraka.h
-endif
-ifneq (,$(findstring sha2,$(PARAMS)))
-	SOURCES += \
-		c/$(SOURCES_DIR)/sha2.c \
-		c/$(SOURCES_DIR)/hash_sha2.c \
-		c/$(SOURCES_DIR)/thash_sha2_$(THASH).c
-	HEADERS += \
-		c/$(SOURCES_DIR)/sha2.h
-endif
+# haraka
+SOURCES += \
+	c/$(SOURCES_DIR)/haraka.c \
+	c/$(SOURCES_DIR)/hash_haraka.c \
+	c/$(SOURCES_DIR)/thash_haraka_robust.c \
+	c/$(SOURCES_DIR)/thash_haraka_simple.c
+HEADERS += \
+	c/$(SOURCES_DIR)/haraka.h
 
 all: build/test_sphincsplus
 

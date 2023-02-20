@@ -7,23 +7,22 @@
 #include "thash.h"
 #include "utils.h"
 
-#if SPX_SHA512
-static void thash_512(unsigned char *out, const unsigned char *in,
-                      unsigned int inblocks, const spx_ctx *ctx,
-                      uint32_t addr[8]);
-#endif
+static void thash_sha2_512_simple(unsigned char *out, const unsigned char *in,
+                                  unsigned int inblocks, const spx_ctx *ctx,
+                                  uint32_t addr[8]);
 
 /**
  * Takes an array of inblocks concatenated arrays of SPX_N bytes.
  */
-void thash(unsigned char *out, const unsigned char *in, unsigned int inblocks,
-           const spx_ctx *ctx, uint32_t addr[8]) {
-#if SPX_SHA512
-  if (inblocks > 1) {
-    thash_512(out, in, inblocks, ctx, addr);
-    return;
+void thash_sha2_simple(unsigned char *out, const unsigned char *in,
+                       unsigned int inblocks, const spx_ctx *ctx,
+                       uint32_t addr[8]) {
+  if (SPX_SHA512 == 1) {
+    if (inblocks > 1) {
+      thash_sha2_512_simple(out, in, inblocks, ctx, addr);
+      return;
+    }
   }
-#endif
 
   unsigned char outbuf[SPX_SHA256_OUTPUT_BYTES];
   uint8_t sha2_state[40];
@@ -40,10 +39,9 @@ void thash(unsigned char *out, const unsigned char *in, unsigned int inblocks,
   memcpy(out, outbuf, SPX_N);
 }
 
-#if SPX_SHA512
-static void thash_512(unsigned char *out, const unsigned char *in,
-                      unsigned int inblocks, const spx_ctx *ctx,
-                      uint32_t addr[8]) {
+static void thash_sha2_512_simple(unsigned char *out, const unsigned char *in,
+                                  unsigned int inblocks, const spx_ctx *ctx,
+                                  uint32_t addr[8]) {
   unsigned char outbuf[SPX_SHA512_OUTPUT_BYTES];
   uint8_t sha2_state[72];
   SPX_VLA(uint8_t, buf, SPX_SHA256_ADDR_BYTES + inblocks * SPX_N);
@@ -58,4 +56,3 @@ static void thash_512(unsigned char *out, const unsigned char *in,
                       SPX_SHA256_ADDR_BYTES + inblocks * SPX_N);
   memcpy(out, outbuf, SPX_N);
 }
-#endif

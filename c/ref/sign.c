@@ -13,41 +13,45 @@
 #include "utils.h"
 #include "wots.h"
 
-static size_t get_spx_ctx_buf_len() { return SPX_N + SPX_N; }
+#define SPX_CTX_SHA2_STATE_SEEDED_SIZE 40
+#define SPX_CTX_SHA2_STATE_SEEDED_512_SIZE 72
+#define SPX_CTX_HARAKA_TWEAKED512_RC64_SIZE 8 * 10 * 8
+#define SPX_CTX_HARAKA_TWEAKED256_RC32_SIZE 4 * 10 * 8
 
-int crypto_init_context(crypto_type type) {
-  g_context.type = type;
-
-#define SWITCH_CASE_TYPE(HASH_NAME, hash_name, hash_size, HASH_OPTION, \
-                         hash_option, THASH, thash)                    \
-  case CRYPTO_TYPE_##HASH_NAME##_##hash_size##HASH_OPTION##_##THASH:   \
-    return init_##hash_name##_##hash_size##hash_option##_##thash();
-
-#define SWITCH_CASE_SHAKE_TYPE(size)                          \
-  SWITCH_CASE_TYPE(SHAKE, shake, size, S, s, ROBUST, robust); \
-  SWITCH_CASE_TYPE(SHAKE, shake, size, S, s, SIMPLE, simple); \
-  SWITCH_CASE_TYPE(SHAKE, shake, size, F, f, ROBUST, robust); \
-  SWITCH_CASE_TYPE(SHAKE, shake, size, F, f, SIMPLE, simple);
-
-  switch (type) {
-    SWITCH_CASE_SHAKE_TYPE(128);
-    SWITCH_CASE_SHAKE_TYPE(192);
-    SWITCH_CASE_SHAKE_TYPE(256);
-    default:
-      return 1;
+static size_t get_spx_ctx_buf_len() {
+  size_t len = SPX_N + SPX_N;
+  if (g_context.hash_type == CRYPTO_HASH_TYPE_SHA2) {
+    len += SPX_CTX_SHA2_STATE_SEEDED_SIZE;
+  } else if (g_context.hash_type == CRYPTO_HASH_TYPE_HARAKA) {
+    len += SPX_CTX_HARAKA_TWEAKED512_RC64_SIZE;
+    len += SPX_CTX_HARAKA_TWEAKED256_RC32_SIZE;
   }
-
-#undef SWITCH_CASE_TYPE
+  if (g_context.spx_sha512 == 1) {
+    len += SPX_CTX_SHA2_STATE_SEEDED_512_SIZE;
+  }
+  return len;
 }
 
 void init_spx_ctx(spx_ctx *ctx, uint8_t *buffer, size_t buffer_len) {
-  if (buffer_len < get_spx_ctx_buf_len()) {
-    // TODO
-    return;
-  }
+  ASSERT(buffer_len >= get_spx_ctx_buf_len());
   ctx->pub_seed = buffer;
   buffer += SPX_N;
   ctx->sk_seed = buffer;
+  buffer += SPX_N;
+
+  if (g_context.hash_type == CRYPTO_HASH_TYPE_SHA2) {
+    ctx->state_seeded = buffer;
+    buffer += SPX_CTX_SHA2_STATE_SEEDED_SIZE;
+  } else if (g_context.hash_type == CRYPTO_HASH_TYPE_HARAKA) {
+    ctx->tweaked512_rc64 = (uint64_t *)buffer;
+    buffer += SPX_CTX_HARAKA_TWEAKED512_RC64_SIZE;
+    ctx->tweaked256_rc32 = (uint32_t *)buffer;
+    buffer += SPX_CTX_HARAKA_TWEAKED256_RC32_SIZE;
+  }
+  if (g_context.spx_sha512 == 1) {
+    ctx->state_seeded_512 = buffer;
+    buffer += SPX_CTX_SHA2_STATE_SEEDED_512_SIZE;
+  }
 }
 
 #define INIT_SPX_CTX                      \
@@ -264,6 +268,7 @@ int crypto_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
 
   /* Check if the root node equals the root node in the public key. */
   if (memcmp(root, pub_root, SPX_N)) {
+    printf("R2\n");
     return -1;
   }
 

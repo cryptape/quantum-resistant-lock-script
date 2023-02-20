@@ -15,4 +15,24 @@ void thash_shake_simple(unsigned char *out, const unsigned char *in,
                         unsigned int inblocks, const spx_ctx *ctx,
                         uint32_t addr[8]);
 
+#define thash_sha2_robust SPX_NAMESPACE(thash_sha2_robust)
+void thash_sha2_robust(unsigned char *out, const unsigned char *in,
+                       unsigned int inblocks, const spx_ctx *ctx,
+                       uint32_t addr[8]);
+
+#define thash_sha2_simple SPX_NAMESPACE(thash_sha2_simple)
+void thash_sha2_simple(unsigned char *out, const unsigned char *in,
+                       unsigned int inblocks, const spx_ctx *ctx,
+                       uint32_t addr[8]);
+
+#define thash_haraka_robust SPX_NAMESPACE(thash_haraka_robust)
+void thash_haraka_robust(unsigned char *out, const unsigned char *in,
+                        unsigned int inblocks, const spx_ctx *ctx,
+                        uint32_t addr[8]);
+
+#define thash_haraka_simple SPX_NAMESPACE(thash_haraka_simple)
+void thash_haraka_simple(unsigned char *out, const unsigned char *in,
+                        unsigned int inblocks, const spx_ctx *ctx,
+                        uint32_t addr[8]);
+
 #endif

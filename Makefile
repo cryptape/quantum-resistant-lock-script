@@ -3,10 +3,7 @@ TARGET := riscv64-unknown-linux-gnu-
 CC := $(TARGET)gcc
 LD := $(TARGET)gcc
 
-PARAMS = sphincs-shake-256f
-THASH = robust
-
-CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections -nostdlib -Wno-nonnull-compare -DCKB_VM -DPARAMS=$(PARAMS) -DCKB_DECLARATION_ONLY
+CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections -nostdlib -Wno-nonnull-compare -DCKB_VM -DCKB_DECLARATION_ONLY
 LDFLAGS := -fdata-sections -ffunction-sections
 
 CFLAGS := $(CFLAGS) -Wall -Werror -Wno-nonnull  -Wno-unused-function -g
@@ -45,32 +42,34 @@ HEADERS = \
 	c/$(SOURCES_DIR)/randombytes.h \
 	c/ckb-sphincsplus.h
 
-ifneq (,$(findstring shake,$(PARAMS)))
-	SOURCES += \
-		c/$(SOURCES_DIR)/fips202.c \
-		c/$(SOURCES_DIR)/hash_shake.c \
-		c/$(SOURCES_DIR)/thash_shake_$(THASH).c
-	HEADERS += \
-		c/$(SOURCES_DIR)/fips202.h
-endif
-ifneq (,$(findstring haraka,$(PARAMS)))
-	SOURCES += \
-		c/$(SOURCES_DIR)/haraka.c \
-		c/$(SOURCES_DIR)/hash_haraka.c \
-		c/$(SOURCES_DIR)/thash_haraka_$(THASH).c
-	HEADERS += \
-		c/$(SOURCES_DIR)/haraka.h
-endif
-ifneq (,$(findstring sha2,$(PARAMS)))
-	SOURCES += \
-		c/$(SOURCES_DIR)/sha2.c \
-		c/$(SOURCES_DIR)/hash_sha2.c \
-		c/$(SOURCES_DIR)/thash_sha2_$(THASH).c
-	HEADERS += \
-		c/$(SOURCES_DIR)/sha2.h
-endif
+# shake
+SOURCES += \
+	c/$(SOURCES_DIR)/fips202.c \
+	c/$(SOURCES_DIR)/hash_shake.c \
+	c/$(SOURCES_DIR)/thash_shake_robust.c\
+	c/$(SOURCES_DIR)/thash_shake_simple.c
+HEADERS += \
+	c/$(SOURCES_DIR)/fips202.h
 
-# CFLAGS := $(CFLAGS) -DCKB_C_STDLIB_PRINTF
+# sha2
+SOURCES += \
+	c/$(SOURCES_DIR)/sha2.c \
+	c/$(SOURCES_DIR)/hash_sha2.c \
+	c/$(SOURCES_DIR)/thash_sha2_robust.c \
+	c/$(SOURCES_DIR)/thash_sha2_simple.c
+HEADERS += \
+	c/$(SOURCES_DIR)/sha2.h
+
+# haraka
+SOURCES += \
+	c/$(SOURCES_DIR)/haraka.c \
+	c/$(SOURCES_DIR)/hash_haraka.c \
+	c/$(SOURCES_DIR)/thash_haraka_robust.c \
+	c/$(SOURCES_DIR)/thash_haraka_simple.c
+HEADERS += \
+	c/$(SOURCES_DIR)/haraka.h
+
+CFLAGS := $(CFLAGS) -DCKB_C_STDLIB_PRINTF
 
 # docker pull nervos/ckb-riscv-gnu-toolchain:gnu-bionic-20191012
 BUILDER_DOCKER := nervos/ckb-riscv-gnu-toolchain@sha256:aae8a3f79705f67d505d1f1d5ddc694a4fd537ed1c7e9622420a470d59ba2ec3

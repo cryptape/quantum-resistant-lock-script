@@ -23,6 +23,7 @@ lazy_static! {
 }
 
 pub struct TestConfig {
+    hash_type: CryptoType,
     key: SphincsPlus,
     pub sign_error: bool,
     pub pubkey_error: bool,
@@ -31,9 +32,16 @@ pub struct TestConfig {
 }
 
 impl TestConfig {
-    pub fn new() -> Self {
+    pub fn new(t: CryptoType) -> Self {
+        let hash_type = if t == CryptoType::ErrorHashMode {
+            CryptoType::Shake256fRobust
+        } else {
+            t.clone()
+        };
+
         Self {
-            key: SphincsPlus::new(),
+            hash_type: t.clone(),
+            key: SphincsPlus::new(hash_type.clone()),
             sign_error: false,
             pubkey_error: false,
             message_error: false,
@@ -53,9 +61,19 @@ impl TestConfig {
 
 pub fn gen_tx(dummy: &mut DummyDataLoader, config: &mut TestConfig) -> TransactionView {
     let lock_args = Bytes::from(if config.pubkey_error {
-        config.gen_rand_buf(config.key.pk.len())
+        config.gen_rand_buf(config.key.pk.len() + 4)
     } else {
-        config.key.pk.clone()
+        let mut buf = Vec::new();
+        let hash_type: u32 = if config.hash_type == CryptoType::ErrorHashMode {
+            config
+                .rng
+                .gen_range(CryptoType::ErrorHashMode.into()..u32::MAX)
+        } else {
+            config.hash_type.clone().into()
+        };
+        buf.extend_from_slice(&hash_type.to_le_bytes());
+        buf.extend_from_slice(&config.key.pk);
+        buf
     });
     gen_tx_with_grouped_args(dummy, vec![(lock_args, 1)], config)
 }
@@ -148,7 +166,7 @@ pub fn sign_tx_by_input_group(
     config: &mut TestConfig,
 ) -> TransactionView {
     let tx_hash = tx.hash();
-    let witness_len = unsafe { get_sign_size() as usize };
+    let witness_len = unsafe { sphincs_plus_get_sign_size() as usize };
 
     let mut signed_witnesses: Vec<packed::Bytes> = tx
         .inputs()
@@ -189,7 +207,7 @@ pub fn sign_tx_by_input_group(
                     }
                     // let start = std::time::Instant::now();
                     let sign = Bytes::from(if config.sign_error {
-                        config.gen_rand_buf(unsafe { get_sign_size() as usize })
+                        config.gen_rand_buf(unsafe { sphincs_plus_get_sign_size() as usize })
                     } else {
                         config.key.sign(&message)
                     });

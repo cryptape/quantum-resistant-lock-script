@@ -684,8 +684,10 @@ void tweak_constants(spx_ctx *ctx) {
   /* Constants for pk.seed */
   haraka_S(buf, 40 * 16, ctx->pub_seed, SPX_N, ctx);
   for (i = 0; i < 10; i++) {
-    interleave_constant32(ctx->tweaked256_rc32[i], buf + 32 * i);
-    interleave_constant(ctx->tweaked512_rc64[i], buf + 64 * i);
+    // interleave_constant32(ctx->tweaked256_rc32[i], buf + 32 * i);
+    // interleave_constant(ctx->tweaked512_rc64[i], buf + 64 * i);
+    interleave_constant32(ctx->tweaked256_rc32 + i * 8, buf + 32 * i);
+    interleave_constant(ctx->tweaked512_rc64 + i * 8, buf + 64 * i);
   }
 }
 
@@ -838,7 +840,8 @@ void haraka512_perm(unsigned char *out, const unsigned char *in,
       br_aes_ct64_bitslice_Sbox(q);
       shift_rows(q);
       mix_columns(q);
-      add_round_key(q, ctx->tweaked512_rc64[2 * i + j]);
+      // add_round_key(q, ctx->tweaked512_rc64[2 * i + j]);
+      add_round_key(q, ctx->tweaked512_rc64 + (2 * i + j) * 8);
     }
     /* Mix states */
     for (j = 0; j < 8; j++) {
@@ -902,7 +905,8 @@ void haraka256(unsigned char *out, const unsigned char *in,
       br_aes_ct_bitslice_Sbox(q);
       shift_rows32(q);
       mix_columns32(q);
-      add_round_key32(q, ctx->tweaked256_rc32[2 * i + j]);
+      // add_round_key32(q, ctx->tweaked256_rc32[2 * i + j]);
+      add_round_key32(q, ctx->tweaked256_rc32 + (2 * i + j) * 8);
     }
 
     /* Mix states */
