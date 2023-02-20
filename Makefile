@@ -69,7 +69,7 @@ SOURCES += \
 HEADERS += \
 	c/$(SOURCES_DIR)/haraka.h
 
-CFLAGS := $(CFLAGS) -g -DCKB_C_STDLIB_PRINTF
+# CFLAGS := $(CFLAGS) -g -DCKB_C_STDLIB_PRINTF
 
 # docker pull nervos/ckb-riscv-gnu-toolchain:gnu-bionic-20191012
 BUILDER_DOCKER := nervos/ckb-riscv-gnu-toolchain@sha256:aae8a3f79705f67d505d1f1d5ddc694a4fd537ed1c7e9622420a470d59ba2ec3
