@@ -27,22 +27,25 @@ void test_all() {
   ASSERT(ret == 0);
 }
 
-#define RUN_TESTCASE(NAME, size, OPTION, THASH)                             \
-  {                                                                         \
-    clock_t start, end;                                                     \
-    start = clock();                                                        \
-    crypto_init_context(CRYPTO_TYPE_##NAME##_##size##OPTION##_##THASH);     \
-                                                                            \
-    test_all();                                                             \
-                                                                            \
-    int ret =                                                               \
-        sphincs_plus_verify(G_##NAME##_##size##OPTION##_##THASH##_SIGN,     \
-                            G_##NAME##_##size##OPTION##_##THASH##_MSG,      \
-                            G_##NAME##_##size##OPTION##_##THASH##_PUB_KEY); \
-    ASSERT(ret == 0);                                                       \
-    end = clock();                                                          \
-    printf("%s-%s%s-%s  time:%f\n", xstr(NAME), xstr(size), xstr(OPTION),   \
-           xstr(THASH), (double)(end - start) / CLOCKS_PER_SEC);            \
+#define RUN_TESTCASE(NAME, size, OPTION, THASH)                           \
+  {                                                                       \
+    clock_t start, end;                                                   \
+    start = clock();                                                      \
+    crypto_init_context(CRYPTO_TYPE_##NAME##_##size##OPTION##_##THASH);   \
+                                                                          \
+    test_all();                                                           \
+                                                                          \
+    int ret = sphincs_plus_verify(                                        \
+        G_##NAME##_##size##OPTION##_##THASH##_SIGN,                       \
+        sizeof(G_##NAME##_##size##OPTION##_##THASH##_SIGN),               \
+        G_##NAME##_##size##OPTION##_##THASH##_MSG,                        \
+        sizeof(G_##NAME##_##size##OPTION##_##THASH##_MSG),                \
+        G_##NAME##_##size##OPTION##_##THASH##_PUB_KEY,                    \
+        sizeof(G_##NAME##_##size##OPTION##_##THASH##_PUB_KEY));           \
+    ASSERT(ret == 0);                                                     \
+    end = clock();                                                        \
+    printf("%s-%s%s-%s  time:%f\n", xstr(NAME), xstr(size), xstr(OPTION), \
+           xstr(THASH), (double)(end - start) / CLOCKS_PER_SEC);          \
   }
 
 #define RUN_HASH_TEST(NAME, size) RUN_TESTCASE(NAME, size, F, ROBUST);

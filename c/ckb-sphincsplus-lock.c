@@ -13,6 +13,12 @@
 #include "ckb-sphincsplus.h"
 #include "ckb_vm_dbg.h"
 
+#ifndef MOL2_EXIT
+#define MOL2_EXIT ckb_exit
+#endif
+
+#include "blockchain-api2.h"
+
 #define MAX_WITNESS_SIZE 1024 * 64
 #define BLAKE2B_BLOCK_SIZE 32
 #define ONE_BATCH_SIZE 1024 * 64
@@ -169,17 +175,75 @@ exit:
   return err;
 }
 
+static uint32_t read_from_witness(uintptr_t arg[], uint8_t *ptr, uint32_t len,
+                                  uint32_t offset) {
+  int err;
+  uint64_t output_len = len;
+  err = ckb_load_witness(ptr, &output_len, offset, arg[0], arg[1]);
+  if (err != 0) {
+    return 0;
+  }
+  if (output_len > len) {
+    return len;
+  } else {
+    return (uint32_t)output_len;
+  }
+}
+
+uint8_t *g_witness_data_source = NULL;
+int make_witness(WitnessArgsType *witness) {
+  int err = 0;
+  uint64_t witness_len = 0;
+  size_t source = CKB_SOURCE_GROUP_INPUT;
+  err = ckb_load_witness(NULL, &witness_len, 0, 0, source);
+  // when witness is missing, empty or not accessible, make it zero length.
+  // don't fail, because owner lock without omni doesn't require witness.
+  // when it's zero length, any further actions on witness will fail.
+  if (err != 0) {
+    witness_len = 0;
+  }
+
+  mol2_cursor_t cur;
+
+  cur.offset = 0;
+  cur.size = (mol_num_t)witness_len;
+
+  mol2_data_source_t *ptr = (mol2_data_source_t *)g_witness_data_source;
+
+  ptr->read = read_from_witness;
+  ptr->total_size = (uint32_t)witness_len;
+  // pass index and source as args
+  ptr->args[0] = 0;
+  ptr->args[1] = source;
+
+  ptr->cache_size = 0;
+  ptr->start_point = 0;
+  ptr->max_cache_size = MAX_CACHE_SIZE;
+  cur.data_source = ptr;
+
+  *witness = make_WitnessArgs(&cur);
+
+  return 0;
+}
+
 int get_sign(uint8_t *sign) {
   int err = CKB_SUCCESS;
-
   size_t sign_size = sphincs_plus_get_sign_size();
-  uint8_t buf[sign_size + 56];
-  uint64_t len = sizeof(buf);
-  CHECK(ckb_load_witness(buf, &len, 0, 0, CKB_SOURCE_GROUP_INPUT));
-  CHECK2((len == sizeof(buf)), ERROR_SPHINCSPLUS_WITNESS);
+  WitnessArgsType witness_args;
 
-  memcpy(sign, buf + 20, sign_size);
+  uint8_t witness_data_source[MAX_WITNESS_SIZE] = {0};
+  g_witness_data_source = witness_data_source;
+  CHECK(make_witness(&witness_args));
+
+  BytesOptType mol_lock = witness_args.t->lock(&witness_args);
+  CHECK2(!mol_lock.t->is_none(&mol_lock), ERROR_SPHINCSPLUS_WITNESS);
+
+  mol2_cursor_t mol_lock_bytes = mol_lock.t->unwrap(&mol_lock);
+  size_t out_len = mol2_read_at(&mol_lock_bytes, sign, sign_size);
+
+  CHECK2(out_len == sign_size, ERROR_SPHINCSPLUS_WITNESS);
 exit:
+  g_witness_data_source = NULL;
   return err;
 }
 
@@ -192,7 +256,7 @@ int get_public_key(uint8_t *pub_key) {
   int err = CKB_SUCCESS;
 
   uint8_t script[SCRIPT_SIZE];
-  uint64_t script_len = sizeof(script);
+  uint64_t script_len = SCRIPT_SIZE;
   CHECK(ckb_load_script(script, &script_len, 0));
 
   mol_seg_t script_seg;
@@ -228,10 +292,12 @@ int main() {
 
   uint8_t message[BLAKE2B_BLOCK_SIZE];
   uint8_t sign[sphincs_plus_get_sign_size()];
-  CHECK(generate_sighash_all(message, sizeof(message)));
+  CHECK(generate_sighash_all(message, BLAKE2B_BLOCK_SIZE));
 
   CHECK(get_sign(sign));
-  err = sphincs_plus_verify(sign, message, pubkey);
+  err = sphincs_plus_verify(sign, sphincs_plus_get_sign_size(), message,
+                            BLAKE2B_BLOCK_SIZE, pubkey,
+                            sphincs_plus_get_pk_size());
   CHECK2(err == 0, ERROR_SPHINCSPLUS_VERIFY);
 
 exit:

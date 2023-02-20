@@ -132,12 +132,11 @@ pub fn gen_tx_with_grouped_args(
                 previous_out_point.clone(),
                 (previous_output_cell.build(), Bytes::new()),
             );
-            let witness_len = 32;
-            let witness_len = witness_len;
+            let witness_len = SphincsPlus::get_sign_len();
             let random_extra_witness = config.gen_rand_buf(witness_len);
 
             let witness_args = WitnessArgsBuilder::default()
-                .input_type(Some(Bytes::copy_from_slice(&random_extra_witness[..])).pack())
+                .lock(Some(Bytes::copy_from_slice(&random_extra_witness[..])).pack())
                 .build();
             let since = 0;
             tx_builder = tx_builder
@@ -191,6 +190,7 @@ pub fn sign_tx_by_input_group(
                     .as_builder()
                     .lock(Some(zero_lock).pack())
                     .build();
+
                 let witness_len = witness_for_digest.as_bytes().len() as u64;
                 blake2b.update(&witness_len.to_le_bytes());
                 blake2b.update(&witness_for_digest.as_bytes());
@@ -211,6 +211,12 @@ pub fn sign_tx_by_input_group(
                     } else {
                         config.key.sign(&message)
                     });
+                    println!(
+                        "- pk size: {}, sk size: {}, sign size: {}",
+                        config.key.pk.len(),
+                        config.key.sk.len(),
+                        sign.len()
+                    );
                     // println!("sign time(native): {} us", start.elapsed().as_micros());
                     sign
                 };

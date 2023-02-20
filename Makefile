@@ -9,7 +9,7 @@ LDFLAGS := -fdata-sections -ffunction-sections
 CFLAGS := $(CFLAGS) -Wall -Werror -Wno-nonnull  -Wno-unused-function -g
 LDFLAGS := $(LDFLAGS) -Wl,-static -Wl,--gc-sections
 
-CFLAGS := $(CFLAGS) -I c -I deps/ckb-c-stdlib/libc -I deps/ckb-c-stdlib
+CFLAGS := $(CFLAGS) -I c -I deps/ckb-c-stdlib/libc -I deps/ckb-c-stdlib -I deps/ckb-c-stdlib/molecule
 CFLAGS := $(CFLAGS) -I c/ref
 
 SOURCES_DIR = ref

@@ -21,7 +21,14 @@ extern "C" {
     fn sphincs_plus_sign(msg: *const u8, sk: *const u8, out_sign: *mut u8) -> i32;
 
     // int sphincs_plus_verify(uint8_t *sign, uint8_t *message, uint8_t *pubkey);
-    fn sphincs_plus_verify(sign: *const u8, msg: *const u8, pk: *const u8) -> i32;
+    fn sphincs_plus_verify(
+        sign: *const u8,
+        sign_len: u32,
+        msg: *const u8,
+        msg_len: u32,
+        pk: *const u8,
+        pk_len: u32,
+    ) -> i32;
 }
 
 pub struct SphincsPlus {
@@ -126,6 +133,18 @@ impl CryptoType {
 }
 
 impl SphincsPlus {
+    pub fn get_pk_len() -> usize {
+        unsafe { sphincs_plus_get_pk_size() as usize }
+    }
+
+    pub fn get_sk_len() -> usize {
+        unsafe { sphincs_plus_get_sk_size() as usize }
+    }
+
+    pub fn get_sign_len() -> usize {
+        unsafe { sphincs_plus_get_sign_size() as usize }
+    }
+
     pub fn new(t: CryptoType) -> Self {
         let ret = unsafe { sphincs_plus_init(t.into()) };
         assert!(ret == 0);
@@ -149,9 +168,7 @@ impl SphincsPlus {
 
     pub fn sign(&self, msg: &[u8]) -> Vec<u8> {
         let mut s = Vec::new();
-        unsafe {
-            s.resize(sphincs_plus_get_sign_size() as usize, 0);
-        };
+        s.resize(SphincsPlus::get_sign_len(), 0);
 
         let ret = unsafe { sphincs_plus_sign(msg.as_ptr(), self.sk.as_ptr(), s.as_mut_ptr()) };
         assert_eq!(ret, 0);
@@ -164,7 +181,14 @@ impl SphincsPlus {
         sm.resize(32, 0xFF);
 
         unsafe {
-            sphincs_plus_verify(sign.as_ptr(), msg.as_ptr(), self.pk.as_ptr());
+            sphincs_plus_verify(
+                sign.as_ptr(),
+                sign.len() as u32,
+                msg.as_ptr(),
+                msg.len() as u32,
+                self.pk.as_ptr(),
+                self.pk.len() as u32,
+            );
         }
 
         Ok(())

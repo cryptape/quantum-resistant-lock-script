@@ -1,6 +1,7 @@
 #ifndef _C_REF_PARAMS_PARAMS_SPHINCS_DY_H_
 #define _C_REF_PARAMS_PARAMS_SPHINCS_DY_H_
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -143,6 +144,7 @@ typedef struct {
 } crypto_context;
 
 extern crypto_context g_context;
+extern bool g_context_is_init;
 
 #define GEN_INIT_HASH_FUNC(name, size, option, thash) \
   int init_##name##_##size##option##_##thash();

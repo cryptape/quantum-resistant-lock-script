@@ -1,13 +1,11 @@
 #include "params.h"
 
-#include <stdbool.h>
-#include <stddef.h>
-
 #include "hash.h"
 #include "sha2.h"
 #include "thash.h"
 
 crypto_context g_context;
+bool g_context_is_init = false;
 
 void init_hash_param() {
   /* winternitz parameter, */
