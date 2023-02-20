@@ -14,4 +14,5 @@ else
 fi
 
 cd build
-./fuzzer
+mkdir -p corpus
+./fuzzer -max_len=80000 -workers=2 -jobs=2 corpus

@@ -274,7 +274,6 @@ int crypto_sign_verify(crypto_context *cctx, const uint8_t *sig, size_t siglen,
 
   /* Check if the root node equals the root node in the public key. */
   if (memcmp(root, pub_root, SPX_N)) {
-    printf("R2\n");
     return -1;
   }
 
