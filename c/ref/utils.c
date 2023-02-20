@@ -45,10 +45,10 @@ unsigned long long bytes_to_ull(const unsigned char *in, unsigned int inlen) {
  * Computes a root node given a leaf and an auth path.
  * Expects address to be complete other than the tree_height and tree_index.
  */
-void compute_root(unsigned char *root, const unsigned char *leaf,
-                  uint32_t leaf_idx, uint32_t idx_offset,
-                  const unsigned char *auth_path, uint32_t tree_height,
-                  const spx_ctx *ctx, uint32_t addr[8]) {
+void compute_root(crypto_context *cctx, unsigned char *root,
+                  const unsigned char *leaf, uint32_t leaf_idx,
+                  uint32_t idx_offset, const unsigned char *auth_path,
+                  uint32_t tree_height, const spx_ctx *ctx, uint32_t addr[8]) {
   uint32_t i;
   unsigned char buffer[2 * SPX_N];
 
@@ -67,15 +67,15 @@ void compute_root(unsigned char *root, const unsigned char *leaf,
     leaf_idx >>= 1;
     idx_offset >>= 1;
     /* Set the address of the node we're creating. */
-    set_tree_height(addr, i + 1);
-    set_tree_index(addr, leaf_idx + idx_offset);
+    set_tree_height(cctx, addr, i + 1);
+    set_tree_index(cctx, addr, leaf_idx + idx_offset);
 
     /* Pick the right or left neighbor, depending on parity of the node. */
     if (leaf_idx & 1) {
-      thash(buffer + SPX_N, buffer, 2, ctx, addr);
+      thash(cctx, buffer + SPX_N, buffer, 2, ctx, addr);
       memcpy(buffer, auth_path, SPX_N);
     } else {
-      thash(buffer, buffer, 2, ctx, addr);
+      thash(cctx, buffer, buffer, 2, ctx, addr);
       memcpy(buffer + SPX_N, auth_path, SPX_N);
     }
     auth_path += SPX_N;
@@ -84,9 +84,9 @@ void compute_root(unsigned char *root, const unsigned char *leaf,
   /* The last iteration is exceptional; we do not copy an auth_path node. */
   leaf_idx >>= 1;
   idx_offset >>= 1;
-  set_tree_height(addr, tree_height);
-  set_tree_index(addr, leaf_idx + idx_offset);
-  thash(root, buffer, 2, ctx, addr);
+  set_tree_height(cctx, addr, tree_height);
+  set_tree_index(cctx, addr, leaf_idx + idx_offset);
+  thash(cctx, root, buffer, 2, ctx, addr);
 }
 
 /**
@@ -97,8 +97,9 @@ void compute_root(unsigned char *root, const unsigned char *leaf,
  * Applies the offset idx_offset to indices before building addresses, so that
  * it is possible to continue counting indices across trees.
  */
-void treehash(unsigned char *root, unsigned char *auth_path, const spx_ctx *ctx,
-              uint32_t leaf_idx, uint32_t idx_offset, uint32_t tree_height,
+void treehash(crypto_context *cctx, unsigned char *root,
+              unsigned char *auth_path, const spx_ctx *ctx, uint32_t leaf_idx,
+              uint32_t idx_offset, uint32_t tree_height,
               void (*gen_leaf)(unsigned char * /* leaf */,
                                const spx_ctx * /* ctx */,
                                uint32_t /* addr_idx */,
@@ -127,11 +128,11 @@ void treehash(unsigned char *root, unsigned char *auth_path, const spx_ctx *ctx,
       tree_idx = (idx >> (heights[offset - 1] + 1));
 
       /* Set the address of the node we're creating. */
-      set_tree_height(tree_addr, heights[offset - 1] + 1);
-      set_tree_index(tree_addr,
+      set_tree_height(cctx, tree_addr, heights[offset - 1] + 1);
+      set_tree_index(cctx, tree_addr,
                      tree_idx + (idx_offset >> (heights[offset - 1] + 1)));
       /* Hash the top-most nodes from the stack together. */
-      thash(stack + (offset - 2) * SPX_N, stack + (offset - 2) * SPX_N, 2, ctx,
+      thash(cctx, stack + (offset - 2) * SPX_N, stack + (offset - 2) * SPX_N, 2, ctx,
             tree_addr);
       offset--;
       /* Note that the top-most node is now one layer higher. */

@@ -226,9 +226,9 @@ int make_witness(WitnessArgsType *witness) {
   return 0;
 }
 
-int get_sign(uint8_t *sign) {
+int get_sign(uint8_t *sign, crypto_context *cctx) {
   int err = CKB_SUCCESS;
-  size_t sign_size = sphincs_plus_get_sign_size();
+  size_t sign_size = sphincs_plus_get_sign_size(cctx);
   WitnessArgsType witness_args;
 
   uint8_t witness_data_source[MAX_WITNESS_SIZE] = {0};
@@ -252,7 +252,7 @@ exit:
 // |  hash type 4 bytes  |  public key  |
 //
 // note: different hash types have different public key lengths
-int get_public_key(uint8_t *pub_key) {
+int get_public_key(uint8_t *pub_key, crypto_context *cctx) {
   int err = CKB_SUCCESS;
 
   uint8_t script[SCRIPT_SIZE];
@@ -269,9 +269,10 @@ int get_public_key(uint8_t *pub_key) {
   CHECK2((args_bytes_seg.size > sizeof(uint32_t)), ERROR_SPHINCSPLUS_ARGS);
   uint32_t hash_type = 0;
   memcpy(&hash_type, args_bytes_seg.ptr, sizeof(uint32_t));
-  CHECK2(!sphincs_plus_init(hash_type), ERROR_SPHINCSPLUS_HASH_TYPE);
+  CHECK2(!sphincs_plus_init_context(hash_type, cctx),
+         ERROR_SPHINCSPLUS_HASH_TYPE);
 
-  size_t pubkey_size = sphincs_plus_get_pk_size();
+  size_t pubkey_size = sphincs_plus_get_pk_size(cctx);
   CHECK2((args_bytes_seg.size == sizeof(uint32_t)) + pubkey_size,
          ERROR_SPHINCSPLUS_ARGS);
   memcpy(pub_key, args_bytes_seg.ptr + sizeof(uint32_t), pubkey_size);
@@ -285,19 +286,20 @@ int main() {
 
   // signature data size depends on args data(hash type)
   uint8_t pubkey[SPHINCSPLUS_PUBKEY_MAX_SIZE];
-  err = get_public_key(pubkey);
+  crypto_context cctx = {0};
+  err = get_public_key(pubkey, &cctx);
   if (err) {
     return err;
   }
 
   uint8_t message[BLAKE2B_BLOCK_SIZE];
-  uint8_t sign[sphincs_plus_get_sign_size()];
+  uint8_t sign[sphincs_plus_get_sign_size(&cctx)];
   CHECK(generate_sighash_all(message, BLAKE2B_BLOCK_SIZE));
 
-  CHECK(get_sign(sign));
-  err = sphincs_plus_verify(sign, sphincs_plus_get_sign_size(), message,
-                            BLAKE2B_BLOCK_SIZE, pubkey,
-                            sphincs_plus_get_pk_size());
+  CHECK(get_sign(sign, &cctx));
+  err = sphincs_plus_verify(&cctx, sign, sphincs_plus_get_sign_size(&cctx),
+                            message, BLAKE2B_BLOCK_SIZE, pubkey,
+                            sphincs_plus_get_pk_size(&cctx));
   CHECK2(err == 0, ERROR_SPHINCSPLUS_VERIFY);
 
 exit:

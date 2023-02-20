@@ -15,8 +15,8 @@
  * It also generates the WOTS signature if leaf_info indicates
  * that we're signing with this WOTS key
  */
-void wots_gen_leafx1(unsigned char *dest, const spx_ctx *ctx, uint32_t leaf_idx,
-                     void *v_info) {
+void wots_gen_leafx1(crypto_context *cctx, unsigned char *dest,
+                     const spx_ctx *ctx, uint32_t leaf_idx, void *v_info) {
   struct leaf_info_x1 *info = v_info;
   uint32_t *leaf_addr = info->leaf_addr;
   uint32_t *pk_addr = info->pk_addr;
@@ -34,21 +34,21 @@ void wots_gen_leafx1(unsigned char *dest, const spx_ctx *ctx, uint32_t leaf_idx,
     wots_k_mask = (uint32_t)~0;
   }
 
-  set_keypair_addr(leaf_addr, leaf_idx);
-  set_keypair_addr(pk_addr, leaf_idx);
+  set_keypair_addr(cctx, leaf_addr, leaf_idx);
+  set_keypair_addr(cctx, pk_addr, leaf_idx);
 
   for (i = 0, buffer = pk_buffer; i < SPX_WOTS_LEN; i++, buffer += SPX_N) {
     uint32_t wots_k = info->wots_steps[i] | wots_k_mask; /* Set wots_k to */
     /* the step if we're generating a signature, ~0 if we're not */
 
     /* Start with the secret seed */
-    set_chain_addr(leaf_addr, i);
-    set_hash_addr(leaf_addr, 0);
-    set_type(leaf_addr, SPX_ADDR_TYPE_WOTSPRF);
+    set_chain_addr(cctx, leaf_addr, i);
+    set_hash_addr(cctx, leaf_addr, 0);
+    set_type(cctx, leaf_addr, SPX_ADDR_TYPE_WOTSPRF);
 
-    prf_addr(buffer, ctx, leaf_addr);
+    prf_addr(cctx, buffer, ctx, leaf_addr);
 
-    set_type(leaf_addr, SPX_ADDR_TYPE_WOTS);
+    set_type(cctx, leaf_addr, SPX_ADDR_TYPE_WOTS);
 
     /* Iterate down the WOTS chain */
     for (k = 0;; k++) {
@@ -62,12 +62,12 @@ void wots_gen_leafx1(unsigned char *dest, const spx_ctx *ctx, uint32_t leaf_idx,
       if (k == SPX_WOTS_W - 1) break;
 
       /* Iterate one step on the chain */
-      set_hash_addr(leaf_addr, k);
+      set_hash_addr(cctx, leaf_addr, k);
 
-      thash(buffer, buffer, 1, ctx, leaf_addr);
+      thash(cctx, buffer, buffer, 1, ctx, leaf_addr);
     }
   }
 
   /* Do the final thash to generate the public keys */
-  thash(dest, pk_buffer, SPX_WOTS_LEN, ctx, pk_addr);
+  thash(cctx, dest, pk_buffer, SPX_WOTS_LEN, ctx, pk_addr);
 }

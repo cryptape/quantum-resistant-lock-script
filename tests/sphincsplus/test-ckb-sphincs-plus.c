@@ -10,46 +10,48 @@
 #include "randombytes.h"
 #include "test_data.h"
 
-void test_all() {
-  uint8_t pubkey[sphincs_plus_get_pk_size()];
-  memset(pubkey, 0, sphincs_plus_get_pk_size());
-  uint8_t prikey[sphincs_plus_get_sk_size()];
-  memset(prikey, 0, sphincs_plus_get_sk_size());
-  int ret = sphincs_plus_generate_keypair(pubkey, prikey);
+void test_all(crypto_context *cctx) {
+  uint32_t pubkey_len = sphincs_plus_get_pk_size(cctx);
+  uint8_t pubkey[pubkey_len];
+  memset(pubkey, 0, pubkey_len);
+  uint8_t prikey[sphincs_plus_get_sk_size(cctx)];
+  memset(prikey, 0, sphincs_plus_get_sk_size(cctx));
+  int ret = sphincs_plus_generate_keypair(cctx, pubkey, prikey);
   ASSERT(ret == 0);
   uint8_t message[SPX_MLEN];
   randombytes(message, sizeof(message));
-  uint8_t sign[sphincs_plus_get_sign_size()];
-  memset(sign, 0, sphincs_plus_get_sign_size());
-  ret = sphincs_plus_sign(message, prikey, sign);
+  uint32_t sign_len = sphincs_plus_get_sign_size(cctx);
+  uint8_t sign[sign_len];
+  memset(sign, 0, sign_len);
+  ret = sphincs_plus_sign(cctx, message, prikey, sign);
   ASSERT(ret == 0);
-  ret = sphincs_plus_verify(sign, message, pubkey);
+  ret = sphincs_plus_verify(cctx, sign, sign_len, message, SPX_MLEN, pubkey,
+                            pubkey_len);
   ASSERT(ret == 0);
 }
 
-#define RUN_TESTCASE(NAME, size, OPTION, THASH)                           \
-  {                                                                       \
-    clock_t start, end;                                                   \
-    start = clock();                                                      \
-    crypto_init_context(CRYPTO_TYPE_##NAME##_##size##OPTION##_##THASH);   \
-                                                                          \
-    test_all();                                                           \
-                                                                          \
-    int ret = sphincs_plus_verify(                                        \
-        G_##NAME##_##size##OPTION##_##THASH##_SIGN,                       \
-        sizeof(G_##NAME##_##size##OPTION##_##THASH##_SIGN),               \
-        G_##NAME##_##size##OPTION##_##THASH##_MSG,                        \
-        sizeof(G_##NAME##_##size##OPTION##_##THASH##_MSG),                \
-        G_##NAME##_##size##OPTION##_##THASH##_PUB_KEY,                    \
-        sizeof(G_##NAME##_##size##OPTION##_##THASH##_PUB_KEY));           \
-    ASSERT(ret == 0);                                                     \
-    end = clock();                                                        \
-    printf("%s-%s%s-%s  time:%f\n", xstr(NAME), xstr(size), xstr(OPTION), \
-           xstr(THASH), (double)(end - start) / CLOCKS_PER_SEC);          \
+#define RUN_TESTCASE(NAME, size, OPTION, THASH)                              \
+  {                                                                          \
+    clock_t start, end;                                                      \
+    start = clock();                                                         \
+    crypto_context ctx;                                                      \
+    sphincs_plus_init_context(CRYPTO_TYPE_##NAME##_##size##OPTION##_##THASH, \
+                              &ctx);                                         \
+    test_all(&ctx);                                                          \
+    int ret = sphincs_plus_verify(                                           \
+        &ctx, G_##NAME##_##size##OPTION##_##THASH##_SIGN,                    \
+        sizeof(G_##NAME##_##size##OPTION##_##THASH##_SIGN),                  \
+        G_##NAME##_##size##OPTION##_##THASH##_MSG,                           \
+        sizeof(G_##NAME##_##size##OPTION##_##THASH##_MSG),                   \
+        G_##NAME##_##size##OPTION##_##THASH##_PUB_KEY,                       \
+        sizeof(G_##NAME##_##size##OPTION##_##THASH##_PUB_KEY));              \
+    ASSERT(ret == 0);                                                        \
+    end = clock();                                                           \
+    printf("%s-%s%s-%s  time:%f\n", xstr(NAME), xstr(size), xstr(OPTION),    \
+           xstr(THASH), (double)(end - start) / CLOCKS_PER_SEC);             \
   }
 
 #define RUN_HASH_TEST(NAME, size) RUN_TESTCASE(NAME, size, F, ROBUST);
-
 // RUN_TESTCASE(NAME, size, F, SIMPLE);
 // RUN_TESTCASE(NAME, size, S, ROBUST);
 // RUN_TESTCASE(NAME, size, S, SIMPLE);

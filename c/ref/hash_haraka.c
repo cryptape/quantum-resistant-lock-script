@@ -8,13 +8,17 @@
 #include "params.h"
 #include "utils.h"
 
-void initialize_haraka_hash_function(spx_ctx *ctx) { tweak_constants(ctx); }
+void initialize_haraka_hash_function(void *p_cctx, spx_ctx *ctx) {
+  crypto_context *cctx = (crypto_context *)p_cctx;
+  tweak_constants(cctx, ctx);
+}
 
 /*
  * Computes PRF(key, addr), given a secret key of SPX_N bytes and an address
  */
-void haraka_prf_addr(unsigned char *out, const spx_ctx *ctx,
+void haraka_prf_addr(void *p_cctx, unsigned char *out, const spx_ctx *ctx,
                      const uint32_t addr[8]) {
+  crypto_context *cctx = (crypto_context *)p_cctx;
   /* Since SPX_N may be smaller than 32, we need temporary buffers. */
   unsigned char outbuf[32];
   unsigned char buf[64] = {0};
@@ -30,10 +34,12 @@ void haraka_prf_addr(unsigned char *out, const spx_ctx *ctx,
  * Computes the message-dependent randomness R, using a secret seed and an
  * optional randomization value as well as the message.
  */
-void gen_haraka_message_random(unsigned char *R, const unsigned char *sk_prf,
+void gen_haraka_message_random(void *p_cctx, unsigned char *R,
+                               const unsigned char *sk_prf,
                                const unsigned char *optrand,
                                const unsigned char *m, unsigned long long mlen,
                                const spx_ctx *ctx) {
+  crypto_context *cctx = (crypto_context *)p_cctx;
   uint8_t s_inc[65];
 
   haraka_S_inc_init(s_inc);
@@ -49,10 +55,11 @@ void gen_haraka_message_random(unsigned char *R, const unsigned char *sk_prf,
  * Outputs the message digest and the index of the leaf. The index is split in
  * the tree index and the leaf index, for convenient copying to an address.
  */
-void haraka_hash_message(unsigned char *digest, uint64_t *tree,
+void haraka_hash_message(void *p_cctx, unsigned char *digest, uint64_t *tree,
                          uint32_t *leaf_idx, const unsigned char *R,
                          const unsigned char *pk, const unsigned char *m,
                          unsigned long long mlen, const spx_ctx *ctx) {
+  crypto_context *cctx = (crypto_context *)p_cctx;
 #define SPX_TREE_BITS (SPX_TREE_HEIGHT * (SPX_D - 1))
 #define SPX_TREE_BYTES ((SPX_TREE_BITS + 7) / 8)
 #define SPX_LEAF_BITS SPX_TREE_HEIGHT

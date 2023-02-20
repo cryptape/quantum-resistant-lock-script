@@ -22,9 +22,11 @@
  * This works by using the standard Merkle tree building algorithm,
  */
 void treehashx1(
-    unsigned char *root, unsigned char *auth_path, const spx_ctx *ctx,
-    uint32_t leaf_idx, uint32_t idx_offset, uint32_t tree_height,
-    void (*gen_leaf)(unsigned char * /* Where to write the leaves */,
+    crypto_context *cctx, unsigned char *root, unsigned char *auth_path,
+    const spx_ctx *ctx, uint32_t leaf_idx, uint32_t idx_offset,
+    uint32_t tree_height,
+    void (*gen_leaf)(crypto_context *,
+                     unsigned char * /* Where to write the leaves */,
                      const spx_ctx * /* ctx */, uint32_t idx, void *info),
     uint32_t tree_addr[8], void *info) {
   /* This is where we keep the intermediate nodes */
@@ -36,7 +38,7 @@ void treehashx1(
     unsigned char current[2 * SPX_N]; /* Current logical node is at */
     /* index[SPX_N].  We do this to minimize the number of copies */
     /* needed during a thash */
-    gen_leaf(&current[SPX_N], ctx, idx + idx_offset, info);
+    gen_leaf(cctx, &current[SPX_N], ctx, idx + idx_offset, info);
 
     /* Now combine the freshly generated right node with previously */
     /* generated left ones */
@@ -75,12 +77,12 @@ void treehashx1(
 
       /* Set the address of the node we're creating. */
       internal_idx_offset >>= 1;
-      set_tree_height(tree_addr, h + 1);
-      set_tree_index(tree_addr, internal_idx / 2 + internal_idx_offset);
+      set_tree_height(cctx, tree_addr, h + 1);
+      set_tree_index(cctx, tree_addr, internal_idx / 2 + internal_idx_offset);
 
       unsigned char *left = &stack[h * SPX_N];
       memcpy(&current[0], left, SPX_N);
-      thash(&current[1 * SPX_N], &current[0 * SPX_N], 2, ctx, tree_addr);
+      thash(cctx, &current[1 * SPX_N], &current[0 * SPX_N], 2, ctx, tree_addr);
     }
 
     /* We've hit a left child; save the current for when we get the */

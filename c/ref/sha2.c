@@ -683,7 +683,7 @@ void mgf1_512(unsigned char *out, unsigned long outlen, const unsigned char *in,
  * This initializes state_seeded and state_seeded_512, which can then be
  * reused in thash
  **/
-void seed_state(spx_ctx *ctx) {
+void seed_state(crypto_context *cctx, spx_ctx *ctx) {
   uint8_t block[SPX_SHA512_BLOCK_BYTES];
   size_t i;
 

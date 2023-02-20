@@ -132,7 +132,7 @@ pub fn gen_tx_with_grouped_args(
                 previous_out_point.clone(),
                 (previous_output_cell.build(), Bytes::new()),
             );
-            let witness_len = SphincsPlus::get_sign_len();
+            let witness_len = config.key.get_sign_len();
             let random_extra_witness = config.gen_rand_buf(witness_len);
 
             let witness_args = WitnessArgsBuilder::default()
@@ -165,7 +165,7 @@ pub fn sign_tx_by_input_group(
     config: &mut TestConfig,
 ) -> TransactionView {
     let tx_hash = tx.hash();
-    let witness_len = unsafe { sphincs_plus_get_sign_size() as usize };
+    let witness_len = config.key.get_sign_len();
 
     let mut signed_witnesses: Vec<packed::Bytes> = tx
         .inputs()
@@ -207,16 +207,11 @@ pub fn sign_tx_by_input_group(
                     }
                     // let start = std::time::Instant::now();
                     let sign = Bytes::from(if config.sign_error {
-                        config.gen_rand_buf(unsafe { sphincs_plus_get_sign_size() as usize })
+                        config.gen_rand_buf(config.key.get_sign_len())
                     } else {
                         config.key.sign(&message)
                     });
-                    println!(
-                        "- pk size: {}, sk size: {}, sign size: {}",
-                        config.key.pk.len(),
-                        config.key.sk.len(),
-                        sign.len()
-                    );
+
                     // println!("sign time(native): {} us", start.elapsed().as_micros());
                     sign
                 };

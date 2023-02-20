@@ -7,19 +7,21 @@
 #include "thash.h"
 #include "utils.h"
 
-static void thash_sha2_512_simple(unsigned char *out, const unsigned char *in,
+static void thash_sha2_512_simple(crypto_context *cctx, unsigned char *out,
+                                  const unsigned char *in,
                                   unsigned int inblocks, const spx_ctx *ctx,
                                   uint32_t addr[8]);
 
 /**
  * Takes an array of inblocks concatenated arrays of SPX_N bytes.
  */
-void thash_sha2_simple(unsigned char *out, const unsigned char *in,
-                       unsigned int inblocks, const spx_ctx *ctx,
-                       uint32_t addr[8]) {
+void thash_sha2_simple(void *p_cctx, unsigned char *out,
+                       const unsigned char *in, unsigned int inblocks,
+                       const spx_ctx *ctx, uint32_t addr[8]) {
+  crypto_context *cctx = (crypto_context *)p_cctx;
   if (SPX_SHA512 == 1) {
     if (inblocks > 1) {
-      thash_sha2_512_simple(out, in, inblocks, ctx, addr);
+      thash_sha2_512_simple(cctx, out, in, inblocks, ctx, addr);
       return;
     }
   }
@@ -39,7 +41,8 @@ void thash_sha2_simple(unsigned char *out, const unsigned char *in,
   memcpy(out, outbuf, SPX_N);
 }
 
-static void thash_sha2_512_simple(unsigned char *out, const unsigned char *in,
+static void thash_sha2_512_simple(crypto_context *cctx, unsigned char *out,
+                                  const unsigned char *in,
                                   unsigned int inblocks, const spx_ctx *ctx,
                                   uint32_t addr[8]) {
   unsigned char outbuf[SPX_SHA512_OUTPUT_BYTES];

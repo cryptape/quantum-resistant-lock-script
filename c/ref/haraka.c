@@ -674,7 +674,7 @@ static void interleave_constant32(uint32_t *out, const unsigned char *in) {
   br_aes_ct_ortho(out);
 }
 
-void tweak_constants(spx_ctx *ctx) {
+void tweak_constants(crypto_context *cctx, spx_ctx *ctx) {
   unsigned char buf[40 * 16];
   int i;
 

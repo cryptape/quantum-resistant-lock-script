@@ -28,13 +28,17 @@
 
 /* For SHA, there is no immediate reason to initialize at the start,
    so this function is an empty operation. */
-void initialize_sha2_hash_function(spx_ctx *ctx) { seed_state(ctx); }
+void initialize_sha2_hash_function(void *p_cctx, spx_ctx *ctx) {
+  crypto_context *cctx = (crypto_context *)p_cctx;
+  seed_state(cctx, ctx);
+}
 
 /*
  * Computes PRF(pk_seed, sk_seed, addr).
  */
-void sha2_prf_addr(unsigned char *out, const spx_ctx *ctx,
+void sha2_prf_addr(void *p_cctx, unsigned char *out, const spx_ctx *ctx,
                    const uint32_t addr[8]) {
+  crypto_context *cctx = (crypto_context *)p_cctx;
   uint8_t sha2_state[40];
   unsigned char buf[SPX_SHA256_ADDR_BYTES + SPX_N];
   unsigned char outbuf[SPX_SHA256_OUTPUT_BYTES];
@@ -59,10 +63,12 @@ void sha2_prf_addr(unsigned char *out, const spx_ctx *ctx,
  * prefix. This is necessary to prevent having to move the message around (and
  * allocate memory for it).
  */
-void gen_sha2_message_random(unsigned char *R, const unsigned char *sk_prf,
+void gen_sha2_message_random(void *p_cctx, unsigned char *R,
+                             const unsigned char *sk_prf,
                              const unsigned char *optrand,
                              const unsigned char *m, unsigned long long mlen,
                              const spx_ctx *ctx) {
+  crypto_context *cctx = (crypto_context *)p_cctx;
   (void)ctx;
 
   unsigned char buf[SPX_SHAX_BLOCK_BYTES + SPX_SHAX_OUTPUT_BYTES];
@@ -111,10 +117,11 @@ void gen_sha2_message_random(unsigned char *R, const unsigned char *sk_prf,
  * Outputs the message digest and the index of the leaf. The index is split in
  * the tree index and the leaf index, for convenient copying to an address.
  */
-void sha2_hash_message(unsigned char *digest, uint64_t *tree,
+void sha2_hash_message(void *p_cctx, unsigned char *digest, uint64_t *tree,
                        uint32_t *leaf_idx, const unsigned char *R,
                        const unsigned char *pk, const unsigned char *m,
                        unsigned long long mlen, const spx_ctx *ctx) {
+  crypto_context *cctx = (crypto_context *)p_cctx;
   (void)ctx;
 #define SPX_TREE_BITS (SPX_TREE_HEIGHT * (SPX_D - 1))
 #define SPX_TREE_BYTES ((SPX_TREE_BITS + 7) / 8)

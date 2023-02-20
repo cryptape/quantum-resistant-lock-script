@@ -40,6 +40,6 @@ void mgf1_512(unsigned char *out, unsigned long outlen, const unsigned char *in,
               unsigned long inlen);
 
 #define seed_state SPX_NAMESPACE(seed_state)
-void seed_state(spx_ctx *ctx);
+void seed_state(crypto_context *cctx, spx_ctx *ctx);
 
 #endif

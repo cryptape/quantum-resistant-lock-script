@@ -9,15 +9,23 @@
 
 /* For SHAKE256, there is no immediate reason to initialize at the start,
    so this function is an empty operation. */
-void initialize_shake_hash_function(spx_ctx *ctx) {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif  //__clang__
+void initialize_shake_hash_function(void *p_cctx, spx_ctx *ctx) {
   (void)ctx; /* Suppress an 'unused parameter' warning. */
 }
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif  //__clang__
 
 /*
  * Computes PRF(pk_seed, sk_seed, addr)
  */
-void shake_prf_addr(unsigned char *out, const spx_ctx *ctx,
+void shake_prf_addr(void *p_cctx, unsigned char *out, const spx_ctx *ctx,
                     const uint32_t addr[8]) {
+  crypto_context *cctx = (crypto_context *)p_cctx;
   unsigned char buf[2 * SPX_N + SPX_ADDR_BYTES];
 
   memcpy(buf, ctx->pub_seed, SPX_N);
@@ -31,10 +39,12 @@ void shake_prf_addr(unsigned char *out, const spx_ctx *ctx,
  * Computes the message-dependent randomness R, using a secret seed and an
  * optional randomization value as well as the message.
  */
-void gen_shake_message_random(unsigned char *R, const unsigned char *sk_prf,
+void gen_shake_message_random(void *p_cctx, unsigned char *R,
+                              const unsigned char *sk_prf,
                               const unsigned char *optrand,
                               const unsigned char *m, unsigned long long mlen,
                               const spx_ctx *ctx) {
+  crypto_context *cctx = (crypto_context *)p_cctx;
   (void)ctx;
   uint64_t s_inc[26];
 
@@ -51,10 +61,11 @@ void gen_shake_message_random(unsigned char *R, const unsigned char *sk_prf,
  * Outputs the message digest and the index of the leaf. The index is split in
  * the tree index and the leaf index, for convenient copying to an address.
  */
-void shake_hash_message(unsigned char *digest, uint64_t *tree,
+void shake_hash_message(void *p_cctx, unsigned char *digest, uint64_t *tree,
                         uint32_t *leaf_idx, const unsigned char *R,
                         const unsigned char *pk, const unsigned char *m,
                         unsigned long long mlen, const spx_ctx *ctx) {
+  crypto_context *cctx = (crypto_context *)p_cctx;
   (void)ctx;
 #define SPX_TREE_BITS (SPX_TREE_HEIGHT * (SPX_D - 1))
 #define SPX_TREE_BYTES ((SPX_TREE_BITS + 7) / 8)

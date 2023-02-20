@@ -7,7 +7,7 @@
 
 /* Tweak constants with seed */
 #define tweak_constants SPX_NAMESPACE(tweak_constants)
-void tweak_constants(spx_ctx *ctx);
+void tweak_constants(crypto_context *cctx, spx_ctx *ctx);
 
 /* Haraka Sponge */
 #define haraka_S_inc_init SPX_NAMESPACE(haraka_S_inc_init)

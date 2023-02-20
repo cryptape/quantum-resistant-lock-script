@@ -1,39 +1,57 @@
 use num_enum::IntoPrimitive;
+use std::ffi::c_void;
 
 #[link(name = "sphincsplus", kind = "static")]
 extern "C" {
-    // uint32_t sphincs_plus_get_pk_size();
-    fn sphincs_plus_get_pk_size() -> u32;
+    // crypto_context *sphincs_plus_new_context(crypto_type type);
+    fn sphincs_plus_new_context(hash_type: u32) -> *const c_void;
 
-    // uint32_t sphincs_plus_get_sk_size();
-    fn sphincs_plus_get_sk_size() -> u32;
+    // void sphincs_plus_del_context(crypto_context *cctx);
+    fn sphincs_plus_del_context(cctx: *const c_void);
 
-    // uint32_t sphincs_plus_get_sign_size();
-    pub fn sphincs_plus_get_sign_size() -> u32;
+    // uint32_t sphincs_plus_get_pk_size(crypto_context *cctx);
+    fn sphincs_plus_get_pk_size(cctx: *const c_void) -> u32;
 
-    // int sphincs_plus_init(crypto_type type);
-    fn sphincs_plus_init(hash_type: u32) -> i32;
+    // uint32_t sphincs_plus_get_sk_size(crypto_context *cctx);
+    fn sphincs_plus_get_sk_size(cctx: *const c_void) -> u32;
 
-    // int sphincs_plus_generate_keypair(uint8_t *pk, uint8_t *sk);
-    fn sphincs_plus_generate_keypair(pk: *mut u8, sk: *mut u8) -> i32;
+    // uint32_t sphincs_plus_get_sign_size(crypto_context *cctx);
+    fn sphincs_plus_get_sign_size(cctx: *const c_void) -> u32;
 
-    // int sphincs_plus_sign(uint8_t *message, uint8_t *sk, uint8_t *out_sign);
-    fn sphincs_plus_sign(msg: *const u8, sk: *const u8, out_sign: *mut u8) -> i32;
+    // int sphincs_plus_init_context(crypto_type type, crypto_context *cctx);
+    // fn sphincs_plus_init_context(hash_type: u32, cctx: *mut c_void) -> i32;
 
-    // int sphincs_plus_verify(uint8_t *sign, uint8_t *message, uint8_t *pubkey);
+    // int sphincs_plus_generate_keypair(crypto_context *cctx, uint8_t *pk,
+    //                                 uint8_t *sk);
+    fn sphincs_plus_generate_keypair(cctx: *const c_void, pk: *mut u8, sk: *mut u8) -> i32;
+
+    // int sphincs_plus_sign(crypto_context *cctx, uint8_t *message, uint8_t *sk,
+    //                     uint8_t *out_sign);
+    fn sphincs_plus_sign(
+        cctx: *const c_void,
+        message: *const u8,
+        sk: *const u8,
+        out_sign: *mut u8,
+    ) -> i32;
+
+    // int sphincs_plus_verify(crypto_context *cctx, uint8_t *sign, uint32_t sign_size,
+    //                         uint8_t *message, uint32_t message_size,
+    //                         uint8_t *pubkey, uint32_t pubkey_size);
     fn sphincs_plus_verify(
+        cctx: *const c_void,
         sign: *const u8,
-        sign_len: u32,
-        msg: *const u8,
-        msg_len: u32,
+        sign_size: u32,
+        message: *const u8,
+        message_sizse: u32,
         pk: *const u8,
-        pk_len: u32,
+        pk_size: u32,
     ) -> i32;
 }
 
 pub struct SphincsPlus {
     pub pk: Vec<u8>,
     pub sk: Vec<u8>,
+    cctx: *const c_void,
 }
 
 #[derive(IntoPrimitive, Clone, PartialEq, Eq)]
@@ -133,32 +151,33 @@ impl CryptoType {
 }
 
 impl SphincsPlus {
-    pub fn get_pk_len() -> usize {
-        unsafe { sphincs_plus_get_pk_size() as usize }
+    pub fn get_pk_len(&self) -> usize {
+        unsafe { sphincs_plus_get_pk_size(self.cctx) as usize }
     }
 
-    pub fn get_sk_len() -> usize {
-        unsafe { sphincs_plus_get_sk_size() as usize }
+    pub fn get_sk_len(&self) -> usize {
+        unsafe { sphincs_plus_get_sk_size(self.cctx) as usize }
     }
 
-    pub fn get_sign_len() -> usize {
-        unsafe { sphincs_plus_get_sign_size() as usize }
+    pub fn get_sign_len(&self) -> usize {
+        unsafe { sphincs_plus_get_sign_size(self.cctx) as usize }
     }
 
     pub fn new(t: CryptoType) -> Self {
-        let ret = unsafe { sphincs_plus_init(t.into()) };
-        assert!(ret == 0);
+        let cctx = unsafe { sphincs_plus_new_context(t.into()) };
 
         let mut s = Self {
+            cctx: cctx,
             pk: Vec::new(),
             sk: Vec::new(),
         };
         unsafe {
-            s.pk.resize(sphincs_plus_get_pk_size() as usize, 0);
-            s.sk.resize(sphincs_plus_get_sk_size() as usize, 0);
+            s.pk.resize(sphincs_plus_get_pk_size(s.cctx) as usize, 0);
+            s.sk.resize(sphincs_plus_get_sk_size(s.cctx) as usize, 0);
         }
 
-        let ret = unsafe { sphincs_plus_generate_keypair(s.pk.as_mut_ptr(), s.sk.as_mut_ptr()) };
+        let ret =
+            unsafe { sphincs_plus_generate_keypair(s.cctx, s.pk.as_mut_ptr(), s.sk.as_mut_ptr()) };
         if ret != 0 {
             panic!("gen keypair failed");
         }
@@ -168,9 +187,10 @@ impl SphincsPlus {
 
     pub fn sign(&self, msg: &[u8]) -> Vec<u8> {
         let mut s = Vec::new();
-        s.resize(SphincsPlus::get_sign_len(), 0);
+        s.resize(self.get_sign_len(), 0);
 
-        let ret = unsafe { sphincs_plus_sign(msg.as_ptr(), self.sk.as_ptr(), s.as_mut_ptr()) };
+        let ret =
+            unsafe { sphincs_plus_sign(self.cctx, msg.as_ptr(), self.sk.as_ptr(), s.as_mut_ptr()) };
         assert_eq!(ret, 0);
 
         s
@@ -182,6 +202,7 @@ impl SphincsPlus {
 
         unsafe {
             sphincs_plus_verify(
+                self.cctx,
                 sign.as_ptr(),
                 sign.len() as u32,
                 msg.as_ptr(),
@@ -192,5 +213,11 @@ impl SphincsPlus {
         }
 
         Ok(())
+    }
+}
+
+impl Drop for SphincsPlus {
+    fn drop(&mut self) {
+        unsafe { sphincs_plus_del_context(self.cctx) };
     }
 }

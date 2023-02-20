@@ -6,7 +6,7 @@ LD := $(TARGET)gcc
 CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections -nostdlib -Wno-nonnull-compare -DCKB_VM -DCKB_DECLARATION_ONLY
 LDFLAGS := -fdata-sections -ffunction-sections
 
-CFLAGS := $(CFLAGS) -Wall -Werror -Wno-nonnull  -Wno-unused-function -g
+CFLAGS := $(CFLAGS) -Wall -Werror -Wno-nonnull  -Wno-unused-function
 LDFLAGS := $(LDFLAGS) -Wl,-static -Wl,--gc-sections
 
 CFLAGS := $(CFLAGS) -I c -I deps/ckb-c-stdlib/libc -I deps/ckb-c-stdlib -I deps/ckb-c-stdlib/molecule
@@ -69,7 +69,7 @@ SOURCES += \
 HEADERS += \
 	c/$(SOURCES_DIR)/haraka.h
 
-CFLAGS := $(CFLAGS) -DCKB_C_STDLIB_PRINTF
+CFLAGS := $(CFLAGS) -g -DCKB_C_STDLIB_PRINTF
 
 # docker pull nervos/ckb-riscv-gnu-toolchain:gnu-bionic-20191012
 BUILDER_DOCKER := nervos/ckb-riscv-gnu-toolchain@sha256:aae8a3f79705f67d505d1f1d5ddc694a4fd537ed1c7e9622420a470d59ba2ec3

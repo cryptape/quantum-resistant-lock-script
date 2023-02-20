@@ -37,10 +37,10 @@ unsigned long long bytes_to_ull(const unsigned char *in, unsigned int inlen);
  * Expects address to be complete other than the tree_height and tree_index.
  */
 #define compute_root SPX_NAMESPACE(compute_root)
-void compute_root(unsigned char *root, const unsigned char *leaf,
-                  uint32_t leaf_idx, uint32_t idx_offset,
-                  const unsigned char *auth_path, uint32_t tree_height,
-                  const spx_ctx *ctx, uint32_t addr[8]);
+void compute_root(crypto_context *cctx, unsigned char *root,
+                  const unsigned char *leaf, uint32_t leaf_idx,
+                  uint32_t idx_offset, const unsigned char *auth_path,
+                  uint32_t tree_height, const spx_ctx *ctx, uint32_t addr[8]);
 
 /**
  * For a given leaf index, computes the authentication path and the resulting
@@ -51,8 +51,9 @@ void compute_root(unsigned char *root, const unsigned char *leaf,
  * it is possible to continue counting indices across trees.
  */
 #define treehash SPX_NAMESPACE(treehash)
-void treehash(unsigned char *root, unsigned char *auth_path, const spx_ctx *ctx,
-              uint32_t leaf_idx, uint32_t idx_offset, uint32_t tree_height,
+void treehash(crypto_context *cctx, unsigned char *root,
+              unsigned char *auth_path, const spx_ctx *ctx, uint32_t leaf_idx,
+              uint32_t idx_offset, uint32_t tree_height,
               void (*gen_leaf)(unsigned char * /* leaf */,
                                const spx_ctx *ctx /* ctx */,
                                uint32_t /* addr_idx */,

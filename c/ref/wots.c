@@ -22,9 +22,10 @@
  * Interprets in as start-th value of the chain.
  * addr has to contain the address of the chain.
  */
-static void gen_chain(unsigned char *out, const unsigned char *in,
-                      unsigned int start, unsigned int steps,
-                      const spx_ctx *ctx, uint32_t addr[8]) {
+static void gen_chain(crypto_context *cctx, unsigned char *out,
+                      const unsigned char *in, unsigned int start,
+                      unsigned int steps, const spx_ctx *ctx,
+                      uint32_t addr[8]) {
   uint32_t i;
 
   /* Initialize out with the value at position 'start'. */
@@ -32,8 +33,8 @@ static void gen_chain(unsigned char *out, const unsigned char *in,
 
   /* Iterate 'steps' calls to the hash function. */
   for (i = start; i < (start + steps) && i < SPX_WOTS_W; i++) {
-    set_hash_addr(addr, i);
-    thash(out, out, 1, ctx, addr);
+    set_hash_addr(cctx, addr, i);
+    thash(cctx, out, out, 1, ctx, addr);
   }
 }
 
@@ -42,8 +43,8 @@ static void gen_chain(unsigned char *out, const unsigned char *in,
  * Interprets an array of bytes as integers in base w.
  * This only works when log_w is a divisor of 8.
  */
-static void base_w(unsigned int *output, const int out_len,
-                   const unsigned char *input) {
+static void base_w(crypto_context *cctx, unsigned int *output,
+                   const int out_len, const unsigned char *input) {
   int in = 0;
   int out = 0;
   unsigned char total;
@@ -63,7 +64,7 @@ static void base_w(unsigned int *output, const int out_len,
 }
 
 /* Computes the WOTS+ checksum over a message (in base_w). */
-static void wots_checksum(unsigned int *csum_base_w,
+static void wots_checksum(crypto_context *cctx, unsigned int *csum_base_w,
                           const unsigned int *msg_base_w) {
   unsigned int csum = 0;
   unsigned char csum_bytes[(SPX_WOTS_LEN2 * SPX_WOTS_LOGW + 7) / 8];
@@ -78,13 +79,14 @@ static void wots_checksum(unsigned int *csum_base_w,
   /* Make sure expected empty zero bits are the least significant bits. */
   csum = csum << ((8 - ((SPX_WOTS_LEN2 * SPX_WOTS_LOGW) % 8)) % 8);
   ull_to_bytes(csum_bytes, sizeof(csum_bytes), csum);
-  base_w(csum_base_w, SPX_WOTS_LEN2, csum_bytes);
+  base_w(cctx, csum_base_w, SPX_WOTS_LEN2, csum_bytes);
 }
 
 /* Takes a message and derives the matching chain lengths. */
-void chain_lengths(unsigned int *lengths, const unsigned char *msg) {
-  base_w(lengths, SPX_WOTS_LEN1, msg);
-  wots_checksum(lengths + SPX_WOTS_LEN1, lengths);
+void chain_lengths(crypto_context *cctx, unsigned int *lengths,
+                   const unsigned char *msg) {
+  base_w(cctx, lengths, SPX_WOTS_LEN1, msg);
+  wots_checksum(cctx, lengths + SPX_WOTS_LEN1, lengths);
 }
 
 /**
@@ -92,17 +94,17 @@ void chain_lengths(unsigned int *lengths, const unsigned char *msg) {
  *
  * Writes the computed public key to 'pk'.
  */
-void wots_pk_from_sig(unsigned char *pk, const unsigned char *sig,
-                      const unsigned char *msg, const spx_ctx *ctx,
-                      uint32_t addr[8]) {
+void wots_pk_from_sig(crypto_context *cctx, unsigned char *pk,
+                      const unsigned char *sig, const unsigned char *msg,
+                      const spx_ctx *ctx, uint32_t addr[8]) {
   unsigned int lengths[SPX_WOTS_LEN];
   uint32_t i;
 
-  chain_lengths(lengths, msg);
+  chain_lengths(cctx, lengths, msg);
 
   for (i = 0; i < SPX_WOTS_LEN; i++) {
-    set_chain_addr(addr, i);
-    gen_chain(pk + i * SPX_N, sig + i * SPX_N, lengths[i],
+    set_chain_addr(cctx, addr, i);
+    gen_chain(cctx, pk + i * SPX_N, sig + i * SPX_N, lengths[i],
               SPX_WOTS_W - 1 - lengths[i], ctx, addr);
   }
 }

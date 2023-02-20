@@ -65,17 +65,20 @@ typedef enum {
   CRYPTO_HASH_TYPE_HARAKA,
 } crypto_hash_type;
 
-typedef void (*func_spx_thash)(unsigned char *out, const unsigned char *in,
-                               unsigned int inblocks, const spx_ctx *ctx,
-                               uint32_t addr[8]);
-typedef void (*func_spx_initialize_hash_function)(spx_ctx *ctx);
-typedef void (*func_spx_prf_addr)(unsigned char *out, const spx_ctx *ctx,
-                                  const uint32_t addr[8]);
-typedef void (*func_spx_gen_msg_rand)(
-    unsigned char *R, const unsigned char *sk_prf, const unsigned char *optrand,
-    const unsigned char *m, unsigned long long mlen, const spx_ctx *ctx);
+typedef void (*func_spx_thash)(void *p_cctx, unsigned char *out,
+                               const unsigned char *in, unsigned int inblocks,
+                               const spx_ctx *ctx, uint32_t addr[8]);
+typedef void (*func_spx_initialize_hash_function)(void *p_cctx, spx_ctx *ctx);
+typedef void (*func_spx_prf_addr)(void *p_cctx, unsigned char *out,
+                                  const spx_ctx *ctx, const uint32_t addr[8]);
+typedef void (*func_spx_gen_msg_rand)(void *p_cctx, unsigned char *R,
+                                      const unsigned char *sk_prf,
+                                      const unsigned char *optrand,
+                                      const unsigned char *m,
+                                      unsigned long long mlen,
+                                      const spx_ctx *ctx);
 typedef void (*func_spx_hash_message)(
-    unsigned char *digest, uint64_t *tree, uint32_t *leaf_idx,
+    void *p_cctx, unsigned char *digest, uint64_t *tree, uint32_t *leaf_idx,
     const unsigned char *R, const unsigned char *pk, const unsigned char *m,
     unsigned long long mlen, const spx_ctx *ctx);
 
@@ -143,11 +146,8 @@ typedef struct {
 
 } crypto_context;
 
-extern crypto_context g_context;
-extern bool g_context_is_init;
-
 #define GEN_INIT_HASH_FUNC(name, size, option, thash) \
-  int init_##name##_##size##option##_##thash();
+  int init_##name##_##size##option##_##thash(crypto_context *ctx);
 
 #define GEN_INIT_HASH_T_FUNC(name, size)     \
   GEN_INIT_HASH_FUNC(name, size, s, robust); \
@@ -168,54 +168,54 @@ GEN_INIT_HASH_T_FUNC2(haraka);
 #undef GEN_INIT_HASH_T_FUNC
 #undef GEN_INIT_HASH_FUNC
 
-#define SPX_N g_context.spx_n
-#define SPX_FULL_HEIGHT g_context.spx_full_height
-#define SPX_D g_context.spx_d
-#define SPX_FORS_HEIGHT g_context.spx_fors_height
-#define SPX_FORS_TREES g_context.spx_fors_trees
-#define SPX_WOTS_W g_context.spx_wots_w
-#define SPX_ADDR_BYTES g_context.spx_addr_bytes
-#define SPX_WOTS_LOGW g_context.spx_wots_logw
-#define SPX_WOTS_LEN1 g_context.spx_wots_len1
-#define SPX_WOTS_LEN2 g_context.spx_wots_len2
-#define SPX_WOTS_LEN g_context.spx_wots_len
-#define SPX_WOTS_BYTES g_context.spx_wots_bytes
-#define SPX_WOTS_PK_BYTES g_context.spx_wots_pk_bytes
-#define SPX_TREE_HEIGHT g_context.spx_tree_height
-#define SPX_FORS_MSG_BYTES g_context.spx_fors_msg_bytes
-#define SPX_FORS_BYTES g_context.spx_fors_bytes
-#define SPX_FORS_PK_BYTES g_context.spx_fors_pk_bytes
-#define SPX_BYTES g_context.spx_bytes
-#define SPX_PK_BYTES g_context.spx_pk_bytes
-#define SPX_SK_BYTES g_context.spx_sk_bytes
+#define SPX_N cctx->spx_n
+#define SPX_FULL_HEIGHT cctx->spx_full_height
+#define SPX_D cctx->spx_d
+#define SPX_FORS_HEIGHT cctx->spx_fors_height
+#define SPX_FORS_TREES cctx->spx_fors_trees
+#define SPX_WOTS_W cctx->spx_wots_w
+#define SPX_ADDR_BYTES cctx->spx_addr_bytes
+#define SPX_WOTS_LOGW cctx->spx_wots_logw
+#define SPX_WOTS_LEN1 cctx->spx_wots_len1
+#define SPX_WOTS_LEN2 cctx->spx_wots_len2
+#define SPX_WOTS_LEN cctx->spx_wots_len
+#define SPX_WOTS_BYTES cctx->spx_wots_bytes
+#define SPX_WOTS_PK_BYTES cctx->spx_wots_pk_bytes
+#define SPX_TREE_HEIGHT cctx->spx_tree_height
+#define SPX_FORS_MSG_BYTES cctx->spx_fors_msg_bytes
+#define SPX_FORS_BYTES cctx->spx_fors_bytes
+#define SPX_FORS_PK_BYTES cctx->spx_fors_pk_bytes
+#define SPX_BYTES cctx->spx_bytes
+#define SPX_PK_BYTES cctx->spx_pk_bytes
+#define SPX_SK_BYTES cctx->spx_sk_bytes
 
-#define SPX_SHA512 g_context.spx_sha512
+#define SPX_SHA512 cctx->spx_sha512
 
-#define SPX_OFFSET_LAYER g_context.spx_offset_layer
-#define SPX_OFFSET_TREE g_context.spx_offset_tree
-#define SPX_OFFSET_TYPE g_context.spx_offset_type
-#define SPX_OFFSET_KP_ADDR2 g_context.spx_offset_kp_addr2
-#define SPX_OFFSET_KP_ADDR1 g_context.spx_offset_kp_addr1
-#define SPX_OFFSET_CHAIN_ADDR g_context.spx_offset_chain_addr
-#define SPX_OFFSET_HASH_ADDR g_context.spx_offset_hash_addr
-#define SPX_OFFSET_TREE_HGT g_context.spx_offset_tree_hgt
-#define SPX_OFFSET_TREE_INDEX g_context.spx_offset_tree_index
+#define SPX_OFFSET_LAYER cctx->spx_offset_layer
+#define SPX_OFFSET_TREE cctx->spx_offset_tree
+#define SPX_OFFSET_TYPE cctx->spx_offset_type
+#define SPX_OFFSET_KP_ADDR2 cctx->spx_offset_kp_addr2
+#define SPX_OFFSET_KP_ADDR1 cctx->spx_offset_kp_addr1
+#define SPX_OFFSET_CHAIN_ADDR cctx->spx_offset_chain_addr
+#define SPX_OFFSET_HASH_ADDR cctx->spx_offset_hash_addr
+#define SPX_OFFSET_TREE_HGT cctx->spx_offset_tree_hgt
+#define SPX_OFFSET_TREE_INDEX cctx->spx_offset_tree_index
 
-#define SPX_SHAX_OUTPUT_BYTES g_context.spx_shax_output_bytes
-#define SPX_SHAX_BLOCK_BYTES g_context.spx_shax_block_bytes
-#define shaX_inc_init g_context.func_shax_inc_init
-#define shaX_inc_blocks g_context.func_shax_inc_blocks
-#define shaX_inc_finalize g_context.func_shax_inc_finalize
-#define shaX g_context.func_shax
-#define mgf1_X g_context.func_mgf1_x
+#define SPX_SHAX_OUTPUT_BYTES cctx->spx_shax_output_bytes
+#define SPX_SHAX_BLOCK_BYTES cctx->spx_shax_block_bytes
+#define shaX_inc_init cctx->func_shax_inc_init
+#define shaX_inc_blocks cctx->func_shax_inc_blocks
+#define shaX_inc_finalize cctx->func_shax_inc_finalize
+#define shaX cctx->func_shax
+#define mgf1_X cctx->func_mgf1_x
 
 #define SPX_NAMESPACE(s) SPX_##s
 
-#define thash g_context.func_thash
-#define initialize_hash_function g_context.func_init_hash_function
-#define prf_addr g_context.func_prf_addr
-#define gen_message_random g_context.func_gen_msg_rand
-#define hash_message g_context.func_hash_msg
+#define thash cctx->func_thash
+#define initialize_hash_function cctx->func_init_hash_function
+#define prf_addr cctx->func_prf_addr
+#define gen_message_random cctx->func_gen_msg_rand
+#define hash_message cctx->func_hash_msg
 
 #ifndef ASSERT
 #define ASSERT(c)                                \
