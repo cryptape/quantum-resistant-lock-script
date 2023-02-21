@@ -4,9 +4,11 @@ CC=clang
 LLVM_PROFDATA=llvm-profdata
 LLVM_COV=llvm-cov
 
-NPROC?=30
+NPROC?=16
 
 SOURCES_DIR = ref
+COVERAGE_DIR=coverage
+CORPUS_DIR=corpus
 
 SOURCES = \
 	../../../c/$(SOURCES_DIR)/params.c \
@@ -73,6 +75,8 @@ ifeq ($(OS),MacOS)
 	COVERAGE_FLAGS+=-Wl,-U,_LLVMFuzzerCustomMutator -Wl,-U,_LLVMFuzzerInitialize
 endif
 
+EXTERNAL_HEADERS=../../../deps/ckb-c-stdlib-20210801/ckb_exec.h
+
 all: build/fuzzer build/cover
 
 build/fuzzer: sphincs_plus_fuzzer.c $(SOURCES) $(HEADERS)
@@ -83,8 +87,23 @@ build/cover: sphincs_plus_cover.c sphincs_plus_fuzzer.c $(SOURCES) $(HEADERS)
 	$(CC) $(COVERAGE_FLAGS) -o $@ $(SOURCES) $< sphincs_plus_fuzzer.c
 
 start-fuzzer: build/fuzzer
-	mkdir -p build/corpus
-	cd build && ./fuzzer -max_len=8000000 -jobs=$(NPROC) corpus
+	cd build && mkdir -p $(CORPUS_DIR)
+	cd build && ./fuzzer -max_len=8000000 -jobs=$(NPROC) $(CORPUS_DIR)
+
+show: build/$(COVERAGE_DIR)/fuzzer.profdata
+	cd build && mkdir -p $(COVERAGE_DIR)
+	cd build && $(LLVM_COV) show --instr-profile=$(COVERAGE_DIR)/fuzzer.profdata cover
+
+report: build/$(COVERAGE_DIR)/fuzzer.profdata build/cover $(EXTERNAL_HEADERS)
+	$(LLVM_COV) report --show-functions --instr-profile=$(COVERAGE_DIR)/fuzzer.profdata build/cover $(EXTERNAL_HEADERS)
+
+%.profraw: build/cover
+	LLVM_PROFILE_FILE=$@ build/cover build/$(CORPUS_DIR)/*
+
+%.profdata: %.profraw
+	$(LLVM_PROFDATA) merge --sparse $< -o $@
+
+.PRECIOUS: build/$(COVERAGE_DIR)/fuzzer.profraw build/$(COVERAGE_DIR)/fuzzer.profdata
 
 clean:
 	rm -rf build/*
