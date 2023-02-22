@@ -13,6 +13,10 @@
 #define NROUNDS 24
 #define ROL(a, offset) (((a) << (offset)) ^ ((a) >> (64 - (offset))))
 
+#ifdef CKB_VM
+void riscv_keccak_f1600(uint64_t *state, uint64_t *rc);
+#endif
+
 /*************************************************
  * Name:        load64
  *
@@ -63,6 +67,13 @@ static const uint64_t KeccakF_RoundConstants[NROUNDS] = {
  *
  * Arguments:   - uint64_t *state: pointer to input/output Keccak state
  **************************************************/
+#ifdef CKB_VM
+
+static void KeccakF1600_StatePermute(uint64_t *state) {
+  riscv_keccak_f1600(state, (uint64_t *)KeccakF_RoundConstants);
+}
+
+#else   // CKB_VM
 static void KeccakF1600_StatePermute(uint64_t *state) {
   int round;
 
@@ -325,6 +336,7 @@ static void KeccakF1600_StatePermute(uint64_t *state) {
   state[23] = Aso;
   state[24] = Asu;
 }
+#endif  // CKB_VM
 
 /*************************************************
  * Name:        keccak_absorb

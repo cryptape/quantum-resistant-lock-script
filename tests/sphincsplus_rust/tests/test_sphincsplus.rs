@@ -14,7 +14,7 @@ pub const MAX_CYCLES: u64 = std::u64::MAX;
 fn test_base() {
     let hash_types = CryptoType::get_all();
     for hash_type in hash_types {
-        let mut config = TestConfig::new(hash_type);
+        let mut config = TestConfig::new(hash_type.clone());
 
         let mut dummy = DummyDataLoader::new();
 
@@ -26,6 +26,9 @@ fn test_base() {
 
         verifier.set_debug_printer(debug_printer);
         let verify_result = verifier.verify(MAX_CYCLES);
+
+        let tmp_hash_type : u32 = hash_type.into();
+        println!("-- hash type: {}", tmp_hash_type);
         verify_result.expect("pass verification");
     }
 }

@@ -1,4 +1,3 @@
-TARGET := 
 TARGET := riscv64-unknown-linux-gnu-
 CC := $(TARGET)gcc
 LD := $(TARGET)gcc
@@ -46,8 +45,9 @@ HEADERS = \
 SOURCES += \
 	c/$(SOURCES_DIR)/fips202.c \
 	c/$(SOURCES_DIR)/hash_shake.c \
-	c/$(SOURCES_DIR)/thash_shake_robust.c\
-	c/$(SOURCES_DIR)/thash_shake_simple.c
+	c/$(SOURCES_DIR)/thash_shake_robust.c \
+	c/$(SOURCES_DIR)/thash_shake_simple.c \
+	c/$(SOURCES_DIR)/fips202_asm_bin.S
 HEADERS += \
 	c/$(SOURCES_DIR)/fips202.h
 
@@ -69,7 +69,7 @@ SOURCES += \
 HEADERS += \
 	c/$(SOURCES_DIR)/haraka.h
 
-# CFLAGS := $(CFLAGS) -g -DCKB_C_STDLIB_PRINTF
+CFLAGS := $(CFLAGS) -g -DCKB_C_STDLIB_PRINTF
 
 # docker pull nervos/ckb-riscv-gnu-toolchain:gnu-bionic-20191012
 BUILDER_DOCKER := nervos/ckb-riscv-gnu-toolchain@sha256:aae8a3f79705f67d505d1f1d5ddc694a4fd537ed1c7e9622420a470d59ba2ec3
@@ -79,7 +79,10 @@ all: build/sphincsplus_lock
 all-via-docker:
 	docker run --rm -v `pwd`:/code ${BUILDER_DOCKER} bash -c "cd /code && make"
 
-build/sphincsplus_lock: c/ckb-sphincsplus-lock.c $(SOURCES) $(HEADERS)
+build/convert_asm: c/ref/fips202_asm.S
+	riscv-naive-assembler -i c/ref/fips202_asm.S > c/ref/fips202_asm_bin.S
+
+build/sphincsplus_lock: c/ckb-sphincsplus-lock.c $(SOURCES) $(HEADERS) build/convert_asm
 	mkdir -p build
 	$(CC) $(CFLAGS) -o $@ $(SOURCES) $<
 
