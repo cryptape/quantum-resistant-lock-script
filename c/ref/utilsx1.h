@@ -2,8 +2,9 @@
 #define SPX_UTILSX4_H
 
 #include <stdint.h>
-#include "params.h"
+
 #include "context.h"
+#include "params.h"
 
 /**
  * For a given leaf index, computes the authentication path and the resulting
@@ -14,13 +15,13 @@
  * it is possible to continue counting indices across trees.
  */
 #define treehashx1 SPX_NAMESPACE(treehashx1)
-void treehashx1(unsigned char *root, unsigned char *auth_path,
-                const spx_ctx* ctx,
-                uint32_t leaf_idx, uint32_t idx_offset, uint32_t tree_height,
-                void (*gen_leaf)(
-                   unsigned char* /* Where to write the leaf */,
-                   const spx_ctx* /* ctx */,
-                   uint32_t addr_idx, void *info),
+void treehashx1(crypto_context *cctx, unsigned char *root,
+                unsigned char *auth_path, const spx_ctx *ctx, uint32_t leaf_idx,
+                uint32_t idx_offset, uint32_t tree_height,
+                void (*gen_leaf)(crypto_context *,
+                                 unsigned char * /* Where to write the leaf */,
+                                 const spx_ctx * /* ctx */, uint32_t addr_idx,
+                                 void *info),
                 uint32_t tree_addrx4[8], void *info);
 
 #endif

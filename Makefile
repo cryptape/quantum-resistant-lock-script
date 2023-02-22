@@ -3,24 +3,19 @@ TARGET := riscv64-unknown-linux-gnu-
 CC := $(TARGET)gcc
 LD := $(TARGET)gcc
 
-CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections
+CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections -nostdlib -Wno-nonnull-compare -DCKB_VM -DCKB_DECLARATION_ONLY
 LDFLAGS := -fdata-sections -ffunction-sections
 
-ifneq ($(TARGET), )
-	CFLAGS := $(CFLAGS) -nostdlib -Wno-nonnull-compare -DCKB_VM
-else
-	CFLAGS := -fsanitize=address -fsanitize=undefined
-endif
-
-CFLAGS := $(CFLAGS) -Wall -Werror -Wno-nonnull  -Wno-unused-function -g
+CFLAGS := $(CFLAGS) -Wall -Werror -Wno-nonnull  -Wno-unused-function
 LDFLAGS := $(LDFLAGS) -Wl,-static -Wl,--gc-sections
 
-CFLAGS := $(CFLAGS) -I c -I deps/ckb-c-stdlib/libc -I deps/ckb-c-stdlib
+CFLAGS := $(CFLAGS) -I c -I deps/ckb-c-stdlib/libc -I deps/ckb-c-stdlib -I deps/ckb-c-stdlib/molecule
 CFLAGS := $(CFLAGS) -I c/ref
 
 SOURCES_DIR = ref
 
 SOURCES = \
+	c/$(SOURCES_DIR)/params.c \
 	c/$(SOURCES_DIR)/address.c \
 	c/$(SOURCES_DIR)/merkle.c \
 	c/$(SOURCES_DIR)/wots.c \
@@ -29,7 +24,8 @@ SOURCES = \
 	c/$(SOURCES_DIR)/utilsx1.c \
 	c/$(SOURCES_DIR)/fors.c \
 	c/$(SOURCES_DIR)/sign.c \
-	c/$(SOURCES_DIR)/randombytes.c
+	c/$(SOURCES_DIR)/randombytes.c \
+	c/ckb-sphincsplus.c
 
 HEADERS = \
 	c/$(SOURCES_DIR)/params.h \
@@ -43,19 +39,49 @@ HEADERS = \
 	c/$(SOURCES_DIR)/api.h \
 	c/$(SOURCES_DIR)/hash.h \
 	c/$(SOURCES_DIR)/thash.h \
-	c/$(SOURCES_DIR)/randombytes.h
+	c/$(SOURCES_DIR)/randombytes.h \
+	c/ckb-sphincsplus.h
 
 # shake
-PARAMS = sphincs-shake-256s
-THASH = robust
+SOURCES += \
+	c/$(SOURCES_DIR)/fips202.c \
+	c/$(SOURCES_DIR)/hash_shake.c \
+	c/$(SOURCES_DIR)/thash_shake_robust.c\
+	c/$(SOURCES_DIR)/thash_shake_simple.c
+HEADERS += \
+	c/$(SOURCES_DIR)/fips202.h
 
-SOURCES += c/$(SOURCES_DIR)/fips202.c c/$(SOURCES_DIR)/hash_shake.c c/$(SOURCES_DIR)/thash_shake_$(THASH).c
-HEADERS += c/$(SOURCES_DIR)/fips202.h
+# sha2
+SOURCES += \
+	c/$(SOURCES_DIR)/sha2.c \
+	c/$(SOURCES_DIR)/hash_sha2.c \
+	c/$(SOURCES_DIR)/thash_sha2_robust.c \
+	c/$(SOURCES_DIR)/thash_sha2_simple.c
+HEADERS += \
+	c/$(SOURCES_DIR)/sha2.h
 
-CFLAGS := $(CFLAGS) -DPARAMS=$(PARAMS) -DCKB_DECLARATION_ONLY -DCKB_C_STDLIB_PRINTF
+# haraka
+SOURCES += \
+	c/$(SOURCES_DIR)/haraka.c \
+	c/$(SOURCES_DIR)/hash_haraka.c \
+	c/$(SOURCES_DIR)/thash_haraka_robust.c \
+	c/$(SOURCES_DIR)/thash_haraka_simple.c
+HEADERS += \
+	c/$(SOURCES_DIR)/haraka.h
 
-build/sphincsplus_example: examples/ckb-sphincsplus-example.c $(SOURCES) $(HEADERS)
+# CFLAGS := $(CFLAGS) -g -DCKB_C_STDLIB_PRINTF
+
+# docker pull nervos/ckb-riscv-gnu-toolchain:gnu-bionic-20191012
+BUILDER_DOCKER := nervos/ckb-riscv-gnu-toolchain@sha256:aae8a3f79705f67d505d1f1d5ddc694a4fd537ed1c7e9622420a470d59ba2ec3
+
+all: build/sphincsplus_lock
+
+all-via-docker:
+	docker run --rm -v `pwd`:/code ${BUILDER_DOCKER} bash -c "cd /code && make"
+
+build/sphincsplus_lock: c/ckb-sphincsplus-lock.c $(SOURCES) $(HEADERS)
+	mkdir -p build
 	$(CC) $(CFLAGS) -o $@ $(SOURCES) $<
 
 clean:
-	rm -rf build/sphincsplus_example
+	rm -rf build/sphincsplus_lock
