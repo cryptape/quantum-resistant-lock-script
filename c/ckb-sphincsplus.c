@@ -26,47 +26,25 @@ enum SphincsPlusError {
 
 #include <stdlib.h>
 
-crypto_context *sphincs_plus_new_context(crypto_type type) {
-  crypto_context *cctx = (crypto_context *)malloc(sizeof(crypto_context));
-  int err = crypto_init_context(type, cctx);
-  ASSERT(err == 0);
-  return cctx;
-}
-
-void sphincs_plus_del_context(crypto_context *cctx) { free(cctx); }
-
 #endif  // CKB_VM
 
-int sphincs_plus_init_context(crypto_type type, crypto_context *cctx) {
-  memset(cctx, 0, sizeof(crypto_context));
-  return crypto_init_context(type, cctx);
-}
+uint32_t sphincs_plus_get_pk_size() { return SPX_PK_BYTES; }
 
-uint32_t sphincs_plus_get_pk_size(crypto_context *cctx) {
-  return cctx->spx_pk_bytes;
-}
+uint32_t sphincs_plus_get_sk_size() { return SPX_SK_BYTES; }
 
-uint32_t sphincs_plus_get_sk_size(crypto_context *cctx) {
-  return cctx->spx_sk_bytes;
-}
-
-uint32_t sphincs_plus_get_sign_size(crypto_context *cctx) {
-  return cctx->spx_bytes + SPX_MLEN;
-}
+uint32_t sphincs_plus_get_sign_size() { return SPX_BYTES + SPX_MLEN; }
 
 #ifndef CKB_VM
 
-int sphincs_plus_generate_keypair(crypto_context *cctx, uint8_t *pk,
-                                  uint8_t *sk) {
-  return crypto_sign_keypair(cctx, pk, sk);
+int sphincs_plus_generate_keypair(uint8_t *pk, uint8_t *sk) {
+  return crypto_sign_keypair(pk, sk);
 }
 
-int sphincs_plus_sign(crypto_context *cctx, uint8_t *message, uint8_t *sk,
-                      uint8_t *out_sign) {
-  unsigned long long out_sign_len = sphincs_plus_get_sign_size(cctx);
-  int ret = crypto_sign(cctx, out_sign, (unsigned long long *)&out_sign_len,
-                        message, SPX_MLEN, sk);
-  if ((uint32_t)out_sign_len != sphincs_plus_get_sign_size(cctx)) {
+int sphincs_plus_sign(uint8_t *message, uint8_t *sk, uint8_t *out_sign) {
+  unsigned long long out_sign_len = sphincs_plus_get_sign_size();
+  int ret = crypto_sign(out_sign, (unsigned long long *)&out_sign_len, message,
+                        SPX_MLEN, sk);
+  if ((uint32_t)out_sign_len != sphincs_plus_get_sign_size()) {
     return 1;
   }
   return ret;
@@ -74,19 +52,19 @@ int sphincs_plus_sign(crypto_context *cctx, uint8_t *message, uint8_t *sk,
 
 #endif  // CKB_VM
 
-int sphincs_plus_verify(crypto_context *cctx, uint8_t *sign, uint32_t sign_size,
-                        uint8_t *message, uint32_t message_size,
-                        uint8_t *pubkey, uint32_t pubkey_size) {
-  size_t sign_len = sphincs_plus_get_sign_size(cctx);
+int sphincs_plus_verify(uint8_t *sign, uint32_t sign_size, uint8_t *message,
+                        uint32_t message_size, uint8_t *pubkey,
+                        uint32_t pubkey_size) {
+  size_t sign_len = sphincs_plus_get_sign_size();
 
   if (sign_size != sign_len || message_size != SPX_MLEN ||
-      pubkey_size != sphincs_plus_get_pk_size(cctx)) {
+      pubkey_size != sphincs_plus_get_pk_size()) {
     return SphincsPlusError_Params;
   }
   unsigned char mout[SPX_BYTES + SPX_MLEN];
   unsigned long long mlen = 0;
 
-  int err = crypto_sign_open(cctx, mout, &mlen, sign, sign_len, pubkey);
+  int err = crypto_sign_open(mout, &mlen, sign, sign_len, pubkey);
   if (err != 0) {
     return SphincsPlusError_Verify;
   }

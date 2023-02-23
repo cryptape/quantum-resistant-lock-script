@@ -20,14 +20,16 @@ cd $workdir
 rm -rf build/*
 mkdir -p build
 
-make -f tests/sphincsplus/Makefile PARAMS=$PARAMS THASH=$THASH
+make all-via-docker PARAMS=$PARAMS THASH=$THASH
 if (($? == 0)); then
   echo "make success"
 else
   exit 1
 fi
 
-./build/test_sphincsplus
+cd tests/sphincsplus_rust
+cargo clean
+cargo test
 if (($? == 0)); then
   echo "success"
 else
