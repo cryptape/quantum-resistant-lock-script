@@ -60,7 +60,9 @@ enum SPHINCSPLUS_EXAMPLE_ERROR {
 
 #ifdef CKB_VM
 // randombytes in sphincs+ depends on fcntl.h and unistd.h
-void randombytes(unsigned char *x, unsigned long long xlen) {}
+void randombytes(unsigned char *x, unsigned long long xlen) {
+  ASSERT(false);
+}
 #endif  // CKB_VM
 
 static int extract_witness_lock(uint8_t *witness, uint64_t len,
@@ -197,9 +199,6 @@ int make_witness(WitnessArgsType *witness) {
   uint64_t witness_len = 0;
   size_t source = CKB_SOURCE_GROUP_INPUT;
   err = ckb_load_witness(NULL, &witness_len, 0, 0, source);
-  // when witness is missing, empty or not accessible, make it zero length.
-  // don't fail, because owner lock without omni doesn't require witness.
-  // when it's zero length, any further actions on witness will fail.
   if (err != 0) {
     witness_len = 0;
   }
