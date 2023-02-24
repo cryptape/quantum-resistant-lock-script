@@ -11,6 +11,7 @@ pub const MAX_CYCLES: u64 = std::u64::MAX;
 
 fn main() {
     let mut config = TestConfig::new();
+    config.print_time = true;
 
     let mut dummy = DummyDataLoader::new();
 
@@ -23,5 +24,5 @@ fn main() {
     verifier.set_debug_printer(debug_printer);
     let verify_result = verifier.verify(MAX_CYCLES);
     let res = verify_result.expect("pass verification");
-    println!("cycles: {}", res);
+    println!("cycles: {} ({:.2?}M)", res, (res as f64) / 1024.0 / 1024.0);
 }

@@ -28,6 +28,7 @@ pub struct TestConfig {
     pub pubkey_error: bool,
     pub message_error: bool,
     rng: ThreadRng,
+    pub print_time: bool,
 }
 
 impl TestConfig {
@@ -38,6 +39,7 @@ impl TestConfig {
             pubkey_error: false,
             message_error: false,
             rng: thread_rng(),
+            print_time: false,
         }
     }
 
@@ -187,14 +189,20 @@ pub fn sign_tx_by_input_group(
                     if config.message_error {
                         config.rng.fill(&mut message);
                     }
-                    // let start = std::time::Instant::now();
+                    let start = std::time::Instant::now();
                     let sign = Bytes::from(if config.sign_error {
                         config.gen_rand_buf(config.key.get_sign_len())
                     } else {
                         config.key.sign(&message)
                     });
+                    if config.print_time {
+                        println!(
+                            "sign time(native): {} us ({:.2?}s)",
+                            start.elapsed().as_micros(),
+                            start.elapsed().as_secs_f32()
+                        );
+                    }
 
-                    // println!("sign time(native): {} us", start.elapsed().as_micros());
                     sign
                 };
 
