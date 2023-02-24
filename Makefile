@@ -74,7 +74,7 @@ BUILDER_DOCKER := nervos/ckb-riscv-gnu-toolchain@sha256:7601a814be2595ad471288fe
 all: build/sphincsplus_lock
 
 all-via-docker:
-	docker run --rm -v `pwd`:/code ${BUILDER_DOCKER} bash -c "cd /code && make"
+	docker run --rm -v `pwd`:/code ${BUILDER_DOCKER} bash -c "cd /code && make PARAMS=$(PARAMS) THASH=$(THASH)"
 
 build/convert_asm: c/ref/fips202_asm.S
 	riscv-naive-assembler -i c/ref/fips202_asm.S > c/ref/fips202_asm_bin.S
