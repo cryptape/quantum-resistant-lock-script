@@ -1,94 +1,90 @@
-
-
-
-# Generate code, user performance analysis
-# CC := $(TARGET)gcc
-# LD := $(TARGET)gcc
+TARGET := riscv64-unknown-linux-gnu-
+CC := $(TARGET)gcc
+LD := $(TARGET)gcc
 
 PARAMS = sphincs-shake-256f
 THASH = robust
 
-CFLAGS := -fPIC -O0 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections
+CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections -nostdlib -Wno-nonnull-compare -DCKB_VM -DCKB_DECLARATION_ONLY
 LDFLAGS := -fdata-sections -ffunction-sections
 
-ifneq ($(TARGET), )
-	CFLAGS := $(CFLAGS) -nostdlib -Wno-nonnull-compare -DCKB_VM
-else
-	CFLAGS := -fsanitize=address -fsanitize=undefined
-endif
-
-CFLAGS := $(CFLAGS) -Wall -Werror -Wno-nonnull  -Wno-unused-function -g
+# Using a new version of gcc will have a warning of ckb-c-stdlib
+CFLAGS := $(CFLAGS) -w
+# CFLAGS := $(CFLAGS) -Wall -Werror -Wno-nonnull  -Wno-unused-function
 LDFLAGS := $(LDFLAGS) -Wl,-static -Wl,--gc-sections
 
-CFLAGS := $(CFLAGS) -I ../../../c -I ../../../c/ref
+CFLAGS := $(CFLAGS) -I ../../../c -I ../../../deps/ckb-c-stdlib/libc -I ../../../deps/ckb-c-stdlib -I ../../../deps/ckb-c-stdlib/molecule -I ../
+CFLAGS := $(CFLAGS) -I ../../../deps/sphincsplus/ref -DPARAMS=$(PARAMS) -DTEST_DATA=$(PARAMS)-$(THASH)
 
-SOURCES_DIR = ref
+SPHINCS_PLUS_DIR = ../../../deps/sphincsplus/ref/
 
 SOURCES = \
-	../../../c/$(SOURCES_DIR)/address.c \
-	../../../c/$(SOURCES_DIR)/merkle.c \
-	../../../c/$(SOURCES_DIR)/wots.c \
-	../../../c/$(SOURCES_DIR)/wotsx1.c \
-	../../../c/$(SOURCES_DIR)/utils.c \
-	../../../c/$(SOURCES_DIR)/utilsx1.c \
-	../../../c/$(SOURCES_DIR)/fors.c \
-	../../../c/$(SOURCES_DIR)/sign.c \
-	../../../c/$(SOURCES_DIR)/randombytes.c \
+	$(SPHINCS_PLUS_DIR)address.c \
+	$(SPHINCS_PLUS_DIR)merkle.c \
+	$(SPHINCS_PLUS_DIR)wots.c \
+	$(SPHINCS_PLUS_DIR)wotsx1.c \
+	$(SPHINCS_PLUS_DIR)utils.c \
+	$(SPHINCS_PLUS_DIR)utilsx1.c \
+	$(SPHINCS_PLUS_DIR)fors.c \
+	$(SPHINCS_PLUS_DIR)sign.c \
 	../../../c/ckb-sphincsplus.c
 
 HEADERS = \
-	../../../c/$(SOURCES_DIR)/params.h \
-	../../../c/$(SOURCES_DIR)/address.h \
-	../../../c/$(SOURCES_DIR)/merkle.h \
-	../../../c/$(SOURCES_DIR)/wots.h \
-	../../../c/$(SOURCES_DIR)/wotsx1.h \
-	../../../c/$(SOURCES_DIR)/utils.h \
-	../../../c/$(SOURCES_DIR)/utilsx1.h \
-	../../../c/$(SOURCES_DIR)/fors.h \
-	../../../c/$(SOURCES_DIR)/api.h \
-	../../../c/$(SOURCES_DIR)/hash.h \
-	../../../c/$(SOURCES_DIR)/thash.h \
-	../../../c/$(SOURCES_DIR)/randombytes.h \
+	$(SPHINCS_PLUS_DIR)params.h \
+	$(SPHINCS_PLUS_DIR)address.h \
+	$(SPHINCS_PLUS_DIR)merkle.h \
+	$(SPHINCS_PLUS_DIR)wots.h \
+	$(SPHINCS_PLUS_DIR)wotsx1.h \
+	$(SPHINCS_PLUS_DIR)utils.h \
+	$(SPHINCS_PLUS_DIR)utilsx1.h \
+	$(SPHINCS_PLUS_DIR)fors.h \
+	$(SPHINCS_PLUS_DIR)api.h \
+	$(SPHINCS_PLUS_DIR)hash.h \
+	$(SPHINCS_PLUS_DIR)thash.h \
+	$(SPHINCS_PLUS_DIR)randombytes.h \
 	../../../c/ckb-sphincsplus.h
 
 ifneq (,$(findstring shake,$(PARAMS)))
 	SOURCES += \
-		../../../c/$(SOURCES_DIR)/fips202.c \
-		../../../c/$(SOURCES_DIR)/hash_shake.c \
-		../../../c/$(SOURCES_DIR)/thash_shake_$(THASH).c
-	HEADERS += \
-		../../../c/$(SOURCES_DIR)/fips202.h
+		$(SPHINCS_PLUS_DIR)fips202.c \
+		$(SPHINCS_PLUS_DIR)hash_shake.c \
+		$(SPHINCS_PLUS_DIR)thash_shake_$(THASH).c
+	HEADERS += $(SPHINCS_PLUS_DIR)fips202.h
 endif
 ifneq (,$(findstring haraka,$(PARAMS)))
 	SOURCES += \
-		../../../c/$(SOURCES_DIR)/haraka.c \
-		../../../c/$(SOURCES_DIR)/hash_haraka.c \
-		../../../c/$(SOURCES_DIR)/thash_haraka_$(THASH).c
-	HEADERS += \
-		../../../c/$(SOURCES_DIR)/haraka.h
+		$(SPHINCS_PLUS_DIR)haraka.c \
+		$(SPHINCS_PLUS_DIR)hash_haraka.c \
+		$(SPHINCS_PLUS_DIR)thash_haraka_$(THASH).c
+	HEADERS += $(SPHINCS_PLUS_DIR)haraka.h
 endif
 ifneq (,$(findstring sha2,$(PARAMS)))
 	SOURCES += \
-		../../../c/$(SOURCES_DIR)/sha2.c \
-		../../../c/$(SOURCES_DIR)/hash_sha2.c \
-		../../../c/$(SOURCES_DIR)/thash_sha2_$(THASH).c
-	HEADERS += \
-		../../../c/$(SOURCES_DIR)/sha2.h
+		$(SPHINCS_PLUS_DIR)sha2.c \
+		$(SPHINCS_PLUS_DIR)hash_sha2.c \
+		$(SPHINCS_PLUS_DIR)thash_sha2_$(THASH).c
+	HEADERS += $(SPHINCS_PLUS_DIR)sha2.h
 endif
 
-CFLAGS := $(CFLAGS) -DPARAMS=$(PARAMS) -DCKB_DECLARATION_ONLY -DCKB_C_STDLIB_PRINTF
+# docker pull nervos/ckb-riscv-gnu-toolchain:gnu-jammy-20230214
+BUILDER_DOCKER := nervos/ckb-riscv-gnu-toolchain@sha256:7601a814be2595ad471288fefc176356b31101837a514ddb0fc93b11c1cf5135
 
-all: build/gen_keypair build/sign build/verify
+all: build/verify
 
-build/gen_keypair: sphincsplus.c $(SOURCES) $(HEADERS)
-	mkdir -p build
-	$(CC) $(CFLAGS) -DSP_GEN_KEYPAIR -o $@ $(SOURCES) $<
+all-via-docker:
+	docker run --rm -v `pwd`:/code ${BUILDER_DOCKER} bash -c "cd /code && make"
 
-build/sign: sphincsplus.c $(SOURCES) $(HEADERS)
-	$(CC) $(CFLAGS) -DSP_SIGN -o $@ $(SOURCES) $<
+build/verify: optimization-sphincsplus.c $(SOURCES) $(HEADERS)
+	$(CC) $(CFLAGS) -o $@ $(SOURCES) $<
 
-build/verify: sphincsplus.c $(SOURCES) $(HEADERS)
-	$(CC) $(CFLAGS) -DSP_VERIFY -o $@ $(SOURCES) $<
+run: build/verify
+	ckb-debugger --bin $< --max-cycles=10000000000
+
+FLAME_GRAPH_DIR := ~/code/tmp/FlameGraph/
+
+ppref: build/verify
+	ckb-debugger --bin $< --max-cycles=10000000000 --pprof build/sphincsplus.pref
+	$(FLAME_GRAPH_DIR)/flamegraph.pl build/sphincsplus.pref > build/sphincsplus.svg
 
 clean:
 	rm -rf build/*

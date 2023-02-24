@@ -1,7 +1,6 @@
 use ckb_script::TransactionScriptsVerifier;
 use ckb_types::packed::Byte32;
 use sphincsplus_rust::dummy_data_loader::DummyDataLoader;
-use sphincsplus_rust::sphincsplus::CryptoType;
 use sphincsplus_rust::utils::*;
 
 pub fn debug_printer(_script: &Byte32, msg: &str) {
@@ -11,7 +10,7 @@ pub fn debug_printer(_script: &Byte32, msg: &str) {
 pub const MAX_CYCLES: u64 = std::u64::MAX;
 
 fn main() {
-    let mut config = TestConfig::new(CryptoType::Shake192sRobust);
+    let mut config = TestConfig::new();
 
     let mut dummy = DummyDataLoader::new();
 

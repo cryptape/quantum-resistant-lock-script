@@ -1,0 +1,35 @@
+# base
+Total cycles consumed: 297774736(284.0M)
+Transfer cycles: 260802(254.7K), running cycles: 297513934(283.7M)
+
+# for 内部
+Total cycles consumed: 355806587(339.3M)
+Transfer cycles: 261138(255.0K), running cycles: 355545449(339.1M)
+
+# asm 实现for
+Total cycles consumed: 353621801(337.2M)
+Transfer cycles: 261066(254.9K), running cycles: 353360735(337.0M)
+
+# 整个 KeccakF1600_StatePermute 拿汇编重写了，尚未进一步优化
+Total cycles consumed: 349330385(333.1M)
+Transfer cycles: 260998(254.9K), running cycles: 349069387(332.9M)
+
+# 优化， BCa 放入 a1 寄存器中
+Total cycles consumed: 331399609(316.0M)
+Transfer cycles: 260958(254.8K), running cycles: 331138651(315.8M)
+
+Total cycles consumed: 310692941(296.3M)
+Transfer cycles: 260914(254.8K), running cycles: 310432027(296.1M)
+
+# BCx 使用寄存器
+Total cycles consumed: 248572929(237.1M)
+Transfer cycles: 260774(254.7K), running cycles: 248312155(236.8M)
++ 19.80%
+
+# Dx 使用寄存器
+Total cycles consumed: 221564229(211.3M)
+Transfer cycles: 260714(254.6K), running cycles: 221303515(211.1M)
++ 34.40%
+
+Total cycles consumed: 221564229(211.3M)
+Transfer cycles: 260714(254.6K), running cycles: 221303515(211.1M)

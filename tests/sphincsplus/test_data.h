@@ -1,42 +1,7 @@
+#include "params.h"
 
-// haraka
-#include "test_data/haraka_128f_robust.h"
-#include "test_data/haraka_128f_simple.h"
-#include "test_data/haraka_128s_robust.h"
-#include "test_data/haraka_128s_simple.h"
-#include "test_data/haraka_192f_robust.h"
-#include "test_data/haraka_192f_simple.h"
-#include "test_data/haraka_192s_robust.h"
-#include "test_data/haraka_192s_simple.h"
-#include "test_data/haraka_256f_robust.h"
-#include "test_data/haraka_256f_simple.h"
-#include "test_data/haraka_256s_robust.h"
-#include "test_data/haraka_256s_simple.h"
+// clang-format off
 
-// sha2
-#include "test_data/sha2_128f_robust.h"
-#include "test_data/sha2_128f_simple.h"
-#include "test_data/sha2_128s_robust.h"
-#include "test_data/sha2_128s_simple.h"
-#include "test_data/sha2_192f_robust.h"
-#include "test_data/sha2_192f_simple.h"
-#include "test_data/sha2_192s_robust.h"
-#include "test_data/sha2_192s_simple.h"
-#include "test_data/sha2_256f_robust.h"
-#include "test_data/sha2_256f_simple.h"
-#include "test_data/sha2_256s_robust.h"
-#include "test_data/sha2_256s_simple.h"
+#include xstr(test_data/TEST_DATA.h)
 
-// shake
-#include "test_data/shake_128f_robust.h"
-#include "test_data/shake_128f_simple.h"
-#include "test_data/shake_128s_robust.h"
-#include "test_data/shake_128s_simple.h"
-#include "test_data/shake_192f_robust.h"
-#include "test_data/shake_192f_simple.h"
-#include "test_data/shake_192s_robust.h"
-#include "test_data/shake_192s_simple.h"
-#include "test_data/shake_256f_robust.h"
-#include "test_data/shake_256f_simple.h"
-#include "test_data/shake_256s_robust.h"
-#include "test_data/shake_256s_simple.h"
+// clang-format on

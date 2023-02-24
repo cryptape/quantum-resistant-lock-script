@@ -23,7 +23,6 @@ lazy_static! {
 }
 
 pub struct TestConfig {
-    hash_type: CryptoType,
     key: SphincsPlus,
     pub sign_error: bool,
     pub pubkey_error: bool,
@@ -32,16 +31,9 @@ pub struct TestConfig {
 }
 
 impl TestConfig {
-    pub fn new(t: CryptoType) -> Self {
-        let hash_type = if t == CryptoType::ErrorHashMode {
-            CryptoType::Shake256fRobust
-        } else {
-            t.clone()
-        };
-
+    pub fn new() -> Self {
         Self {
-            hash_type: t.clone(),
-            key: SphincsPlus::new(hash_type.clone()),
+            key: SphincsPlus::new(),
             sign_error: false,
             pubkey_error: false,
             message_error: false,
@@ -61,19 +53,9 @@ impl TestConfig {
 
 pub fn gen_tx(dummy: &mut DummyDataLoader, config: &mut TestConfig) -> TransactionView {
     let lock_args = Bytes::from(if config.pubkey_error {
-        config.gen_rand_buf(config.key.pk.len() + 4)
+        config.gen_rand_buf(config.key.pk.len())
     } else {
-        let mut buf = Vec::new();
-        let hash_type: u32 = if config.hash_type == CryptoType::ErrorHashMode {
-            config
-                .rng
-                .gen_range(CryptoType::ErrorHashMode.into()..u32::MAX)
-        } else {
-            config.hash_type.clone().into()
-        };
-        buf.extend_from_slice(&hash_type.to_le_bytes());
-        buf.extend_from_slice(&config.key.pk);
-        buf
+        config.key.pk.to_vec()
     });
     gen_tx_with_grouped_args(dummy, vec![(lock_args, 1)], config)
 }
@@ -122,7 +104,7 @@ pub fn gen_tx_with_grouped_args(
             let script = Script::new_builder()
                 .args(args.pack())
                 .code_hash(sighash_all_cell_data_hash.clone())
-                .hash_type(ScriptHashType::Data.into())
+                .hash_type(ScriptHashType::Data1.into())
                 .build();
             let previous_output_cell = CellOutput::new_builder()
                 .capacity(dummy_capacity.pack())

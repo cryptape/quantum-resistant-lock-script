@@ -11,7 +11,6 @@
 
 #include "api.h"
 #include "ckb-sphincsplus.h"
-#include "ckb_vm_dbg.h"
 
 #ifndef MOL2_EXIT
 #define MOL2_EXIT ckb_exit
@@ -22,8 +21,6 @@
 #define MAX_WITNESS_SIZE 1024 * 64
 #define BLAKE2B_BLOCK_SIZE 32
 #define ONE_BATCH_SIZE 1024 * 64
-
-#define SPHINCSPLUS_PUBKEY_MAX_SIZE 1024
 
 #define SCRIPT_SIZE 1024 * 64  // 32k
 
@@ -59,8 +56,14 @@ enum SPHINCSPLUS_EXAMPLE_ERROR {
   ERROR_SPHINCSPLUS_ARGS,
   ERROR_SPHINCSPLUS_WITNESS,
   ERROR_SPHINCSPLUS_VERIFY,
-  ERROR_SPHINCSPLUS_HASH_TYPE,
 };
+
+#ifdef CKB_VM
+// randombytes in sphincs+ depends on fcntl.h and unistd.h
+void randombytes(unsigned char *x, unsigned long long xlen) {
+  ASSERT(false);
+}
+#endif  // CKB_VM
 
 static int extract_witness_lock(uint8_t *witness, uint64_t len,
                                 mol_seg_t *lock_bytes_seg) {
@@ -196,9 +199,6 @@ int make_witness(WitnessArgsType *witness) {
   uint64_t witness_len = 0;
   size_t source = CKB_SOURCE_GROUP_INPUT;
   err = ckb_load_witness(NULL, &witness_len, 0, 0, source);
-  // when witness is missing, empty or not accessible, make it zero length.
-  // don't fail, because owner lock without omni doesn't require witness.
-  // when it's zero length, any further actions on witness will fail.
   if (err != 0) {
     witness_len = 0;
   }
@@ -226,9 +226,9 @@ int make_witness(WitnessArgsType *witness) {
   return 0;
 }
 
-int get_sign(uint8_t *sign, crypto_context *cctx) {
+int get_sign(uint8_t *sign) {
   int err = CKB_SUCCESS;
-  size_t sign_size = sphincs_plus_get_sign_size(cctx);
+  size_t sign_size = sphincs_plus_get_sign_size();
   WitnessArgsType witness_args;
 
   uint8_t witness_data_source[MAX_WITNESS_SIZE] = {0};
@@ -247,12 +247,7 @@ exit:
   return err;
 }
 
-// Args data:
-// |---------------------|--------------|
-// |  hash type 4 bytes  |  public key  |
-//
-// note: different hash types have different public key lengths
-int get_public_key(uint8_t *pub_key, crypto_context *cctx) {
+int get_public_key(uint8_t *pub_key) {
   int err = CKB_SUCCESS;
 
   uint8_t script[SCRIPT_SIZE];
@@ -265,17 +260,9 @@ int get_public_key(uint8_t *pub_key, crypto_context *cctx) {
 
   mol_seg_t args_seg = MolReader_Script_get_args(&script_seg);
   mol_seg_t args_bytes_seg = MolReader_Bytes_raw_bytes(&args_seg);
-
-  CHECK2((args_bytes_seg.size > sizeof(uint32_t)), ERROR_SPHINCSPLUS_ARGS);
-  uint32_t hash_type = 0;
-  memcpy(&hash_type, args_bytes_seg.ptr, sizeof(uint32_t));
-  CHECK2(!sphincs_plus_init_context(hash_type, cctx),
-         ERROR_SPHINCSPLUS_HASH_TYPE);
-
-  size_t pubkey_size = sphincs_plus_get_pk_size(cctx);
-  CHECK2((args_bytes_seg.size == sizeof(uint32_t)) + pubkey_size,
-         ERROR_SPHINCSPLUS_ARGS);
-  memcpy(pub_key, args_bytes_seg.ptr + sizeof(uint32_t), pubkey_size);
+  size_t pubkey_size = sphincs_plus_get_pk_size();
+  CHECK2((args_bytes_seg.size == pubkey_size), ERROR_SPHINCSPLUS_ARGS);
+  memcpy(pub_key, args_bytes_seg.ptr, pubkey_size);
 
 exit:
   return err;
@@ -285,21 +272,21 @@ int main() {
   int err = CKB_SUCCESS;
 
   // signature data size depends on args data(hash type)
-  uint8_t pubkey[SPHINCSPLUS_PUBKEY_MAX_SIZE];
-  crypto_context cctx = {0};
-  err = get_public_key(pubkey, &cctx);
+  uint8_t pubkey[sphincs_plus_get_pk_size()];
+  err = get_public_key(pubkey);
   if (err) {
     return err;
   }
 
   uint8_t message[BLAKE2B_BLOCK_SIZE];
-  uint8_t sign[sphincs_plus_get_sign_size(&cctx)];
+  uint8_t sign[sphincs_plus_get_sign_size()];
   CHECK(generate_sighash_all(message, BLAKE2B_BLOCK_SIZE));
 
-  CHECK(get_sign(sign, &cctx));
-  err = sphincs_plus_verify(&cctx, sign, sphincs_plus_get_sign_size(&cctx),
-                            message, BLAKE2B_BLOCK_SIZE, pubkey,
-                            sphincs_plus_get_pk_size(&cctx));
+  CHECK(get_sign(sign));
+
+  err = sphincs_plus_verify(sign, sphincs_plus_get_sign_size(), message,
+                            BLAKE2B_BLOCK_SIZE, pubkey,
+                            sphincs_plus_get_pk_size());
   CHECK2(err == 0, ERROR_SPHINCSPLUS_VERIFY);
 
 exit:

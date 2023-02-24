@@ -6,70 +6,69 @@ LLVM_COV=llvm-cov
 
 NPROC?=16
 
+PARAMS = sphincs-shake-256f
+THASH = robust
+
 SOURCES_DIR = ref
 COVERAGE_DIR=coverage
 CORPUS_DIR=corpus
 
+SPHINCS_PLUS_DIR = ../../../deps/sphincsplus/ref/
+
 SOURCES = \
-	../../../c/$(SOURCES_DIR)/params.c \
-	../../../c/$(SOURCES_DIR)/address.c \
-	../../../c/$(SOURCES_DIR)/merkle.c \
-	../../../c/$(SOURCES_DIR)/wots.c \
-	../../../c/$(SOURCES_DIR)/wotsx1.c \
-	../../../c/$(SOURCES_DIR)/utils.c \
-	../../../c/$(SOURCES_DIR)/utilsx1.c \
-	../../../c/$(SOURCES_DIR)/fors.c \
-	../../../c/$(SOURCES_DIR)/sign.c \
-	../../../c/$(SOURCES_DIR)/randombytes.c \
+	$(SPHINCS_PLUS_DIR)address.c \
+	$(SPHINCS_PLUS_DIR)merkle.c \
+	$(SPHINCS_PLUS_DIR)wots.c \
+	$(SPHINCS_PLUS_DIR)wotsx1.c \
+	$(SPHINCS_PLUS_DIR)utils.c \
+	$(SPHINCS_PLUS_DIR)utilsx1.c \
+	$(SPHINCS_PLUS_DIR)fors.c \
+	$(SPHINCS_PLUS_DIR)sign.c \
+	$(SPHINCS_PLUS_DIR)randombytes.c \
 	../../../c/ckb-sphincsplus.c
 
 HEADERS = \
-	../../../c/$(SOURCES_DIR)/params.h \
-	../../../c/$(SOURCES_DIR)/address.h \
-	../../../c/$(SOURCES_DIR)/merkle.h \
-	../../../c/$(SOURCES_DIR)/wots.h \
-	../../../c/$(SOURCES_DIR)/wotsx1.h \
-	../../../c/$(SOURCES_DIR)/utils.h \
-	../../../c/$(SOURCES_DIR)/utilsx1.h \
-	../../../c/$(SOURCES_DIR)/fors.h \
-	../../../c/$(SOURCES_DIR)/api.h \
-	../../../c/$(SOURCES_DIR)/hash.h \
-	../../../c/$(SOURCES_DIR)/thash.h \
-	../../../c/$(SOURCES_DIR)/randombytes.h \
+	$(SPHINCS_PLUS_DIR)params.h \
+	$(SPHINCS_PLUS_DIR)address.h \
+	$(SPHINCS_PLUS_DIR)merkle.h \
+	$(SPHINCS_PLUS_DIR)wots.h \
+	$(SPHINCS_PLUS_DIR)wotsx1.h \
+	$(SPHINCS_PLUS_DIR)utils.h \
+	$(SPHINCS_PLUS_DIR)utilsx1.h \
+	$(SPHINCS_PLUS_DIR)fors.h \
+	$(SPHINCS_PLUS_DIR)api.h \
+	$(SPHINCS_PLUS_DIR)hash.h \
+	$(SPHINCS_PLUS_DIR)thash.h \
+	$(SPHINCS_PLUS_DIR)randombytes.h \
 	../../../c/ckb-sphincsplus.h
 
-# shake
-SOURCES += \
-	../../../c/$(SOURCES_DIR)/fips202.c \
-	../../../c/$(SOURCES_DIR)/hash_shake.c \
-	../../../c/$(SOURCES_DIR)/thash_shake_robust.c\
-	../../../c/$(SOURCES_DIR)/thash_shake_simple.c
-HEADERS += \
-	../../../c/$(SOURCES_DIR)/fips202.h
+ifneq (,$(findstring shake,$(PARAMS)))
+	SOURCES += \
+		$(SPHINCS_PLUS_DIR)fips202.c \
+		$(SPHINCS_PLUS_DIR)hash_shake.c \
+		$(SPHINCS_PLUS_DIR)thash_shake_$(THASH).c
+	HEADERS += $(SPHINCS_PLUS_DIR)fips202.h
+endif
+ifneq (,$(findstring haraka,$(PARAMS)))
+	SOURCES += \
+		$(SPHINCS_PLUS_DIR)haraka.c \
+		$(SPHINCS_PLUS_DIR)hash_haraka.c \
+		$(SPHINCS_PLUS_DIR)thash_haraka_$(THASH).c
+	HEADERS += $(SPHINCS_PLUS_DIR)haraka.h
+endif
+ifneq (,$(findstring sha2,$(PARAMS)))
+	SOURCES += \
+		$(SPHINCS_PLUS_DIR)sha2.c \
+		$(SPHINCS_PLUS_DIR)hash_sha2.c \
+		$(SPHINCS_PLUS_DIR)thash_sha2_$(THASH).c
+	HEADERS += $(SPHINCS_PLUS_DIR)sha2.h
+endif
 
-# sha2
-SOURCES += \
-	../../../c/$(SOURCES_DIR)/sha2.c \
-	../../../c/$(SOURCES_DIR)/hash_sha2.c \
-	../../../c/$(SOURCES_DIR)/thash_sha2_robust.c \
-	../../../c/$(SOURCES_DIR)/thash_sha2_simple.c
-HEADERS += \
-	../../../c/$(SOURCES_DIR)/sha2.h
+FUZZER_FLAGS=-g -O1 -fsanitize=fuzzer,address,undefined -fsanitize-recover=address -DPARAMS=$(PARAMS) -DTEST_DATA=$(PARAMS)-$(THASH)
+FUZZER_FLAGS := $(FUZZER_FLAGS) -I ../../../c -I ../../../deps/sphincsplus/ref
 
-# haraka
-SOURCES += \
-	../../../c/$(SOURCES_DIR)/haraka.c \
-	../../../c/$(SOURCES_DIR)/hash_haraka.c \
-	../../../c/$(SOURCES_DIR)/thash_haraka_robust.c \
-	../../../c/$(SOURCES_DIR)/thash_haraka_simple.c
-HEADERS += \
-	../../../c/$(SOURCES_DIR)/haraka.h
-
-FUZZER_FLAGS=-g -O1 -fsanitize=fuzzer,address,undefined -fsanitize-recover=address
-FUZZER_FLAGS := $(FUZZER_FLAGS) -I ../../../c -I ../../../c/ref
-
-COVERAGE_FLAGS=-fprofile-instr-generate -fcoverage-mapping
-COVERAGE_FLAGS := $(COVERAGE_FLAGS) -I ../../../c -I ../../../c/ref
+COVERAGE_FLAGS=-fprofile-instr-generate -fcoverage-mapping -DPARAMS=$(PARAMS) -DTEST_DATA=$(PARAMS)-$(THASH)
+COVERAGE_FLAGS := $(COVERAGE_FLAGS) -I ../../../c -I ../../../deps/sphincsplus/ref
 
 ifeq ($(OS),MacOS)
 	COVERAGE_FLAGS+=-Wl,-U,_LLVMFuzzerCustomMutator -Wl,-U,_LLVMFuzzerInitialize
