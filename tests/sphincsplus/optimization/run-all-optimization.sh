@@ -6,8 +6,8 @@ workdir=$(
 cd $workdir
 
 HASH_NAMES="shake sha2 haraka"
-HASH_SIZES="128 256"
-HASH_OPTIONS="s"
+HASH_SIZES="128 192 256"
+HASH_OPTIONS="s f"
 THASHS="simple robust"
 for HASH_NAME in ${HASH_NAMES[@]}; do
   for HASH_SIZE in ${HASH_SIZES[@]}; do

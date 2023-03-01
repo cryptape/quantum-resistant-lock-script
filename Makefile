@@ -2,8 +2,8 @@ TARGET := riscv64-unknown-linux-gnu-
 CC := $(TARGET)gcc
 LD := $(TARGET)gcc
 
-PARAMS = sphincs-shake-256f
-THASH = robust
+PARAMS = sphincs-shake-128f
+THASH = simple
 
 CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections -nostdlib -Wno-nonnull-compare -DCKB_VM -DCKB_DECLARATION_ONLY
 LDFLAGS := -fdata-sections -ffunction-sections

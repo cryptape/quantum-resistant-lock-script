@@ -1,8 +1,8 @@
 if [ ! -n "$1" ] ;then
   HASH_NAME="shake"
   HASH_SIZE="128"
-  THASH="robust"
-  HASH_OPTION="s"
+  THASH="simple"
+  HASH_OPTION="f"
 else
   HASH_NAME=$1
   HASH_SIZE=$2
