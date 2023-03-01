@@ -66,7 +66,7 @@ ifneq (,$(findstring sha2,$(PARAMS)))
 	HEADERS += $(SPHINCS_PLUS_DIR)sha2.h
 endif
 
-CFLAGS := $(CFLAGS) -g -DCKB_C_STDLIB_PRINTF
+# CFLAGS := $(CFLAGS) -g -DCKB_C_STDLIB_PRINTF
 
 # docker pull nervos/ckb-riscv-gnu-toolchain:gnu-jammy-20230214
 BUILDER_DOCKER := nervos/ckb-riscv-gnu-toolchain@sha256:7601a814be2595ad471288fefc176356b31101837a514ddb0fc93b11c1cf5135
