@@ -301,6 +301,7 @@ pub fn cc_to_def_lock_script(
     lock_arg: &[u8],
     sp_tx_hash: H256,
     sp_tx_index: u32,
+    fee: u64,
 ) {
     let mut ckb_client = CkbRpcClient::new(ckb_rpc);
 
@@ -379,7 +380,8 @@ pub fn cc_to_def_lock_script(
         .build();
 
     let capacity = input_cell.capacity.value() / 100000000;
-    let fee = (capacity / 1024 + 1) * 1000;
+
+    println!("Capacity: {}, Need fee: {}", capacity, fee);
     let output_capacity = Capacity::shannons((input_cell.capacity.value() - fee) as u64);
     tx_builder = tx_builder
         .output(
