@@ -2,10 +2,10 @@ TARGET := riscv64-unknown-linux-gnu-
 CC := $(TARGET)gcc
 LD := $(TARGET)gcc
 
-PARAMS = sphincs-shake-256f
-THASH = robust
+PARAMS = sphincs-shake-128f
+THASH = simple
 
-CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections -nostdlib -Wno-nonnull-compare -DCKB_VM -DCKB_DECLARATION_ONLY
+CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections -nostdlib -Wno-nonnull-compare -DCKB_VM -DCKB_DECLARATION_ONLY -g -DCKB_C_STDLIB_PRINTF
 LDFLAGS := -fdata-sections -ffunction-sections
 
 # Using a new version of gcc will have a warning of ckb-c-stdlib
@@ -72,12 +72,13 @@ BUILDER_DOCKER := nervos/ckb-riscv-gnu-toolchain@sha256:7601a814be2595ad471288fe
 all: build/verify
 
 all-via-docker:
-	docker run --rm -v `pwd`:/code ${BUILDER_DOCKER} bash -c "cd /code && make"
+	cd ../../../ && docker run --rm -v `pwd`:/code ${BUILDER_DOCKER} bash -c "cd /code/tests/sphincsplus/optimization && make PARAMS=$(PARAMS) THASH=$(THASH)"
 
 build/verify: optimization-sphincsplus.c $(SOURCES) $(HEADERS)
 	$(CC) $(CFLAGS) -o $@ $(SOURCES) $<
 
 run: build/verify
+	export RUST_LOG=debug
 	ckb-debugger --bin $< --max-cycles=10000000000
 
 FLAME_GRAPH_DIR := ~/code/tmp/FlameGraph/

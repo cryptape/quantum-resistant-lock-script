@@ -23,6 +23,8 @@ int main() {
     return 2;
   }
 
-  printf("Done");
+  printf("PubKey size: %d, Sign size: %d\n", sizeof(G_TEST_DATA_PUB_KEY),
+         sizeof(G_TEST_DATA_SIGN));
+  // printf("Done");
   return 0;
 }

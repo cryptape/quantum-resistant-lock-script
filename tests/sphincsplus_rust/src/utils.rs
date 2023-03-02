@@ -1,5 +1,6 @@
 use super::dummy_data_loader::DummyDataLoader;
 use super::sphincsplus::*;
+use ckb_hash::blake2b_256;
 use ckb_types::core::{
     cell::{CellMetaBuilder, ResolvedTransaction},
     TransactionView,
@@ -25,9 +26,11 @@ lazy_static! {
 pub struct TestConfig {
     key: SphincsPlus,
     pub sign_error: bool,
+    pub pubkey_hash_error: bool,
     pub pubkey_error: bool,
     pub message_error: bool,
     rng: ThreadRng,
+    pub print_time: bool,
 }
 
 impl TestConfig {
@@ -35,9 +38,11 @@ impl TestConfig {
         Self {
             key: SphincsPlus::new(),
             sign_error: false,
+            pubkey_hash_error: false,
             pubkey_error: false,
             message_error: false,
             rng: thread_rng(),
+            print_time: false,
         }
     }
 
@@ -52,10 +57,10 @@ impl TestConfig {
 }
 
 pub fn gen_tx(dummy: &mut DummyDataLoader, config: &mut TestConfig) -> TransactionView {
-    let lock_args = Bytes::from(if config.pubkey_error {
-        config.gen_rand_buf(config.key.pk.len())
+    let lock_args = Bytes::from(if config.pubkey_hash_error {
+        config.gen_rand_buf(32)
     } else {
-        config.key.pk.to_vec()
+        blake2b_256(&config.key.pk).to_vec()
     });
     gen_tx_with_grouped_args(dummy, vec![(lock_args, 1)], config)
 }
@@ -114,7 +119,7 @@ pub fn gen_tx_with_grouped_args(
                 previous_out_point.clone(),
                 (previous_output_cell.build(), Bytes::new()),
             );
-            let witness_len = config.key.get_sign_len();
+            let witness_len = config.key.get_sign_len() + config.key.get_pk_len();
             let random_extra_witness = config.gen_rand_buf(witness_len);
 
             let witness_args = WitnessArgsBuilder::default()
@@ -147,7 +152,7 @@ pub fn sign_tx_by_input_group(
     config: &mut TestConfig,
 ) -> TransactionView {
     let tx_hash = tx.hash();
-    let witness_len = config.key.get_sign_len();
+    let sign_info_len = config.key.get_sign_len() + config.key.get_pk_len();
 
     let mut signed_witnesses: Vec<packed::Bytes> = tx
         .inputs()
@@ -163,7 +168,7 @@ pub fn sign_tx_by_input_group(
 
                 let zero_lock: Bytes = {
                     let mut buf = Vec::new();
-                    buf.resize(witness_len, 0);
+                    buf.resize(sign_info_len, 0);
                     buf.into()
                 };
 
@@ -187,15 +192,35 @@ pub fn sign_tx_by_input_group(
                     if config.message_error {
                         config.rng.fill(&mut message);
                     }
-                    // let start = std::time::Instant::now();
-                    let sign = Bytes::from(if config.sign_error {
-                        config.gen_rand_buf(config.key.get_sign_len())
-                    } else {
-                        config.key.sign(&message)
-                    });
+                    let start = std::time::Instant::now();
+                    let mut witness_buf = Vec::new();
+                    witness_buf.resize(sign_info_len, 0);
 
-                    // println!("sign time(native): {} us", start.elapsed().as_micros());
-                    sign
+                    witness_buf[..config.key.get_sign_len()].copy_from_slice(
+                        &if config.sign_error {
+                            config.gen_rand_buf(config.key.get_sign_len())
+                        } else {
+                            config.key.sign(&message)
+                        },
+                    );
+
+                    witness_buf[config.key.get_sign_len()..].copy_from_slice(
+                        &if config.pubkey_error {
+                            config.gen_rand_buf(config.key.get_pk_len())
+                        } else {
+                            config.key.pk.clone()
+                        },
+                    );
+
+                    if config.print_time {
+                        println!(
+                            "sign time(native): {} us ({:.2?}s)",
+                            start.elapsed().as_micros(),
+                            start.elapsed().as_secs_f32()
+                        );
+                    }
+
+                    Bytes::from(witness_buf)
                 };
 
                 witness

@@ -1,11 +1,12 @@
 TARGET := riscv64-unknown-linux-gnu-
 CC := $(TARGET)gcc
 LD := $(TARGET)gcc
+OBJCOPY := $(TARGET)objcopy
 
-PARAMS = sphincs-shake-256f
-THASH = robust
+PARAMS = sphincs-shake-128f
+THASH = simple
 
-CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections -nostdlib -Wno-nonnull-compare -DCKB_VM -DCKB_DECLARATION_ONLY
+CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections -nostdlib -Wno-nonnull-compare -DCKB_VM -DCKB_DECLARATION_ONLY -g
 LDFLAGS := -fdata-sections -ffunction-sections
 
 # Using a new version of gcc will have a warning of ckb-c-stdlib
@@ -66,7 +67,7 @@ ifneq (,$(findstring sha2,$(PARAMS)))
 	HEADERS += $(SPHINCS_PLUS_DIR)sha2.h
 endif
 
-CFLAGS := $(CFLAGS) -g -DCKB_C_STDLIB_PRINTF
+# CFLAGS := $(CFLAGS) -DCKB_C_STDLIB_PRINTF
 
 # docker pull nervos/ckb-riscv-gnu-toolchain:gnu-jammy-20230214
 BUILDER_DOCKER := nervos/ckb-riscv-gnu-toolchain@sha256:7601a814be2595ad471288fefc176356b31101837a514ddb0fc93b11c1cf5135
@@ -74,7 +75,7 @@ BUILDER_DOCKER := nervos/ckb-riscv-gnu-toolchain@sha256:7601a814be2595ad471288fe
 all: build/sphincsplus_lock
 
 all-via-docker:
-	docker run --rm -v `pwd`:/code ${BUILDER_DOCKER} bash -c "cd /code && make"
+	docker run --rm -v `pwd`:/code ${BUILDER_DOCKER} bash -c "cd /code && make PARAMS=$(PARAMS) THASH=$(THASH)"
 
 build/convert_asm: c/ref/fips202_asm.S
 	riscv-naive-assembler -i c/ref/fips202_asm.S > c/ref/fips202_asm_bin.S
@@ -82,6 +83,8 @@ build/convert_asm: c/ref/fips202_asm.S
 build/sphincsplus_lock: c/ckb-sphincsplus-lock.c $(SOURCES) $(HEADERS)
 	mkdir -p build
 	$(CC) $(CFLAGS) -o $@ $(SOURCES) $<
+	cp $@ $@.debug
+	$(OBJCOPY) --strip-debug --strip-all $@
 
 clean:
 	rm -rf build/sphincsplus_lock

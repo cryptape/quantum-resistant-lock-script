@@ -47,6 +47,26 @@ fn test_err_sign() {
 }
 
 #[test]
+fn test_err_pubkey_hash() {
+    let mut config = TestConfig::new();
+    config.pubkey_hash_error = true;
+
+    let mut dummy = DummyDataLoader::new();
+
+    let tx = gen_tx(&mut dummy, &mut config);
+    let tx = sign_tx(&mut dummy, tx, &mut config);
+
+    let resolved_tx = build_resolved_tx(&dummy, &tx);
+    let mut verifier = TransactionScriptsVerifier::new(&resolved_tx, &dummy);
+
+    verifier.set_debug_printer(debug_printer);
+    let verify_result = verifier.verify(MAX_CYCLES);
+    if verify_result.is_ok() {
+        panic!("pass verification");
+    }
+}
+
+#[test]
 fn test_err_pubkey() {
     let mut config = TestConfig::new();
     config.pubkey_error = true;

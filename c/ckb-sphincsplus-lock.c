@@ -54,15 +54,14 @@ enum SPHINCSPLUS_EXAMPLE_ERROR {
   ERROR_SPHINCSPLUS_SYSCALL,
   ERROR_SPHINCSPLUS_ENCODING,
   ERROR_SPHINCSPLUS_ARGS,
+  ERROR_SPHINCSPLUS_PUBKEY,
   ERROR_SPHINCSPLUS_WITNESS,
   ERROR_SPHINCSPLUS_VERIFY,
 };
 
 #ifdef CKB_VM
 // randombytes in sphincs+ depends on fcntl.h and unistd.h
-void randombytes(unsigned char *x, unsigned long long xlen) {
-  ASSERT(false);
-}
+void randombytes(unsigned char *x, unsigned long long xlen) { ASSERT(false); }
 #endif  // CKB_VM
 
 static int extract_witness_lock(uint8_t *witness, uint64_t len,
@@ -226,28 +225,43 @@ int make_witness(WitnessArgsType *witness) {
   return 0;
 }
 
-int get_sign(uint8_t *sign) {
+// Witness data structure
+// |-----Signature data-----|-----Public Key-----|
+int get_sign_info(uint8_t *sign, uint8_t *pubkey) {
   int err = CKB_SUCCESS;
   size_t sign_size = sphincs_plus_get_sign_size();
+  size_t pubkey_size = sphincs_plus_get_pk_size();
+
   WitnessArgsType witness_args;
 
   uint8_t witness_data_source[MAX_WITNESS_SIZE] = {0};
+  BytesOptType mol_lock;
+  mol2_cursor_t mol_lock_bytes;
+  size_t out_len;
+  uint8_t buffer[sign_size + pubkey_size];
+
   g_witness_data_source = witness_data_source;
   CHECK(make_witness(&witness_args));
 
-  BytesOptType mol_lock = witness_args.t->lock(&witness_args);
+  mol_lock = witness_args.t->lock(&witness_args);
   CHECK2(!mol_lock.t->is_none(&mol_lock), ERROR_SPHINCSPLUS_WITNESS);
 
-  mol2_cursor_t mol_lock_bytes = mol_lock.t->unwrap(&mol_lock);
-  size_t out_len = mol2_read_at(&mol_lock_bytes, sign, sign_size);
+  mol_lock_bytes = mol_lock.t->unwrap(&mol_lock);
+  CHECK2(mol_lock_bytes.size == sign_size + pubkey_size,
+         ERROR_SPHINCSPLUS_WITNESS);
 
-  CHECK2(out_len == sign_size, ERROR_SPHINCSPLUS_WITNESS);
+  out_len = mol2_read_at(&mol_lock_bytes, buffer, sign_size + pubkey_size);
+  CHECK2(out_len == sign_size + pubkey_size, ERROR_SPHINCSPLUS_WITNESS);
+
+  memcpy(sign, buffer, sign_size);
+  memcpy(pubkey, buffer + sign_size, pubkey_size);
+
 exit:
   g_witness_data_source = NULL;
   return err;
 }
 
-int get_public_key(uint8_t *pub_key) {
+int get_public_key_hash(uint8_t *pub_key) {
   int err = CKB_SUCCESS;
 
   uint8_t script[SCRIPT_SIZE];
@@ -260,30 +274,39 @@ int get_public_key(uint8_t *pub_key) {
 
   mol_seg_t args_seg = MolReader_Script_get_args(&script_seg);
   mol_seg_t args_bytes_seg = MolReader_Bytes_raw_bytes(&args_seg);
-  size_t pubkey_size = sphincs_plus_get_pk_size();
-  CHECK2((args_bytes_seg.size == pubkey_size), ERROR_SPHINCSPLUS_ARGS);
-  memcpy(pub_key, args_bytes_seg.ptr, pubkey_size);
+  CHECK2((args_bytes_seg.size == BLAKE2B_BLOCK_SIZE), ERROR_SPHINCSPLUS_ARGS);
+  memcpy(pub_key, args_bytes_seg.ptr, BLAKE2B_BLOCK_SIZE);
 
 exit:
   return err;
 }
 
+int check_pubkey(uint8_t *pubkey, uint8_t *pubkey_hash) {
+  blake2b_state blake2b_ctx;
+  blake2b_init(&blake2b_ctx, BLAKE2B_BLOCK_SIZE);
+  blake2b_update(&blake2b_ctx, pubkey, sphincs_plus_get_pk_size());
+  uint8_t msg[BLAKE2B_BLOCK_SIZE];
+  blake2b_final(&blake2b_ctx, msg, sizeof(msg));
+
+  if (memcmp(pubkey_hash, msg, BLAKE2B_BLOCK_SIZE)) {
+    return ERROR_SPHINCSPLUS_PUBKEY;
+  } else {
+    return 0;
+  }
+}
+
 int main() {
   int err = CKB_SUCCESS;
 
-  // signature data size depends on args data(hash type)
-  uint8_t pubkey[sphincs_plus_get_pk_size()];
-  err = get_public_key(pubkey);
-  if (err) {
-    return err;
-  }
-
+  uint8_t pubkey_hash[BLAKE2B_BLOCK_SIZE];
   uint8_t message[BLAKE2B_BLOCK_SIZE];
   uint8_t sign[sphincs_plus_get_sign_size()];
+  uint8_t pubkey[sphincs_plus_get_pk_size()];
+
+  CHECK(get_public_key_hash(pubkey_hash));
   CHECK(generate_sighash_all(message, BLAKE2B_BLOCK_SIZE));
-
-  CHECK(get_sign(sign));
-
+  CHECK(get_sign_info(sign, pubkey));
+  CHECK(check_pubkey(pubkey, pubkey_hash));
   err = sphincs_plus_verify(sign, sphincs_plus_get_sign_size(), message,
                             BLAKE2B_BLOCK_SIZE, pubkey,
                             sphincs_plus_get_pk_size());
