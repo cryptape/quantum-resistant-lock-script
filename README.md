@@ -59,9 +59,25 @@ The script uses fixed signature data (tests/sphincsplus/test_data/), Because dif
    ```
 5. Convert a SPHINCS+ lock script to secp256k1 default lock script.
    ``` shell
-   cargo run -- cc_to_sphincsplus --tx_hash <tx-hash> --tx_index <index> --key_file key.json --lock_arg <LOCK-ARG> --sp_tx_hash <SPHINCS+ Script in step 2> --sp_tx_index <index>
+   cargo run -- cc_to_secp --tx_hash <tx-hash> --tx_index <index> --key_file key.json --lock_arg <LOCK-ARG> --sp_tx_hash <SPHINCS+ Script in step 2> --sp_tx_index <index> --fee 10000
    ```
 
-
 ## Deployment on testnet
-TODO
+The contract can be used on testnet
+```
+tx_hash: 0x35f51257673c7a7edd009fa2166e6f8645156207c9da38202f04ba4d94d9e519
+index: 0
+```
+
+I made a transaction with this contract.
+
+```
+Default lock script (secp256k1) to SPHINCS+
+tx hash: 0x1a48fb4def03465ab826e56fbf77943db65fad57db19d02279465d954e28be64
+
+```
+After that, I transaction the contract：
+```
+tx hash: 0x1e3fcf73f02bb98e90239ed01e4fec63dc3469471309a19ee4eec7cfc00a8637
+```
+
