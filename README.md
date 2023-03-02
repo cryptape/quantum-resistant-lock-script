@@ -1,7 +1,5 @@
 # quantum-resistant-lock-script
-Qantum resistant lock script on CKB, using SPHINCS+
-
-## SPHINCS+
+Quantum resistant lock script on CKB, using [SPHINCS+](https://github.com/sphincs/sphincsplus).
 
 ## Build
 
@@ -32,14 +30,18 @@ The script uses fixed signature data (tests/sphincsplus/test_data/), Because dif
 | haraka simple |    27.5M   |    73.9M   |    39.2M   |   105.8M   |    60.4M   |   114.9M   |
 | haraka robust |    45.7M   |   119.8M   |    70.5M   |   182.7M   |   102.8M   |   193.3M   |
 
+Find out more information about different [parameters](https://github.com/sphincs/sphincsplus#parameters).
+
 * Note: Default hash type: **shake-128f-simple** (Verify cycles: about 70M)
 
-## Sample in Dev Blockchain
-**Convert a default Lock to ckb-sphincsplus lock script (in ckb dev)**
+## Tool
+This tool is to **convert a default Lock(SECP256K1/blake160) to quantum resistant lock script.**. 
 
-1. compile. Hera we use the default options.
-   </br>
-   Here we will get a sphincsplus_lock file, the size is about 85608bytes.
+Follow steps below:
+
+1. compile.
+
+   By default, sphincsplus_lock file's size is about 85K bytes.
 2. Deploy the compiled contract to the test network.
    </br>
    We use [ckb-cli](https://github.com/nervosnetwork/ckb-cli) to deploy this contract, You can refer to [here](https://github.com/nervosnetwork/ckb-cli/wiki/Handle-Complex-Transaction#a-demo).
@@ -53,15 +55,14 @@ The script uses fixed signature data (tests/sphincsplus/test_data/), Because dif
    We can get a set of key files, including public and private keys.
    * If the contract you compile does not use the default value, it needs to be the same here.
    * Need to save this file.
-4. Convert a secp256k1 default lock script to SPHINCS+ lock script.
+4. Convert a SECP256K1/blake160 lock script to quantum resistant lock script.
    ``` shell
    cargo run -- cc_to_sphincsplus --tx_hash <tx-hash> --tx_index <index> --key_file key.json --prikey <You can use ckb-cli account export>
    ```
-5. Convert a SPHINCS+ lock script to secp256k1 default lock script.
+5. Convert a quantum resistant lock script to SECP256K1/blake160 lock script.
    ``` shell
    cargo run -- cc_to_sphincsplus --tx_hash <tx-hash> --tx_index <index> --key_file key.json --lock_arg <LOCK-ARG> --sp_tx_hash <SPHINCS+ Script in step 2> --sp_tx_index <index>
    ```
-
 
 ## Deployment on testnet
 TODO
