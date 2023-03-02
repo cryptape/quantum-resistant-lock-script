@@ -34,12 +34,34 @@ The script uses fixed signature data (tests/sphincsplus/test_data/), Because dif
 
 * Note: Default hash type: **shake-128f-simple** (Verify cycles: about 70M)
 
-## Sample
+## Sample in Dev Blockchain
+**Convert a default Lock to ckb-sphincsplus lock script (in ckb dev)**
 
-```shell
-tx init --tx-file tx.json
-wallet get-capacity --address ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqfkmqr3ry0crq4w88n86mk4h99am3dlldsuydg36
-wallet get-live-cells --address ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqfkmqr3ry0crq4w88n86mk4h99am3dlldsuydg36
-tx add-input --tx-hash 0x1ff88a5f9cb719abd86978b05c39d82fd83473519272013afdbee20d5c7ff162 --index 1 --tx-file tx.json
-tx add-output --to-sighash-address ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqfkmqr3ry0crq4w88n86mk4h99am3dlldsuydg36 --capacity 15096.20139385 --tx-file tx.json
-```
+1. compile. Hera we use the default options.
+   </br>
+   Here we will get a sphincsplus_lock file, the size is about 85608bytes.
+2. Deploy the compiled contract to the test network.
+   </br>
+   We use [ckb-cli](https://github.com/nervosnetwork/ckb-cli) to deploy this contract, You can refer to [here](https://github.com/nervosnetwork/ckb-cli/wiki/Handle-Complex-Transaction#a-demo).
+   * After the execution is successful, it is recommended to record the tx-hash to facilitate subsequent operations.
+3. Generate key file.
+   </br>
+   Use this tool: tools/ckb-sphincs-tools.
+   ``` shell
+   cargo run -- gen-key key.json
+   ```
+   We can get a set of key files, including public and private keys.
+   * If the contract you compile does not use the default value, it needs to be the same here.
+   * Need to save this file.
+4. Convert a secp256k1 default lock script to SPHINCS+ lock script.
+   ``` shell
+   cargo run -- cc_to_sphincsplus --tx_hash <tx-hash> --tx_index <index> --key_file key.json --prikey <You can use ckb-cli account export>
+   ```
+5. Convert a SPHINCS+ lock script to secp256k1 default lock script.
+   ``` shell
+   cargo run -- cc_to_sphincsplus --tx_hash <tx-hash> --tx_index <index> --key_file key.json --lock_arg <LOCK-ARG> --sp_tx_hash <SPHINCS+ Script in step 2> --sp_tx_index <index>
+   ```
+
+
+## Sample in Testnet
+TODO
