@@ -24,7 +24,7 @@ The script uses fixed signature data (tests/sphincsplus/test_data/), Because dif
 |               |  128s bit  |  128f bit  |  192s bit  |  192f bit  |  256s bit  |  256f bit  |
 | ------------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- |
 |   pubkey size |       32   |       32   |       48   |       48   |       64   |       64   |
-|     sign size |     7888   |    17120   |    16256   |    35696   |    29824   |    49888   |
+|signature size |     7888   |    17120   |    16256   |    35696   |    29824   |    49888   |
 |  shake simple |    16.9M   |    49.6M   |    25.4M   |    73.8M   |    37.1M   |    72.4M   |
 |  shake robust |    34.3M   |    98.4M   |    49.1M   |   147.5M   |    73.2M   |   150.3M   |
 |   sha2 simple |    10.7M   |    33.9M   |    16.8M   |    48.7M   |    24.7M   |    47.5M   |
@@ -63,5 +63,5 @@ The script uses fixed signature data (tests/sphincsplus/test_data/), Because dif
    ```
 
 
-## Sample in Testnet
+## Deployment on testnet
 TODO
