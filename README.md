@@ -64,22 +64,48 @@ Follow steps below:
    cargo run -- cc_to_secp --tx_hash <tx-hash> --tx_index <index> --key_file key.json --lock_arg <LOCK-ARG> --sp_tx_hash <SPHINCS+ Script in step 2> --sp_tx_index <index> --fee 10000
    ```
 
-## Deployment on testnet
-The contract can be used on testnet
-```
-tx_hash: 0x35f51257673c7a7edd009fa2166e6f8645156207c9da38202f04ba4d94d9e519
-index: 0
-```
+## Deployment
 
-I made a transaction with this contract.
+* Mirana(mainnet)
 
-```
-Default lock script (secp256k1) to SPHINCS+
-tx hash: 0x1a48fb4def03465ab826e56fbf77943db65fad57db19d02279465d954e28be64
+| parameter | value        |
+| --------- | ------------ |
+| code_hash | not deployed |
+| hash_type | type         |
+| tx_hash   | not deployed |
+| index     | 0            |
+| dep_type  | code         |
 
-```
-After that, I transaction the contract：
-```
-tx hash: 0x1e3fcf73f02bb98e90239ed01e4fec63dc3469471309a19ee4eec7cfc00a8637
-```
+* Pudge(testnet)
 
+| parameter | value                                                              |
+| --------- | ------------------------------------------------------------------ |
+| code_hash | 0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8 |
+| hash_type | type                                                               |
+| tx_hash   | 0x35f51257673c7a7edd009fa2166e6f8645156207c9da38202f04ba4d94d9e519 |
+| index     | 0                                                                  |
+| dep_type  | code                                                               |
+
+## Sample transactions.
+
+### Convert a cell lock script to SPHINCS+ through transactions.
+* Note, The output cell hash_type need to use data1. Because the contract uses the B extensions.
+
+| parameter | value                                                              |
+| --------- | ------------------------------------------------------------------ |
+| code_hash | 0x989ab456455509a1c2ad1cb8116b7d209df228144445c741b101ec3e55ee8351 |
+| hash_type | data1                                                              |
+| tx_hash   | 0x1a48fb4def03465ab826e56fbf77943db65fad57db19d02279465d954e28be64 |
+| index     | 0                                                                  |
+| dep_type  | code                                                               |
+
+### Unlock this Cell
+Transfer out this Cell (use SPHINCS+ to unlock).
+
+| parameter | value                                                              |
+| --------- | ------------------------------------------------------------------ |
+| code_hash | 0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8 |
+| hash_type | type                                                               |
+| tx_hash   | 0x1e3fcf73f02bb98e90239ed01e4fec63dc3469471309a19ee4eec7cfc00a8637 |
+| index     | 0                                                                  |
+| dep_type  | code                                                               |
