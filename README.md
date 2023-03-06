@@ -78,6 +78,7 @@ Follow steps below:
 
 * Pudge(testnet)
 
+[CKB Explorer](https://pudge.explorer.nervos.org/transaction/0x35f51257673c7a7edd009fa2166e6f8645156207c9da38202f04ba4d94d9e519)
 | parameter | value                                                              |
 | --------- | ------------------------------------------------------------------ |
 | code_hash | 0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8 |
@@ -91,6 +92,7 @@ Follow steps below:
 ### Genetate a cell locked by this script
 * Note, This script should use "hash_type=data1" or "hash_type=type" to support RISC-V B extensions.
 
+[CKB Explorer](https://pudge.explorer.nervos.org/transaction/0x1a48fb4def03465ab826e56fbf77943db65fad57db19d02279465d954e28be64)
 | parameter | value                                                              |
 | --------- | ------------------------------------------------------------------ |
 | code_hash | 0x989ab456455509a1c2ad1cb8116b7d209df228144445c741b101ec3e55ee8351 |
@@ -101,6 +103,7 @@ Follow steps below:
 
 ### Unlock this cell
 
+[CKB Explorer](https://pudge.explorer.nervos.org/transaction/0x1e3fcf73f02bb98e90239ed01e4fec63dc3469471309a19ee4eec7cfc00a8637)
 | parameter | value                                                              |
 | --------- | ------------------------------------------------------------------ |
 | code_hash | 0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8 |
