@@ -86,10 +86,10 @@ Follow steps below:
 | index     | 0                                                                  |
 | dep_type  | code                                                               |
 
-## Sample transactions.
+## Sample Transactions
 
-### Convert a cell lock script to SPHINCS+ through transactions.
-* Note, The output cell hash_type need to use data1. Because the contract uses the B extensions.
+### Genetate a cell locked by this script
+* Note, This script should use "hash_type=data1" or "hash_type=type" to support RISC-V B extensions.
 
 | parameter | value                                                              |
 | --------- | ------------------------------------------------------------------ |
@@ -99,8 +99,7 @@ Follow steps below:
 | index     | 0                                                                  |
 | dep_type  | code                                                               |
 
-### Unlock this Cell
-Transfer out this Cell (use SPHINCS+ to unlock).
+### Unlock this cell
 
 | parameter | value                                                              |
 | --------- | ------------------------------------------------------------------ |
