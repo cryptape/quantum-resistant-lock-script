@@ -47,6 +47,7 @@ fn get_args() -> Command {
                 .arg(arg!(--lock_arg <LOCK_ARG>))
                 .arg(arg!(--sp_tx_hash <LOCK_ARG> "SPHINCS+ Lock transaction hash"))
                 .arg(arg!(--sp_tx_index <LOCK_ARG> "SPHINCS+ Lock transaction index"))
+                .arg(arg!(--fee <FEE>).num_args(0..=usize::MAX))
                 .arg_required_else_help(true),
         )
 }
@@ -97,6 +98,11 @@ fn main() {
             let sp_tx_index = sub_matches
                 .get_one::<String>("sp_tx_index")
                 .expect("required");
+            let fee = sub_matches
+                .get_one::<String>("fee")
+                .expect("required")
+                .parse::<u64>()
+                .unwrap();
 
             sub_conversion::cc_to_def_lock_script(
                 sub_gen_key::parse_key_file(PathBuf::from(key_file)),
@@ -106,6 +112,7 @@ fn main() {
                 &str_to_bytes(&lock_arg),
                 H256::from_trimmed_str(sp_tx_hash).unwrap(),
                 sp_tx_index.parse::<u32>().unwrap(),
+                fee.clone(),
             );
         }
         _ => panic!("Unknow subcommand: {:?}", matches.subcommand()),
