@@ -32,7 +32,7 @@ The script uses fixed signature data (tests/sphincsplus/test_data/), Because dif
 
 Find out more information about different [parameters](https://github.com/sphincs/sphincsplus#parameters).
 
-* Note: Default hash type: **shake-128f-simple** (Verify cycles: about 70M)
+* Note: Default hash type: **shake-128f-simple** (Verify cycles: about 49.6M)
 
 ## Tool
 This tool is to **convert a default Lock(SECP256K1/blake160) to quantum resistant lock script.**. 
