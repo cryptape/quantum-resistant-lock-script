@@ -1,7 +1,7 @@
 use ckb_script::TransactionScriptsVerifier;
 use ckb_types::packed::Byte32;
-use sphincsplus_rust::dummy_data_loader::DummyDataLoader;
-use sphincsplus_rust::utils::*;
+use sphincsplus_rust_test::dummy_data_loader::DummyDataLoader;
+use sphincsplus_rust_test::utils::*;
 
 pub fn debug_printer(_script: &Byte32, msg: &str) {
     print!("{}", msg);
