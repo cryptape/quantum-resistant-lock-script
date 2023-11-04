@@ -1,5 +1,5 @@
 use super::dummy_data_loader::DummyDataLoader;
-use super::sphincsplus::*;
+use ckb_sphincs_utils::sphincsplus::*;
 use ckb_hash::blake2b_256;
 use ckb_types::core::{
     cell::{CellMetaBuilder, ResolvedTransaction},
