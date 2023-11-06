@@ -15,3 +15,5 @@ jobs:
       run: ./tests/sphincsplus/all_run.sh
     - name: Run sphincs+ rust tests
       run: ./tests/sphincsplus_rust/run_rust.sh
+    - name: Run Tools tests
+      run: cd tools/ckb-sphincs-tools && cargo test 

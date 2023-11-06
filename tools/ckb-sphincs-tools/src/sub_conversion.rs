@@ -14,7 +14,7 @@ use ckb_types::{
     H256,
 };
 use lazy_static::lazy_static;
-use sphincsplus_rust::SphincsPlus;
+use ckb_sphincs_utils::SphincsPlus;
 
 lazy_static! {
     pub static ref SPHINCSPLUS_EXAMPLE_BIN: Bytes =

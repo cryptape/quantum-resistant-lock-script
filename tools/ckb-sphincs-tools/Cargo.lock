@@ -757,10 +757,26 @@ dependencies = [
  "ckb-jsonrpc-types 0.106.0",
  "ckb-sdk",
  "ckb-types 0.106.0",
+ "ckb_sphincs_utils",
  "clap",
  "lazy_static",
  "serde_json",
- "sphincsplus_rust",
+]
+
+[[package]]
+name = "ckb_sphincs_utils"
+version = "0.1.0"
+dependencies = [
+ "cc",
+ "ckb-chain-spec 0.107.0",
+ "ckb-hash 0.107.0",
+ "ckb-script 0.107.0",
+ "ckb-traits 0.107.0",
+ "ckb-types 0.107.0",
+ "lazy_static",
+ "libc",
+ "num_enum",
+ "rand 0.8.5",
 ]
 
 [[package]]
@@ -2169,22 +2185,6 @@ dependencies = [
  "blake2b-rs",
  "cc",
  "cfg-if 0.1.10",
-]
-
-[[package]]
-name = "sphincsplus_rust"
-version = "0.1.0"
-dependencies = [
- "cc",
- "ckb-chain-spec 0.107.0",
- "ckb-hash 0.107.0",
- "ckb-script 0.107.0",
- "ckb-traits 0.107.0",
- "ckb-types 0.107.0",
- "lazy_static",
- "libc",
- "num_enum",
- "rand 0.8.5",
 ]
 
 [[package]]
