@@ -239,6 +239,8 @@ pub fn sign_tx_by_input_group(
                     } else {
                         config.sign.as_ref().unwrap().to_vec()
                     });
+
+                    #[cfg(feature = "serialize_key")]
                     if config.print_sign {
                         use base64::prelude::*;
                         print!(

@@ -6,7 +6,7 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["shake", "hash_128", "hash_options_f", "thashes_simple", "serialize_key"]
+default = ["shake", "hash_128", "hash_options_f", "thashes_simple"]
 haraka = ["ckb_sphincs_utils/haraka"]
 sha2 = ["ckb_sphincs_utils/sha2"]
 shake = ["ckb_sphincs_utils/shake"]
@@ -36,3 +36,12 @@ num_enum = "0.5.10"
 rand = "0.8.5"
 clap = { version = "4.3.2", optional = true }
 base64 = { version = "0.22.0", optional = true }
+
+
+[[bin]]
+name = "generate_fix_infos"
+required-features = ["serialize_key"]
+
+[[bin]]
+name = "run_brenchmark"
+required-features = ["serialize_key"]

@@ -17,7 +17,7 @@ workdir=$(
   pwd
 )
 
-export BENCH_ARGS=`./target/debug/examples/generate_fix_infos`
+export BENCH_ARGS=`./target/debug/generate_fix_infos`
 
 cd $workdir
 rm -rf build/*
@@ -29,9 +29,9 @@ else
   exit 1
 fi
 cd $workdir/tests/sphincsplus_rust
-# cargo clean
-cargo build --examples --no-default-features --features "serialize_key $HASH_NAME hash_$HASH_SIZE hash_options_$HASH_OPTION thashes_$THASH"
-./target/debug/examples/run_brenchmark $BENCH_ARGS
+cargo clean
+cargo build --no-default-features --features "serialize_key $HASH_NAME hash_$HASH_SIZE hash_options_$HASH_OPTION thashes_$THASH"
+./target/debug/run_brenchmark $BENCH_ARGS
 if (($? == 0)); then
   echo "success"
 else
@@ -48,8 +48,8 @@ else
   exit 1
 fi
 cd $workdir/tests/sphincsplus_rust
-cargo build --examples --no-default-features --features "serialize_key $HASH_NAME hash_$HASH_SIZE hash_options_$HASH_OPTION thashes_$THASH"
-./target/debug/examples/run_brenchmark $BENCH_ARGS
+cargo build --no-default-features --features "serialize_key $HASH_NAME hash_$HASH_SIZE hash_options_$HASH_OPTION thashes_$THASH"
+./target/debug/run_brenchmark $BENCH_ARGS
 if (($? == 0)); then
   echo "success"
 else
