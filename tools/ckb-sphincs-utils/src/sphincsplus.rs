@@ -64,6 +64,35 @@ impl SphincsPlus {
         s
     }
 
+    #[cfg(feature = "serialize_key")]
+    pub fn deserialize_key(s: &str) -> Self {
+        use base64::prelude::*;
+        let buf = BASE64_STANDARD.decode(s).expect("decode base64");
+
+        let pk_len = unsafe { sphincs_plus_get_pk_size() as usize };
+        let sk_len = unsafe { sphincs_plus_get_sk_size() as usize };
+        assert_eq!(buf.len(), pk_len + sk_len);
+
+        Self {
+            pk: buf[0..pk_len].to_vec(),
+            sk: buf[pk_len..].to_vec(),
+        }
+    }
+
+    #[cfg(feature = "serialize_key")]
+    pub fn serialize_key(&self) -> String {
+        let buf_len = self.pk.len() + self.sk.len();
+        let mut buf = Vec::with_capacity(buf_len);
+
+        buf.resize(buf_len, 0);
+
+        buf[0..self.pk.len()].copy_from_slice(&self.pk);
+        buf[self.pk.len()..].copy_from_slice(&self.sk);
+
+        use base64::prelude::*;
+        BASE64_STANDARD.encode(&buf)
+    }
+
     pub fn sign(&self, msg: &[u8]) -> Vec<u8> {
         let mut s = Vec::new();
         s.resize(self.get_sign_len(), 0);

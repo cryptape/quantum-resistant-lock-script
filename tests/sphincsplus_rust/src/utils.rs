@@ -1,6 +1,6 @@
 use super::dummy_data_loader::DummyDataLoader;
-use ckb_sphincs_utils::sphincsplus::*;
 use ckb_hash::blake2b_256;
+use ckb_sphincs_utils::sphincsplus::*;
 use ckb_types::core::{
     cell::{CellMetaBuilder, ResolvedTransaction},
     TransactionView,
@@ -31,6 +31,10 @@ pub struct TestConfig {
     pub message_error: bool,
     rng: ThreadRng,
     pub print_time: bool,
+    pub print_sign: bool,
+    pub fixed_rand: bool,
+    rng_count: usize,
+    pub sign: Option<Vec<u8>>,
 }
 
 impl TestConfig {
@@ -43,6 +47,27 @@ impl TestConfig {
             message_error: false,
             rng: thread_rng(),
             print_time: false,
+            print_sign: false,
+            fixed_rand: false,
+            rng_count: 0,
+            sign: None,
+        }
+    }
+
+    #[cfg(feature = "serialize_key")]
+    pub fn new_with_key(key: SphincsPlus) -> Self {
+        Self {
+            key,
+            sign_error: false,
+            pubkey_hash_error: false,
+            pubkey_error: false,
+            message_error: false,
+            rng: thread_rng(),
+            print_time: false,
+            print_sign: false,
+            fixed_rand: false,
+            rng_count: 0,
+            sign: None,
         }
     }
 
@@ -50,8 +75,14 @@ impl TestConfig {
         let mut buf = Vec::<u8>::with_capacity(len);
         buf.resize(len, 0);
 
-        self.rng.fill(buf.as_mut_slice());
-
+        if !self.fixed_rand {
+            self.rng.fill(buf.as_mut_slice());
+        } else {
+            for i in buf.iter_mut() {
+                *i = self.rng_count as u8;
+            }
+            self.rng_count += 1;
+        }
         buf
     }
 }
@@ -196,13 +227,25 @@ pub fn sign_tx_by_input_group(
                     let mut witness_buf = Vec::new();
                     witness_buf.resize(sign_info_len, 0);
 
-                    witness_buf[..config.key.get_sign_len()].copy_from_slice(
-                        &if config.sign_error {
+                    witness_buf[..config.key.get_sign_len()].copy_from_slice(&if config
+                        .sign
+                        .is_none()
+                    {
+                        if config.sign_error {
                             config.gen_rand_buf(config.key.get_sign_len())
                         } else {
-                            config.key.sign(&message)
-                        },
-                    );
+                            config.key.sign(&message).to_vec()
+                        }
+                    } else {
+                        config.sign.as_ref().unwrap().to_vec()
+                    });
+                    if config.print_sign {
+                        use base64::prelude::*;
+                        print!(
+                            "--sign {}",
+                            BASE64_STANDARD.encode(&witness_buf[..config.key.get_sign_len()])
+                        )
+                    }
 
                     witness_buf[config.key.get_sign_len()..].copy_from_slice(
                         &if config.pubkey_error {

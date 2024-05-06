@@ -1,0 +1,87 @@
+CC := clang-16
+LD := ld.lld-16
+OBJCOPY := llvm-objcopy-16
+AR := llvm-ar-16
+RANLIB := llvm-ranlib-16
+
+PARAMS = sphincs-shake-128f
+THASH = simple
+
+CFLAGS := --target=riscv64 -march=rv64imc_zba_zbb_zbc_zbs \
+		-g -O3 -fPIC \
+		-Wall -Werror -Wno-nonnull -Wno-unused-function \
+		-Wno-error=unused-but-set-variable \
+		-Wno-error=unused-command-line-argument \
+		-Wno-error=bitwise-instead-of-logical \
+		-fno-builtin-printf -fno-builtin-memcmp \
+		-nostdinc -nostdlib -fvisibility=hidden \
+		-fdata-sections -ffunction-sections \
+		-DCKB_VM -DCKB_DECLARATION_ONLY
+
+LDFLAGS := -static -Wl,--gc-sections
+
+CFLAGS := $(CFLAGS) -I c -I deps/ckb-c-stdlib/libc -I deps/ckb-c-stdlib -I deps/ckb-c-stdlib/molecule
+CFLAGS := $(CFLAGS) -I deps/sphincsplus/ref -DPARAMS=$(PARAMS)
+
+SPHINCS_PLUS_DIR = deps/sphincsplus/ref/
+
+SOURCES = \
+	$(SPHINCS_PLUS_DIR)address.c \
+	$(SPHINCS_PLUS_DIR)merkle.c \
+	$(SPHINCS_PLUS_DIR)wots.c \
+	$(SPHINCS_PLUS_DIR)wotsx1.c \
+	$(SPHINCS_PLUS_DIR)utils.c \
+	$(SPHINCS_PLUS_DIR)utilsx1.c \
+	$(SPHINCS_PLUS_DIR)fors.c \
+	$(SPHINCS_PLUS_DIR)sign.c \
+	c/ckb-sphincsplus.c
+
+HEADERS = \
+	$(SPHINCS_PLUS_DIR)params.h \
+	$(SPHINCS_PLUS_DIR)address.h \
+	$(SPHINCS_PLUS_DIR)merkle.h \
+	$(SPHINCS_PLUS_DIR)wots.h \
+	$(SPHINCS_PLUS_DIR)wotsx1.h \
+	$(SPHINCS_PLUS_DIR)utils.h \
+	$(SPHINCS_PLUS_DIR)utilsx1.h \
+	$(SPHINCS_PLUS_DIR)fors.h \
+	$(SPHINCS_PLUS_DIR)api.h \
+	$(SPHINCS_PLUS_DIR)hash.h \
+	$(SPHINCS_PLUS_DIR)thash.h \
+	$(SPHINCS_PLUS_DIR)randombytes.h \
+	c/ckb-sphincsplus.h
+
+ifneq (,$(findstring shake,$(PARAMS)))
+	SOURCES += \
+		$(SPHINCS_PLUS_DIR)fips202.c \
+		$(SPHINCS_PLUS_DIR)hash_shake.c \
+		$(SPHINCS_PLUS_DIR)thash_shake_$(THASH).c
+	HEADERS += $(SPHINCS_PLUS_DIR)fips202.h
+endif
+ifneq (,$(findstring haraka,$(PARAMS)))
+	SOURCES += \
+		$(SPHINCS_PLUS_DIR)haraka.c \
+		$(SPHINCS_PLUS_DIR)hash_haraka.c \
+		$(SPHINCS_PLUS_DIR)thash_haraka_$(THASH).c
+	HEADERS += $(SPHINCS_PLUS_DIR)haraka.h
+endif
+ifneq (,$(findstring sha2,$(PARAMS)))
+	SOURCES += \
+		$(SPHINCS_PLUS_DIR)sha2.c \
+		$(SPHINCS_PLUS_DIR)hash_sha2.c \
+		$(SPHINCS_PLUS_DIR)thash_sha2_$(THASH).c
+	HEADERS += $(SPHINCS_PLUS_DIR)sha2.h
+endif
+
+# CFLAGS := $(CFLAGS) -DCKB_C_STDLIB_PRINTF
+
+all: build/sphincsplus_lock
+
+build/sphincsplus_lock: c/ckb-sphincsplus-lock.c $(SOURCES) $(HEADERS)
+	mkdir -p build
+	$(CC) $(CFLAGS) -o $@ $(SOURCES) $<
+	cp $@ $@.debug
+	$(OBJCOPY) --strip-debug --strip-all $@
+
+clean:
+	rm -rf build/sphincsplus_lock
