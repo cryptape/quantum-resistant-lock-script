@@ -1,0 +1,15 @@
+name: Rust
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Update submodules
+      run: git submodule update --init
+    - name: Run sphincs+ rust tests
+      run: ./tests/sphincsplus_rust/run_rust.sh
