@@ -12,4 +12,4 @@ jobs:
     - name: Update submodules
       run: git submodule update --init
     - name: Run sphincs+ rust tests
-      run: ./tests/sphincsplus_rust/run_rust.sh
+      run: ./tests/sphincsplus_rust/run_rust_with_clang.sh
