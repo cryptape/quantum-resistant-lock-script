@@ -21,6 +21,7 @@ hash_options_s = ["ckb_sphincs_utils/hash_options_s"]
 thashes_robust = ["ckb_sphincs_utils/thashes_robust"]
 thashes_simple = ["ckb_sphincs_utils/thashes_simple"]
 
+serialize_key = ["ckb_sphincs_utils/serialize_key", "dep:clap", "dep:base64"]
 
 [dependencies]
 ckb_sphincs_utils = { path = "../../tools/ckb-sphincs-utils", default-features = false }
@@ -33,3 +34,14 @@ lazy_static = "1.4.0"
 libc = "0.2.139"
 num_enum = "0.5.10"
 rand = "0.8.5"
+clap = { version = "4.3.2", optional = true }
+base64 = { version = "0.22.0", optional = true }
+
+
+[[bin]]
+name = "generate_fix_infos"
+required-features = ["serialize_key"]
+
+[[bin]]
+name = "run_brenchmark"
+required-features = ["serialize_key"]

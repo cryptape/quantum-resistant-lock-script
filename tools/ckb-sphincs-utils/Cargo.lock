@@ -3,14 +3,21 @@
 version = 3
 
 [[package]]
-name = "cc"
-version = "1.0.79"
+name = "base64"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50d30906286121d95be3d479533b458f87493b30a4b5f79a607db8f5d11aa91f"
+checksum = "9475866fec1451be56a3c2400fd081ff546538961565ccb5b7142cbd22bc7a51"
+
+[[package]]
+name = "cc"
+version = "1.0.95"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d32a725bc159af97c3e629873bb9f88fb8cf8a4867175f76dc987815ea07c83b"
 
 [[package]]
 name = "ckb_sphincs_utils"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "cc",
 ]
