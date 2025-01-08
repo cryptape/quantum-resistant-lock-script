@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "tests/sphincsplus_rust",
+    "tools/ckb-sphincs-tools",
+    "tools/ckb-sphincs-utils"
+]
