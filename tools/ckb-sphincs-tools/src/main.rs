@@ -64,8 +64,11 @@ fn main() {
         Some(("signature", sub_matches)) => {
             let key_file = sub_matches.get_one::<String>("key_file").expect("required");
             let message =
-                H256::from_trimmed_str(sub_matches.get_one::<String>("message").expect("required"))
-                    .unwrap();
+                H256::from_trimmed_str(
+                    sub_matches.get_one::<String>("message").expect("required")
+                        .trim_start_matches("0x")
+                        .trim_start_matches('0')
+                ).unwrap();
             sub_sign::sub_sign(
                 sub_gen_key::parse_key_file(PathBuf::from(key_file)),
                 message,
@@ -81,9 +84,17 @@ fn main() {
             sub_conversion::cc_to_sphincsplus(
                 sub_gen_key::parse_key_file(PathBuf::from(key_file)),
                 &ckb_rpc,
-                H256::from_trimmed_str(tx_hash).unwrap(),
+                H256::from_trimmed_str(
+                    tx_hash
+                        .trim_start_matches("0x")
+                        .trim_start_matches('0')
+                ).unwrap(),
                 tx_index.parse::<u32>().unwrap(),
-                H256::from_trimmed_str(prikey).unwrap(),
+                H256::from_trimmed_str(
+                    prikey
+                        .trim_start_matches("0x")
+                        .trim_start_matches('0')
+                ).unwrap(),
             );
         }
         Some(("cc_to_secp", sub_matches)) => {
@@ -107,10 +118,18 @@ fn main() {
             sub_conversion::cc_to_def_lock_script(
                 sub_gen_key::parse_key_file(PathBuf::from(key_file)),
                 &ckb_rpc,
-                H256::from_trimmed_str(tx_hash).unwrap(),
+                H256::from_trimmed_str(
+                    tx_hash
+                    .trim_start_matches("0x")
+                    .trim_start_matches('0')
+                ).unwrap(),
                 tx_index.parse::<u32>().unwrap(),
                 &str_to_bytes(&lock_arg),
-                H256::from_trimmed_str(sp_tx_hash).unwrap(),
+                H256::from_trimmed_str(
+                    sp_tx_hash
+                        .trim_start_matches("0x")
+                        .trim_start_matches('0')
+                ).unwrap(),
                 sp_tx_index.parse::<u32>().unwrap(),
                 fee.clone(),
             );
