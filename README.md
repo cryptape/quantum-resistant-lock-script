@@ -35,7 +35,7 @@ Find out more information about different [parameters](https://github.com/sphinc
 * Note: Default hash type: **shake-128f-simple** (Verify cycles: about 49.6M)
 
 ## Tool
-This tool is to **migrate a default Lock(SECP256K1/blake160) to quantum resistant lock script.**. 
+This tool is to **migrate from default Lock(SECP256K1/blake160) to quantum resistant lock script.**. 
 
 Follow steps below:
 
