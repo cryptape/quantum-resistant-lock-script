@@ -35,7 +35,7 @@ Find out more information about different [parameters](https://github.com/sphinc
 * Note: Default hash type: **shake-128f-simple** (Verify cycles: about 49.6M)
 
 ## Tool
-This tool is to **migrate from default Lock(SECP256K1/blake160) to quantum resistant lock script.**. 
+This tool is to **migrate Cells from default lock(SECP256K1/blake160) to quantum resistant lock.**
 
 Follow steps below:
 
@@ -55,11 +55,11 @@ Follow steps below:
    We can get a set of key files, including public and private keys.
    * If the contract you compile does not use the default value, it needs to be the same here.
    * Need to save this file.
-4. Migrate from SECP256K1/blake160 lock script to quantum resistant lock script.
+4. Update a Cell's Lock Script from SECP256K1/blake160 to quantum resistant.
    ``` shell
    cargo run -- cc_to_sphincsplus --tx_hash <tx-hash> --tx_index <index> --key_file key.json --prikey <You can use ckb-cli account export>
    ```
-5. Migrate a quantum resistant lock script to SECP256K1/blake160 lock script.
+5. Update a Cell's Lock Script from quantum resistant to SECP256K1/blake160.
    ``` shell
    cargo run -- cc_to_secp --tx_hash <tx-hash> --tx_index <index> --key_file key.json --lock_arg <LOCK-ARG> --sp_tx_hash <SPHINCS+ Script in step 2> --sp_tx_index <index> --fee 10000
    ```
