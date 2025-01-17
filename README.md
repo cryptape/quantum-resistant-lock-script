@@ -81,7 +81,7 @@ Follow steps below:
 [CKB Explorer](https://pudge.explorer.nervos.org/transaction/0x35f51257673c7a7edd009fa2166e6f8645156207c9da38202f04ba4d94d9e519)
 | parameter | value                                                              |
 | --------- | ------------------------------------------------------------------ |
-| code_hash | 0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8 |
+| code_hash | 0x989ab456455509a1c2ad1cb8116b7d209df228144445c741b101ec3e55ee8351 |
 | hash_type | type                                                               |
 | tx_hash   | 0x35f51257673c7a7edd009fa2166e6f8645156207c9da38202f04ba4d94d9e519 |
 | index     | 0                                                                  |
