@@ -82,7 +82,7 @@ Follow steps below:
 | parameter | value                                                              |
 | --------- | ------------------------------------------------------------------ |
 | code_hash | 0x989ab456455509a1c2ad1cb8116b7d209df228144445c741b101ec3e55ee8351 |
-| hash_type | type                                                               |
+| hash_type | data1                                                               |
 | tx_hash   | 0x35f51257673c7a7edd009fa2166e6f8645156207c9da38202f04ba4d94d9e519 |
 | index     | 0                                                                  |
 | dep_type  | code                                                               |
