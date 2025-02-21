@@ -15,7 +15,7 @@ To cope with this issue, we employ a different solution: `c-sphincs-all-in-one-l
 
 Due to this particular design, special tools are required to patch and merge binaries, we have hand-written [tools](../build-tools) to fulfill those purposes:
 
-* [build-params-finder](../build-tools/build-params-finder): starting from [parameter set definition file](../params.txt), this tool builds a C header file containing injection points for `offsets` for each leaf script in the umbrella script, and handy utility structures for the root script.
-* [patch-root-binary](../build-tools/patch-root-binary): when root script(however the offsets are invalid at this point) and leaf scripts are built, this tool reads the sizes for each script, calculates the correct offsets for all leaf scripts, patch the root binary with the correct offsets, and then merge all scripts into a single umbrella script.
+* [build-params-finder](../build-tools/build-params-finder): starting from [parameter set definition file](../params.txt), this tool builds a C header file containing handy utility structures for fetching different parameter sets (with leaf script offsets) from root script.
+* [script-merge-tool](../build-tools/script-merge-tool): this is a generic tool that helps build offset symbol definition sources from built leaf scripts, and also patch root script to update correct offsets from leaf scripts. This tool is designed so no logic of our SPHINCS+ lock is required. Ideally it can be reused elsewhere for similar purposes
 
 We do hope this `umbrella` design can help inspire more different kinds of CKB scripts in the future.
