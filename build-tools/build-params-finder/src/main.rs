@@ -27,15 +27,8 @@ fn main() {
     println!(
         r#"#include <stdint.h>
 #include "aggregated-params.h"
-"#
+#include "leaf-vars.h""#
     );
-
-    for (params_id, _params_name) in &params {
-        println!(
-            r#"__attribute__ ((visibility ("default"))) const uint32_t param{params_id}_binary_offset = 0xFFFFFFFF;
-__attribute__ ((visibility ("default"))) const uint32_t param{params_id}_binary_length = 1;"#
-        );
-    }
 
     println!(
         r#"
@@ -51,12 +44,15 @@ CkbSphincsParams ckb_sphincs_supported_params[] = {{"#
     );
 
     for (params_id, params_name) in &params {
+        let name = format!("CKB_{}", params_name)
+            .replace("-", "_")
+            .to_uppercase();
         println!(
             r#"  {{
     .pk_bytes = PARAM{params_id}_PK_BYTES,
     .sign_bytes = PARAM{params_id}_SIGN_BYTES,
-    .offset_ptr = &param{params_id}_binary_offset,
-    .length_ptr = &param{params_id}_binary_length,
+    .offset_ptr = &{name}_BINARY_OFFSET,
+    .length_ptr = &{name}_BINARY_LENGTH,
     .name = "{params_name}",
   }},"#
         );

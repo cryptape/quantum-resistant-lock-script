@@ -23,6 +23,7 @@
 #include <ckb_syscalls.h>
 #include <molecule/blockchain-api2.h>
 
+#define CKB_SCRIPT_MERGE_TOOL_DEFINE_VARS
 #include "params-finder.h"
 
 #include "ckb_tx_message_all.h"

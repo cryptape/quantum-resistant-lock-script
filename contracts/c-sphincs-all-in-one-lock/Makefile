@@ -85,26 +85,36 @@ build: $(CUR_BUILD)/$(BINARY)
 	cp $(CUR_BUILD)/$(BINARY).debug $(TOP)/$(BUILD_DIR)
 
 $(CUR_BUILD)/$(BINARY): $(CUR_BUILD)/root.complete $(CUR_BUILD)/leaf.complete
-	$(TOP)/target/$(MODE)/patch-root-binary --root-debug-binary $(CUR_BUILD)/root.debug \
-		--root-actual-binary $(CUR_BUILD)/root.debug \
-		--leaf-binary-template $(CUR_BUILD)/leaf_@@.debug \
-		--output-binary $@.debug \
-		--params-file $(PARAMS_DEFINITION_FILE) \
+	$(TOP)/target/$(MODE)/script-merge-tool --prefix CKB_ merge \
+		--root-debug $(CUR_BUILD)/root.debug \
+		--root-actual $(CUR_BUILD)/root.debug \
+		--leaves $(CUR_BUILD)/leaves_debug \
+		--output $@.debug \
 		--merge
-	$(TOP)/target/$(MODE)/patch-root-binary --root-debug-binary $(CUR_BUILD)/root.debug \
-		--root-actual-binary $(CUR_BUILD)/root.stripped \
-		--leaf-binary-template $(CUR_BUILD)/leaf_@@.stripped \
-		--output-binary $@ \
-		--params-file $(PARAMS_DEFINITION_FILE) \
+	$(TOP)/target/$(MODE)/script-merge-tool --prefix CKB_ merge \
+		--root-debug $(CUR_BUILD)/root.debug \
+		--root-actual $(CUR_BUILD)/root.stripped \
+		--leaves $(CUR_BUILD)/leaves_stripped \
+		--output $@ \
 		--merge
 
-$(CUR_BUILD)/root.complete: ckb-sphincsplus-root-lock.c $(CUR_BUILD)/params-finder.h
+$(CUR_BUILD)/root.complete: ckb-sphincsplus-root-lock.c $(CUR_BUILD)/params-finder.h $(CUR_BUILD)/leaf-vars.h
 	$(CLANG) $(CFLAGS) $(LDFLAGS) -o $(CUR_BUILD)/root.debug $<
 	$(OBJCOPY) --strip-debug --strip-all $(CUR_BUILD)/root.debug $(CUR_BUILD)/root.stripped
 	touch $@
 
+$(CUR_BUILD)/leaf-vars.h: $(CUR_BUILD)/leaf.complete
+	# leaf-vars.h only need script names, either debug or stripped directory will work,
+	# no need to do it twice
+	$(TOP)/target/$(MODE)/script-merge-tool --prefix CKB_ generate \
+		--leaves $(CUR_BUILD)/leaves_stripped \
+		--language c \
+		--output $@
+
 $(CUR_BUILD)/leaf.complete: $(SOURCES) $(HEADERS) ckb-sphincsplus-leaf-lock.c
 	mkdir -p $(CUR_BUILD)
+	rm -rf $(CUR_BUILD)/leaves_debug $(CUR_BUILD)/leaves_stripped
+	mkdir -p $(CUR_BUILD)/leaves_debug $(CUR_BUILD)/leaves_stripped
 	@set -eu; \
 	for param_id in $(ALL_PARAM_IDS); do \
 		param=$$(head -n $$param_id $(PARAMS_DEFINITION_FILE) | tail -1 | cut -d" " -f2); \
@@ -118,11 +128,11 @@ $(CUR_BUILD)/leaf.complete: $(SOURCES) $(HEADERS) ckb-sphincsplus-leaf-lock.c
 		echo "Building sphincs+ lock with params id: $${param_id}, params: $${param}"; \
 		set -x; \
 		$(CLANG) $(CFLAGS) $(LDFLAGS) -DPARAMS_ID=$${param_id} -DPARAMS=$${param} \
-			-o $(CUR_BUILD)/leaf_$${param}.debug \
+			-o $(CUR_BUILD)/leaves_debug/$${param} \
 			$(SOURCES) $${others} ckb-sphincsplus-leaf-lock.c; \
 		$(OBJCOPY) --strip-debug --strip-all \
-			$(CUR_BUILD)/leaf_$${param}.debug \
-			$(CUR_BUILD)/leaf_$${param}.stripped; \
+			$(CUR_BUILD)/leaves_debug/$${param} \
+			$(CUR_BUILD)/leaves_stripped/$${param}; \
 		set +x; \
 	done;
 	touch $@

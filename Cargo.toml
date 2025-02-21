@@ -3,7 +3,7 @@ resolver = "2"
 
 members = [
   "build-tools/build-params-finder",
-  "build-tools/patch-root-binary",
+  "build-tools/script-merge-tool",
 ]
 
 [profile.release]
