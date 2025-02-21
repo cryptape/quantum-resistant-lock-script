@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+
+members = [
+  "build-tools/build-params-finder",
+  "build-tools/patch-root-binary",
+]
+
+[profile.release]
+overflow-checks = true
+strip = false
+codegen-units = 1
+debug = true

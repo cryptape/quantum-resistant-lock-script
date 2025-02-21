@@ -24,23 +24,17 @@ enum SphincsPlusError {
 
 #ifndef CKB_VM
 
+// TODO: switch the code to use crypto_sign_signature / crypto_sign_verify,
+// so we don't need to append message to the end of the signature.
+
 #include <stdlib.h>
-
-#endif  // CKB_VM
-
-uint32_t sphincs_plus_get_pk_size() { return SPX_PK_BYTES; }
-
-uint32_t sphincs_plus_get_sk_size() { return SPX_SK_BYTES; }
-
-uint32_t sphincs_plus_get_sign_size() { return SPX_BYTES + SPX_MLEN; }
-
-#ifndef CKB_VM
 
 int sphincs_plus_generate_keypair(uint8_t *pk, uint8_t *sk) {
   return crypto_sign_keypair(pk, sk);
 }
 
-int sphincs_plus_sign(uint8_t *message, uint8_t *sk, uint8_t *out_sign) {
+int sphincs_plus_sign(const uint8_t *message, const uint8_t *sk,
+                      uint8_t *out_sign) {
   unsigned long long out_sign_len = sphincs_plus_get_sign_size();
   int ret = crypto_sign(out_sign, (unsigned long long *)&out_sign_len, message,
                         SPX_MLEN, sk);
@@ -52,9 +46,9 @@ int sphincs_plus_sign(uint8_t *message, uint8_t *sk, uint8_t *out_sign) {
 
 #endif  // CKB_VM
 
-int sphincs_plus_verify(uint8_t *sign, uint32_t sign_size, uint8_t *message,
-                        uint32_t message_size, uint8_t *pubkey,
-                        uint32_t pubkey_size) {
+int sphincs_plus_verify(const uint8_t *sign, uint32_t sign_size,
+                        const uint8_t *message, uint32_t message_size,
+                        const uint8_t *pubkey, uint32_t pubkey_size) {
   size_t sign_len = sphincs_plus_get_sign_size();
 
   if (sign_size != sign_len || message_size != SPX_MLEN ||

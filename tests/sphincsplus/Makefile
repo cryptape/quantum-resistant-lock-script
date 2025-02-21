@@ -1,5 +1,4 @@
-CC := clang
-LD := clang
+CC := clang-16
 
 PARAMS = sphincs-shake-256f
 THASH = robust
