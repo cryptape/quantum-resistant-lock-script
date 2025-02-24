@@ -18,14 +18,10 @@
 enum SphincsPlusError {
   SphincsPlusError_Params = 200,
   SphincsPlusError_Verify,
-  SphincsPlusError_Verify_MsgLen,
-  SphincsPlusError_Verify_MsgCmp,
+  SphincsPlusError_OutputSignLength,
 };
 
 #ifndef CKB_VM
-
-// TODO: switch the code to use crypto_sign_signature / crypto_sign_verify,
-// so we don't need to append message to the end of the signature.
 
 #include <stdlib.h>
 
@@ -35,11 +31,14 @@ int sphincs_plus_generate_keypair(uint8_t *pk, uint8_t *sk) {
 
 int sphincs_plus_sign(const uint8_t *message, const uint8_t *sk,
                       uint8_t *out_sign) {
-  unsigned long long out_sign_len = SPHINCS_PLUS_SIGN_SIZE;
-  int ret = crypto_sign(out_sign, (unsigned long long *)&out_sign_len, message,
-                        SPX_MLEN, sk);
+  size_t out_sign_len = 0;
+  int ret =
+      crypto_sign_signature(out_sign, &out_sign_len, message, SPX_MLEN, sk);
+  if (ret != 0) {
+    return ret;
+  }
   if ((uint32_t)out_sign_len != SPHINCS_PLUS_SIGN_SIZE) {
-    return 1;
+    return SphincsPlusError_OutputSignLength;
   }
   return ret;
 }
@@ -58,20 +57,11 @@ int sphincs_plus_verify(const uint8_t *sign, uint32_t sign_size,
       pubkey_size != SPHINCS_PLUS_PK_SIZE) {
     return SphincsPlusError_Params;
   }
-  unsigned char mout[SPX_BYTES + SPX_MLEN];
-  unsigned long long mlen = 0;
 
-  int err = crypto_sign_open(mout, &mlen, sign, SPHINCS_PLUS_SIGN_SIZE, pubkey);
+  int err = crypto_sign_verify(sign, SPHINCS_PLUS_SIGN_SIZE, message,
+                               message_size, pubkey);
   if (err != 0) {
     return SphincsPlusError_Verify;
-  }
-
-  if (mlen != SPX_MLEN) {
-    return SphincsPlusError_Verify_MsgLen;
-  }
-
-  if (memcmp(mout, message, SPX_MLEN) != 0) {
-    return SphincsPlusError_Verify_MsgCmp;
   }
 
   return 0;

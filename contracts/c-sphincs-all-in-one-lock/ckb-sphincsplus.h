@@ -7,7 +7,7 @@
 
 #define SPHINCS_PLUS_PK_SIZE SPX_PK_BYTES
 #define SPHINCS_PLUS_SK_SIZE SPX_SK_BYTES
-#define SPHINCS_PLUS_SIGN_SIZE (SPX_BYTES + SPX_MLEN)
+#define SPHINCS_PLUS_SIGN_SIZE SPX_BYTES
 
 #ifndef CKB_VM
 int sphincs_plus_generate_keypair(uint8_t *pk, uint8_t *sk);

@@ -1,6 +1,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
@@ -14,7 +15,7 @@
 #define ASSERT(c)                                \
   if (!(c)) {                                    \
     printf("Assert: %s:%d", __FILE__, __LINE__); \
-    ((void)0);                                   \
+    exit(-1);                                    \
   }
 #endif  // ASSERT
 
@@ -52,8 +53,13 @@ int main() {
   clock_t start, end;
   start = clock();
 
+  /*
+   * G_TEST_DATA_SIGN was prepared at a time where signature is followed
+   * by message. We remove this behavior later, so sizeof(G_TEST_DATA_SIGN)
+   * will not give correct result here.
+   */
   int ret =
-      sphincs_plus_verify(G_TEST_DATA_SIGN, sizeof(G_TEST_DATA_SIGN),
+      sphincs_plus_verify(G_TEST_DATA_SIGN, SPHINCS_PLUS_SIGN_SIZE,
                           G_TEST_DATA_MSG, sizeof(G_TEST_DATA_MSG),
                           G_TEST_DATA_PUB_KEY, sizeof(G_TEST_DATA_PUB_KEY));
   ASSERT(ret == 0);
