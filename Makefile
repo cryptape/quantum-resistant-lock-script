@@ -1,6 +1,6 @@
 # We cannot use $(shell pwd), which will return unix path format on Windows,
 # making it hard to use.
-cur_dir = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+cur_dir = $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
 TOP := $(cur_dir)
 # RUSTFLAGS that are likely to be tweaked by developers. For example,
@@ -51,6 +51,9 @@ build:
 		for contract in $(wildcard contracts/*); do \
 			$(MAKE) -e -C $$contract build; \
 		done; \
+		for crate in $(wildcard tools/*); do \
+			cargo build -p $$(basename $$crate | tr '-' '_') $(MODE_ARGS) $(CARGO_ARGS); \
+		done; \
 	else \
 		$(MAKE) -e -C contracts/$(CONTRACT) build; \
 		cargo build -p $(CONTRACT)-sim; \
@@ -63,8 +66,9 @@ TASK :=
 run:
 	$(MAKE) -e -C contracts/$(CONTRACT) $(TASK)
 
-test:	
+test:
 	bash tests/sphincsplus/all_run.sh
+	bash tests/sphincsplus_rust/all_run.sh
 	# cargo test $(CARGO_ARGS)
 
 # check, clippy and fmt here are provided for completeness,

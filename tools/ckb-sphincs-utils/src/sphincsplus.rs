@@ -33,6 +33,12 @@ pub struct SphincsPlus {
     pub sk: Vec<u8>,
 }
 
+impl Default for SphincsPlus {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SphincsPlus {
     pub fn get_pk_len(&self) -> usize {
         unsafe { sphincs_plus_get_pk_size() as usize }
@@ -94,8 +100,7 @@ impl SphincsPlus {
     }
 
     pub fn sign(&self, msg: &[u8]) -> Vec<u8> {
-        let mut s = Vec::new();
-        s.resize(self.get_sign_len(), 0);
+        let mut s = vec![0; self.get_sign_len()];
 
         let ret = unsafe { sphincs_plus_sign(msg.as_ptr(), self.sk.as_ptr(), s.as_mut_ptr()) };
         assert_eq!(ret, 0);
@@ -103,7 +108,7 @@ impl SphincsPlus {
         s
     }
 
-    pub fn verify(&self, msg: &[u8], sign: &[u8]) -> Result<(), ()> {
+    pub fn verify(&self, msg: &[u8], sign: &[u8]) -> bool {
         let mut sm = Vec::new();
         sm.resize(32, 0xFF);
 
@@ -115,9 +120,126 @@ impl SphincsPlus {
                 msg.len() as u32,
                 self.pk.as_ptr(),
                 self.pk.len() as u32,
-            );
+            ) == 0
         }
-
-        Ok(())
     }
+}
+
+pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
+    if cfg!(all(
+        feature = "sha2",
+        feature = "hash_128",
+        feature = "hash_options_f",
+        feature = "thashes_simple"
+    )) {
+        return Some([0x81, 0x01, 0x01, 0x01, 0x01]);
+    }
+
+    if cfg!(all(
+        feature = "sha2",
+        feature = "hash_128",
+        feature = "hash_options_s",
+        feature = "thashes_simple"
+    )) {
+        return Some([0x82, 0x01, 0x01, 0x01, 0x02]);
+    }
+
+    if cfg!(all(
+        feature = "sha2",
+        feature = "hash_192",
+        feature = "hash_options_f",
+        feature = "thashes_simple"
+    )) {
+        return Some([0x83, 0x01, 0x01, 0x01, 0x03]);
+    }
+
+    if cfg!(all(
+        feature = "sha2",
+        feature = "hash_192",
+        feature = "hash_options_s",
+        feature = "thashes_simple"
+    )) {
+        return Some([0x84, 0x01, 0x01, 0x01, 0x04]);
+    }
+
+    if cfg!(all(
+        feature = "sha2",
+        feature = "hash_256",
+        feature = "hash_options_f",
+        feature = "thashes_simple"
+    )) {
+        return Some([0x85, 0x01, 0x01, 0x01, 0x05]);
+    }
+
+    if cfg!(all(
+        feature = "sha2",
+        feature = "hash_256",
+        feature = "hash_options_s",
+        feature = "thashes_simple"
+    )) {
+        return Some([0x86, 0x01, 0x01, 0x01, 0x06]);
+    }
+
+    if cfg!(all(
+        feature = "shake",
+        feature = "hash_128",
+        feature = "hash_options_f",
+        feature = "thashes_simple"
+    )) {
+        return Some([0x87, 0x01, 0x01, 0x01, 0x07]);
+    }
+
+    if cfg!(all(
+        feature = "shake",
+        feature = "hash_128",
+        feature = "hash_options_s",
+        feature = "thashes_simple"
+    )) {
+        return Some([0x88, 0x01, 0x01, 0x01, 0x08]);
+    }
+
+    if cfg!(all(
+        feature = "shake",
+        feature = "hash_192",
+        feature = "hash_options_f",
+        feature = "thashes_simple"
+    )) {
+        return Some([0x89, 0x01, 0x01, 0x01, 0x09]);
+    }
+
+    if cfg!(all(
+        feature = "shake",
+        feature = "hash_192",
+        feature = "hash_options_s",
+        feature = "thashes_simple"
+    )) {
+        return Some([0x8a, 0x01, 0x01, 0x01, 0x0a]);
+    }
+
+    if cfg!(all(
+        feature = "shake",
+        feature = "hash_256",
+        feature = "hash_options_f",
+        feature = "thashes_simple"
+    )) {
+        return Some([0x8b, 0x01, 0x01, 0x01, 0x0b]);
+    }
+
+    if cfg!(all(
+        feature = "shake",
+        feature = "hash_256",
+        feature = "hash_options_s",
+        feature = "thashes_simple"
+    )) {
+        return Some([0x8c, 0x01, 0x01, 0x01, 0x0c]);
+    }
+
+    None
+}
+
+pub fn single_sign_witness_prefix() -> Option<[u8; 5]> {
+    single_sign_script_args_prefix().map(|mut prefix| {
+        prefix[4] |= 0x80;
+        prefix
+    })
 }

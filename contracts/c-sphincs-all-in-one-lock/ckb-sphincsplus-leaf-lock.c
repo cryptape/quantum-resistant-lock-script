@@ -31,8 +31,7 @@
 /* We only use molecule-c2's cursor here for minimal code size. */
 #include "witness_args_lazy_utils.h"
 
-#define ITERATION_SIZE \
-  (1 + sphincs_plus_get_pk_size() + sphincs_plus_get_sign_size())
+#define ITERATION_SIZE (1 + SPHINCS_PLUS_PK_SIZE + SPHINCS_PLUS_SIGN_SIZE)
 #define MAX_BATCH_BUFFER_SIZE (256 * 1024)
 #define BATCH_COUNT (MAX_BATCH_BUFFER_SIZE / ITERATION_SIZE)
 #define BATCH_BUFFER_SIZE (ITERATION_SIZE * BATCH_COUNT)
@@ -82,25 +81,23 @@ int handle_exec(const uint8_t *command, size_t command_length) {
 
     if ((param_id & MULTISIG_SIG_MASK) != 0) {
       /* Validate a signature when we see one */
-      CHECK2(cursor.size >=
-                 sphincs_plus_get_pk_size() + sphincs_plus_get_sign_size(),
+      CHECK2(cursor.size >= SPHINCS_PLUS_PK_SIZE + SPHINCS_PLUS_SIGN_SIZE,
              ERROR_SPHINCSPLUS_WITNESS);
 
-      uint8_t pubkey[sphincs_plus_get_pk_size()];
-      uint8_t sign[sphincs_plus_get_sign_size()];
+      uint8_t pubkey[SPHINCS_PLUS_PK_SIZE];
+      uint8_t sign[SPHINCS_PLUS_SIGN_SIZE];
 
-      CHECK(mol2_read_and_advance(&cursor, pubkey, sphincs_plus_get_pk_size()));
-      CHECK(mol2_read_and_advance(&cursor, sign, sphincs_plus_get_sign_size()));
+      CHECK(mol2_read_and_advance(&cursor, pubkey, SPHINCS_PLUS_PK_SIZE));
+      CHECK(mol2_read_and_advance(&cursor, sign, SPHINCS_PLUS_SIGN_SIZE));
 
-      err = sphincs_plus_verify(sign, sphincs_plus_get_sign_size(), message,
-                                BLAKE2B_BLOCK_SIZE, pubkey,
-                                sphincs_plus_get_pk_size());
+      err =
+          sphincs_plus_verify(sign, SPHINCS_PLUS_SIGN_SIZE, message,
+                              BLAKE2B_BLOCK_SIZE, pubkey, SPHINCS_PLUS_PK_SIZE);
       CHECK2(err == 0, ERROR_SPHINCSPLUS_VERIFY);
     } else {
       /* Skip pubkey without a signature */
-      CHECK2(cursor.size >= sphincs_plus_get_pk_size(),
-             ERROR_SPHINCSPLUS_WITNESS);
-      mol2_advance(&cursor, sphincs_plus_get_pk_size());
+      CHECK2(cursor.size >= SPHINCS_PLUS_PK_SIZE, ERROR_SPHINCSPLUS_WITNESS);
+      mol2_advance(&cursor, SPHINCS_PLUS_PK_SIZE);
     }
   }
 

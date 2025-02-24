@@ -56,23 +56,22 @@ pub fn get_hash() -> String {
 
 #[inline(always)]
 fn char_to_u8(c: char) -> u8 {
-    if c >= '0' && c <= '9' {
-        ((c as u8) - ('0' as u8)) as u8
-    } else if c >= 'a' && c <= 'f' {
-        ((c as u8) - ('a' as u8)) as u8 + 0xA
-    } else if c >= 'A' && c <= 'F' {
-        ((c as u8) - ('A' as u8)) as u8 + 0xA
+    if c.is_ascii_digit() {
+        (c as u8) - b'0'
+    } else if ('a'..='f').contains(&c) {
+        ((c as u8) - b'a') + 0xA
+    } else if ('A'..='F').contains(&c) {
+        ((c as u8) - b'A') + 0xA
     } else {
         panic!("unknow char: {}", c);
     }
 }
 
 pub fn str_to_bytes(input: &str) -> Vec<u8> {
-    let off = if input.find("0x").is_some() { 2 } else { 0 };
+    let off = if input.contains("0x") { 2 } else { 0 };
     let input = input.as_bytes();
     assert!(input.len() % 2 == 0);
-    let mut r = Vec::<u8>::new();
-    r.resize((input.len() - off) / 2, 0);
+    let mut r = vec![0; (input.len() - off) / 2];
 
     for i in 0..r.len() {
         r[i] = (char_to_u8(input[i * 2 + off] as char) << 4)

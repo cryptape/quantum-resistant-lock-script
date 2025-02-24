@@ -5,11 +5,9 @@
 
 #define SPX_MLEN 32
 
-static inline uint32_t sphincs_plus_get_pk_size() { return SPX_PK_BYTES; }
-static inline uint32_t sphincs_plus_get_sk_size() { return SPX_SK_BYTES; }
-static inline uint32_t sphincs_plus_get_sign_size() {
-  return SPX_BYTES + SPX_MLEN;
-}
+#define SPHINCS_PLUS_PK_SIZE SPX_PK_BYTES
+#define SPHINCS_PLUS_SK_SIZE SPX_SK_BYTES
+#define SPHINCS_PLUS_SIGN_SIZE (SPX_BYTES + SPX_MLEN)
 
 #ifndef CKB_VM
 int sphincs_plus_generate_keypair(uint8_t *pk, uint8_t *sk);

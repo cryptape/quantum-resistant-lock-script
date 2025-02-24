@@ -1,6 +1,6 @@
 # We cannot use $(shell pwd), which will return unix path format on Windows,
 # making it hard to use.
-cur_dir = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+cur_dir = $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
 TOP := $(cur_dir)
 MODE := release
@@ -27,7 +27,12 @@ CLANG_FORMAT := $(subst clang,clang-format,$(CLANG))
 
 # Local build directory
 CUR_BUILD := $(cur_dir)/build
+# FIPS 205 only approves simple THASH type
+THASH = simple
+LOCK_DIR := $(cur_dir)
 SPHINCS_PLUS_DIR := $(TOP)/deps/sphincsplus/ref
+
+include $(TOP)/mk/files.mk
 
 PARAMS_DEFINITION_FILE := $(TOP)/params.txt
 ALL_PARAM_IDS := $(shell cat $(PARAMS_DEFINITION_FILE) | cut -d" " -f1)
@@ -49,34 +54,6 @@ CFLAGS += -I $(SPHINCS_PLUS_DIR) -I $(CUR_BUILD) -I $(cur_dir)/utils
 # CFLAGS += -DCKB_C_STDLIB_PRINTF
 
 LDFLAGS := -static -Wl,--gc-sections
-
-SOURCES = \
-	$(SPHINCS_PLUS_DIR)/address.c \
-	$(SPHINCS_PLUS_DIR)/merkle.c \
-	$(SPHINCS_PLUS_DIR)/wots.c \
-	$(SPHINCS_PLUS_DIR)/wotsx1.c \
-	$(SPHINCS_PLUS_DIR)/utils.c \
-	$(SPHINCS_PLUS_DIR)/utilsx1.c \
-	$(SPHINCS_PLUS_DIR)/fors.c \
-	$(SPHINCS_PLUS_DIR)/sign.c \
-	ckb-sphincsplus.c
-
-HEADERS = \
-	$(SPHINCS_PLUS_DIR)/params.h \
-	$(SPHINCS_PLUS_DIR)/address.h \
-	$(SPHINCS_PLUS_DIR)/merkle.h \
-	$(SPHINCS_PLUS_DIR)/wots.h \
-	$(SPHINCS_PLUS_DIR)/wotsx1.h \
-	$(SPHINCS_PLUS_DIR)/utils.h \
-	$(SPHINCS_PLUS_DIR)/utilsx1.h \
-	$(SPHINCS_PLUS_DIR)/fors.h \
-	$(SPHINCS_PLUS_DIR)/api.h \
-	$(SPHINCS_PLUS_DIR)/hash.h \
-	$(SPHINCS_PLUS_DIR)/thash.h \
-	$(SPHINCS_PLUS_DIR)/randombytes.h \
-	ckb-sphincsplus.h \
-	ckb-sphincsplus-common.h \
-	$(wildcard utils/*.h)
 
 default: build
 
@@ -111,7 +88,7 @@ $(CUR_BUILD)/leaf-vars.h: $(CUR_BUILD)/leaf.complete
 		--language c \
 		--output $@
 
-$(CUR_BUILD)/leaf.complete: $(SOURCES) $(HEADERS) ckb-sphincsplus-leaf-lock.c
+$(CUR_BUILD)/leaf.complete: $(DETECTING_SOURCES) $(HEADERS) ckb-sphincsplus-leaf-lock.c
 	mkdir -p $(CUR_BUILD)
 	rm -rf $(CUR_BUILD)/leaves_debug $(CUR_BUILD)/leaves_stripped
 	mkdir -p $(CUR_BUILD)/leaves_debug $(CUR_BUILD)/leaves_stripped
@@ -119,17 +96,15 @@ $(CUR_BUILD)/leaf.complete: $(SOURCES) $(HEADERS) ckb-sphincsplus-leaf-lock.c
 	for param_id in $(ALL_PARAM_IDS); do \
 		param=$$(head -n $$param_id $(PARAMS_DEFINITION_FILE) | tail -1 | cut -d" " -f2); \
 		if echo "$${param}" | grep "shake" - > /dev/null; then \
-			others="$(SPHINCS_PLUS_DIR)/fips202.c $(SPHINCS_PLUS_DIR)/hash_shake.c"; \
-			others="$${others} $(SPHINCS_PLUS_DIR)/thash_shake_simple.c"; \
+			srcs="$(COMPILING_COMMON_SOURCES) $(COMPILING_SHAKE_SOURCES)"; \
 		elif echo "$${param}" | grep "sha2" - > /dev/null; then \
-			others="$(SPHINCS_PLUS_DIR)/sha2.c $(SPHINCS_PLUS_DIR)/hash_sha2.c"; \
-			others="$${others} $(SPHINCS_PLUS_DIR)/thash_sha2_simple.c"; \
+			srcs="$(COMPILING_COMMON_SOURCES) $(COMPILING_SHA2_SOURCES)"; \
 		fi; \
 		echo "Building sphincs+ lock with params id: $${param_id}, params: $${param}"; \
 		set -x; \
 		$(CLANG) $(CFLAGS) $(LDFLAGS) -DPARAMS_ID=$${param_id} -DPARAMS=$${param} \
 			-o $(CUR_BUILD)/leaves_debug/$${param} \
-			$(SOURCES) $${others} ckb-sphincsplus-leaf-lock.c; \
+			$${srcs} ckb-sphincsplus-leaf-lock.c; \
 		$(OBJCOPY) --strip-debug --strip-all \
 			$(CUR_BUILD)/leaves_debug/$${param} \
 			$(CUR_BUILD)/leaves_stripped/$${param}; \

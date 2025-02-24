@@ -19,37 +19,48 @@
 #endif  // ASSERT
 
 void test_all() {
-  uint32_t pubkey_len = sphincs_plus_get_pk_size();
+  uint32_t pubkey_len = SPHINCS_PLUS_PK_SIZE;
   uint8_t pubkey[pubkey_len];
   memset(pubkey, 0, pubkey_len);
-  uint8_t prikey[sphincs_plus_get_sk_size()];
-  memset(prikey, 0, sphincs_plus_get_sk_size());
+  uint8_t prikey[SPHINCS_PLUS_SK_SIZE];
+  memset(prikey, 0, SPHINCS_PLUS_SK_SIZE);
   int ret = sphincs_plus_generate_keypair(pubkey, prikey);
   ASSERT(ret == 0);
   uint8_t message[SPX_MLEN];
   randombytes(message, sizeof(message));
-  uint32_t sign_len = sphincs_plus_get_sign_size();
+  uint32_t sign_len = SPHINCS_PLUS_SIGN_SIZE;
   uint8_t sign[sign_len];
   memset(sign, 0, sign_len);
   ret = sphincs_plus_sign(message, prikey, sign);
   ASSERT(ret == 0);
+
+  clock_t start, end;
+  start = clock();
+
   ret = sphincs_plus_verify(sign, sign_len, message, SPX_MLEN, pubkey,
                             pubkey_len);
   ASSERT(ret == 0);
+
+  end = clock();
+  printf("%s  random verify time: %f seconds\n", xstr(TEST_DATA),
+         (double)(end - start) / CLOCKS_PER_SEC);
 }
 
 int main() {
+  test_all();
+
   clock_t start, end;
   start = clock();
-  test_all();
 
   int ret =
       sphincs_plus_verify(G_TEST_DATA_SIGN, sizeof(G_TEST_DATA_SIGN),
                           G_TEST_DATA_MSG, sizeof(G_TEST_DATA_MSG),
                           G_TEST_DATA_PUB_KEY, sizeof(G_TEST_DATA_PUB_KEY));
   ASSERT(ret == 0);
+
   end = clock();
-  printf("%s  time: %f seconds\n", xstr(TEST_DATA), (double)(end - start) / CLOCKS_PER_SEC);
+  printf("%s  test data verify time: %f seconds\n", xstr(TEST_DATA),
+         (double)(end - start) / CLOCKS_PER_SEC);
 
   return 0;
 }

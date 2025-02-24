@@ -2499,7 +2499,6 @@ dependencies = [
  "ckb-types 0.107.0",
  "ckb_sphincs_utils",
  "clap",
- "lazy_static",
  "libc",
  "num_enum",
  "rand 0.8.5",

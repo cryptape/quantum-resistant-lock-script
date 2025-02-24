@@ -18,7 +18,7 @@ fn main() {
         .map(|line| {
             let parts: Vec<&str> = line.split(" ").collect();
             (
-                usize::from_str_radix(parts[0], 10).expect("parse number"),
+                parts[0].parse::<usize>().expect("parse number"),
                 parts[1].to_string(),
             )
         })

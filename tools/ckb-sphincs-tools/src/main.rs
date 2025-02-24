@@ -10,7 +10,7 @@ use utils::*;
 
 fn get_args() -> Command {
     Command::new("")
-        .about(&format!("For processing ckb-sphincs+ {}", get_hash()))
+        .about(format!("For processing ckb-sphincs+ {}", get_hash()))
         .subcommand_required(true)
         .arg_required_else_help(true)
         .allow_external_subcommands(true)
@@ -80,7 +80,7 @@ fn main() {
 
             sub_conversion::cc_to_sphincsplus(
                 sub_gen_key::parse_key_file(PathBuf::from(key_file)),
-                &ckb_rpc,
+                ckb_rpc,
                 H256::from_trimmed_str(tx_hash).unwrap(),
                 tx_index.parse::<u32>().unwrap(),
                 H256::from_trimmed_str(prikey).unwrap(),
@@ -106,13 +106,13 @@ fn main() {
 
             sub_conversion::cc_to_def_lock_script(
                 sub_gen_key::parse_key_file(PathBuf::from(key_file)),
-                &ckb_rpc,
+                ckb_rpc,
                 H256::from_trimmed_str(tx_hash).unwrap(),
                 tx_index.parse::<u32>().unwrap(),
-                &str_to_bytes(&lock_arg),
+                &str_to_bytes(lock_arg),
                 H256::from_trimmed_str(sp_tx_hash).unwrap(),
                 sp_tx_index.parse::<u32>().unwrap(),
-                fee.clone(),
+                fee,
             );
         }
         _ => panic!("Unknow subcommand: {:?}", matches.subcommand()),

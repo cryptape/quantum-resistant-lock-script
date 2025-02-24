@@ -20,15 +20,18 @@
 #endif
 
 #undef ASSERT
-// #define ASSERT(s)
-#define ASSERT(s) ckb_exit(-1)
+#define ASSERT(s)                             \
+  do {                                        \
+    if (!(s)) {                               \
+      ckb_exit(ERROR_SPHINCSPLUS_UNEXPECTED); \
+    }                                         \
+  } while (0)
 
 #undef CHECK2
 #define CHECK2(cond, code) \
   do {                     \
     if (!(cond)) {         \
       err = code;          \
-      ASSERT(0);           \
       goto exit;           \
     }                      \
   } while (0)
@@ -39,7 +42,6 @@
     int code = (_code); \
     if (code != 0) {    \
       err = code;       \
-      ASSERT(0);        \
       goto exit;        \
     }                   \
   } while (0)

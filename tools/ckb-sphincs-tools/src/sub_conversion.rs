@@ -4,6 +4,7 @@ use ckb_hash::blake2b_256;
 use ckb_jsonrpc_types as json_types;
 use ckb_jsonrpc_types::Either;
 use ckb_sdk::rpc::CkbRpcClient;
+use ckb_sphincs_utils::SphincsPlus;
 use ckb_types::{
     bytes::Bytes,
     core::{Capacity, DepType, ScriptHashType, TransactionBuilder, TransactionView},
@@ -14,11 +15,10 @@ use ckb_types::{
     H256,
 };
 use lazy_static::lazy_static;
-use ckb_sphincs_utils::SphincsPlus;
 
 lazy_static! {
     pub static ref SPHINCSPLUS_EXAMPLE_BIN: Bytes =
-        Bytes::from(&include_bytes!("../../../build/sphincsplus_lock")[..]);
+        Bytes::from(&include_bytes!("../../../build/release/c-sphincs-all-in-one-lock")[..]);
 }
 
 pub const SIGNATURE_SIZE: usize = 65;
@@ -34,7 +34,7 @@ fn get_secp256k1_sighash(ckb_client: &mut CkbRpcClient) -> CellDep {
     CellDep::new_builder()
         .out_point(OutPoint::new(
             Byte32::from_slice(tx.hash.as_bytes()).unwrap(),
-            0 as u32,
+            0,
         ))
         .dep_type(DepType::DepGroup.into())
         .build()
@@ -61,7 +61,7 @@ fn _get_sphincsplus_sighash(ckb_client: &mut CkbRpcClient, sp_tx_hash: H256, sp_
 }
 
 fn get_sphincsplus_code_hash() -> [u8; 32] {
-    blake2b_256(&SPHINCSPLUS_EXAMPLE_BIN.to_vec())
+    blake2b_256(SPHINCSPLUS_EXAMPLE_BIN.to_vec())
 }
 
 pub fn sign_tx(tx: TransactionView, key: &Privkey) -> TransactionView {
@@ -87,11 +87,8 @@ pub fn sign_tx_by_input_group(
                 blake2b.update(&tx_hash.raw_data());
                 // digest the first witness
                 let witness = WitnessArgs::new_unchecked(tx.witnesses().get(i).unwrap().unpack());
-                let zero_lock: Bytes = {
-                    let mut buf = Vec::new();
-                    buf.resize(SIGNATURE_SIZE, 0);
-                    buf.into()
-                };
+                let zero_lock: Bytes = vec![0; SIGNATURE_SIZE].into();
+
                 let witness_for_digest = witness
                     .clone()
                     .as_builder()
@@ -152,11 +149,8 @@ pub fn sign_tx_by_input_group_sphincs_plus(
                 blake2b.update(&tx_hash.raw_data());
                 // digest the first witness
                 let witness = WitnessArgs::new_unchecked(tx.witnesses().get(i).unwrap().unpack());
-                let zero_lock: Bytes = {
-                    let mut buf = Vec::new();
-                    buf.resize(key.get_sign_len() + key.get_pk_len(), 0);
-                    buf.into()
-                };
+                let zero_lock: Bytes = vec![0; key.get_sign_len() + key.get_pk_len()].into();
+
                 let witness_for_digest = witness
                     .clone()
                     .as_builder()
@@ -175,8 +169,7 @@ pub fn sign_tx_by_input_group_sphincs_plus(
                 let message = H256::from(message);
 
                 let witness_data = {
-                    let mut data = Vec::<u8>::new();
-                    data.resize(key.get_sign_len() + key.get_pk_len(), 0);
+                    let mut data = vec![0; key.get_sign_len() + key.get_pk_len()];
 
                     data[..key.get_sign_len()].copy_from_slice(&key.sign(message.as_bytes()));
                     data[key.get_sign_len()..].copy_from_slice(&key.pk);
@@ -267,7 +260,7 @@ pub fn cc_to_sphincsplus(
         .build();
     let capacity = input_cell.capacity.value() / 100000000;
     let fee = (capacity / 1024 + 1) * 1000;
-    let output_capacity = Capacity::shannons((input_cell.capacity.value() - fee) as u64);
+    let output_capacity = Capacity::shannons(input_cell.capacity.value() - fee);
     tx_builder = tx_builder
         .output(
             CellOutput::new_builder()
@@ -293,6 +286,7 @@ pub fn cc_to_sphincsplus(
         .expect("send transaction failed");
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn cc_to_def_lock_script(
     key: SphincsPlus,
     ckb_rpc: &str,
@@ -338,11 +332,7 @@ pub fn cc_to_def_lock_script(
         .build();
 
     let witness_len = key.get_sign_len() + key.get_pk_len();
-    let witness_data = Bytes::from({
-        let mut b = Vec::<u8>::new();
-        b.resize(witness_len, 0);
-        b
-    });
+    let witness_data = Bytes::from(vec![0; witness_len]);
 
     let witness_args = WitnessArgsBuilder::default()
         .lock(Some(witness_data).pack())
@@ -382,7 +372,7 @@ pub fn cc_to_def_lock_script(
     let capacity = input_cell.capacity.value() / 100000000;
 
     println!("Capacity: {}, Need fee: {}", capacity, fee);
-    let output_capacity = Capacity::shannons((input_cell.capacity.value() - fee) as u64);
+    let output_capacity = Capacity::shannons(input_cell.capacity.value() - fee);
     tx_builder = tx_builder
         .output(
             CellOutput::new_builder()

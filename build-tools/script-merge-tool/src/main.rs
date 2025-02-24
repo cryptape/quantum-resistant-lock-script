@@ -88,17 +88,17 @@ fn main() {
                 writeln!(
                     &mut file,
                     "extern const uint32_t {};",
-                    offset_sname(&leaf_name, &cli.prefix)
+                    offset_sname(leaf_name, &cli.prefix)
                 )
                 .expect("write");
                 writeln!(
                     &mut file,
                     "extern const uint32_t {};",
-                    length_sname(&leaf_name, &cli.prefix)
+                    length_sname(leaf_name, &cli.prefix)
                 )
                 .expect("write");
             }
-            writeln!(&mut file, "").expect("write");
+            writeln!(&mut file).expect("write");
 
             // Build actual definitions, but under a ifdef guard
             writeln!(&mut file, "#ifdef CKB_SCRIPT_MERGE_TOOL_DEFINE_VARS").expect("write");
@@ -106,13 +106,13 @@ fn main() {
                 writeln!(
                     &mut file,
                     "__attribute__ ((visibility (\"default\"))) const uint32_t {} = 0xFFFFFFFF;",
-                    offset_sname(&leaf_name, &cli.prefix)
+                    offset_sname(leaf_name, &cli.prefix)
                 )
                 .expect("write");
                 writeln!(
                     &mut file,
                     "__attribute__ ((visibility (\"default\"))) const uint32_t {} = 1;",
-                    length_sname(&leaf_name, &cli.prefix)
+                    length_sname(leaf_name, &cli.prefix)
                 )
                 .expect("write");
             }
@@ -139,7 +139,7 @@ fn main() {
                     length_sname(&leaf_name, &cli.prefix)
                 )
                 .expect("write");
-                writeln!(&mut file, "").expect("write");
+                writeln!(&mut file).expect("write");
             }
         }
         Commands::Merge {
