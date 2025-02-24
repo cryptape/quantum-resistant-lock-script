@@ -1,4 +1,4 @@
-CC := clang-16
+CC := clang-18
 
 PARAMS = sphincs-shake-256f
 THASH = robust
@@ -10,61 +10,62 @@ CFLAGS := $(CFLAGS) -Wall -Werror -Wno-nonnull  -Wno-unused-function -g
 LDFLAGS := $(LDFLAGS) -Wl,-static -Wl,--gc-sections
 CFLAGS := $(CFLAGS) -fsanitize=address -fsanitize=undefined
 
-CFLAGS := $(CFLAGS) -I c -I deps/sphincsplus/ref -DPARAMS=$(PARAMS) -DTEST_DATA=$(PARAMS)-$(THASH)
-SPHINCS_PLUS_DIR = deps/sphincsplus/ref/
+SPHINCS_PLUS_DIR := $(TOP)/deps/sphincsplus/ref
+LOCK_DIR := $(TOP)/contracts/c-sphincs-all-in-one-lock
+CFLAGS := $(CFLAGS) -I $(LOCK_DIR) -I $(SPHINCS_PLUS_DIR) -DPARAMS=$(PARAMS) -DTEST_DATA=$(PARAMS)-$(THASH)
 
 SOURCES = \
-	$(SPHINCS_PLUS_DIR)address.c \
-	$(SPHINCS_PLUS_DIR)merkle.c \
-	$(SPHINCS_PLUS_DIR)wots.c \
-	$(SPHINCS_PLUS_DIR)wotsx1.c \
-	$(SPHINCS_PLUS_DIR)utils.c \
-	$(SPHINCS_PLUS_DIR)utilsx1.c \
-	$(SPHINCS_PLUS_DIR)fors.c \
-	$(SPHINCS_PLUS_DIR)sign.c \
-	$(SPHINCS_PLUS_DIR)randombytes.c \
-	c/ckb-sphincsplus.c
+	$(SPHINCS_PLUS_DIR)/address.c \
+	$(SPHINCS_PLUS_DIR)/merkle.c \
+	$(SPHINCS_PLUS_DIR)/wots.c \
+	$(SPHINCS_PLUS_DIR)/wotsx1.c \
+	$(SPHINCS_PLUS_DIR)/utils.c \
+	$(SPHINCS_PLUS_DIR)/utilsx1.c \
+	$(SPHINCS_PLUS_DIR)/fors.c \
+	$(SPHINCS_PLUS_DIR)/sign.c \
+	$(SPHINCS_PLUS_DIR)/randombytes.c \
+	$(LOCK_DIR)/ckb-sphincsplus.c
 
 HEADERS = \
-	$(SPHINCS_PLUS_DIR)params.h \
-	$(SPHINCS_PLUS_DIR)address.h \
-	$(SPHINCS_PLUS_DIR)merkle.h \
-	$(SPHINCS_PLUS_DIR)wots.h \
-	$(SPHINCS_PLUS_DIR)wotsx1.h \
-	$(SPHINCS_PLUS_DIR)utils.h \
-	$(SPHINCS_PLUS_DIR)utilsx1.h \
-	$(SPHINCS_PLUS_DIR)fors.h \
-	$(SPHINCS_PLUS_DIR)api.h \
-	$(SPHINCS_PLUS_DIR)hash.h \
-	$(SPHINCS_PLUS_DIR)thash.h \
-	$(SPHINCS_PLUS_DIR)randombytes.h \
-	c/ckb-sphincsplus.h
+	$(SPHINCS_PLUS_DIR)/params.h \
+	$(SPHINCS_PLUS_DIR)/address.h \
+	$(SPHINCS_PLUS_DIR)/merkle.h \
+	$(SPHINCS_PLUS_DIR)/wots.h \
+	$(SPHINCS_PLUS_DIR)/wotsx1.h \
+	$(SPHINCS_PLUS_DIR)/utils.h \
+	$(SPHINCS_PLUS_DIR)/utilsx1.h \
+	$(SPHINCS_PLUS_DIR)/fors.h \
+	$(SPHINCS_PLUS_DIR)/api.h \
+	$(SPHINCS_PLUS_DIR)/hash.h \
+	$(SPHINCS_PLUS_DIR)/thash.h \
+	$(SPHINCS_PLUS_DIR)/randombytes.h \
+	$(LOCK_DIR)/ckb-sphincsplus.h
 
 ifneq (,$(findstring shake,$(PARAMS)))
 	SOURCES += \
-		$(SPHINCS_PLUS_DIR)fips202.c \
-		$(SPHINCS_PLUS_DIR)hash_shake.c \
-		$(SPHINCS_PLUS_DIR)thash_shake_$(THASH).c
-	HEADERS += $(SPHINCS_PLUS_DIR)fips202.h
+		$(SPHINCS_PLUS_DIR)/fips202.c \
+		$(SPHINCS_PLUS_DIR)/hash_shake.c \
+		$(SPHINCS_PLUS_DIR)/thash_shake_$(THASH).c
+	HEADERS += $(SPHINCS_PLUS_DIR)/fips202.h
 endif
 ifneq (,$(findstring haraka,$(PARAMS)))
 	SOURCES += \
-		$(SPHINCS_PLUS_DIR)haraka.c \
-		$(SPHINCS_PLUS_DIR)hash_haraka.c \
-		$(SPHINCS_PLUS_DIR)thash_haraka_$(THASH).c
-	HEADERS += $(SPHINCS_PLUS_DIR)haraka.h
+		$(SPHINCS_PLUS_DIR)/haraka.c \
+		$(SPHINCS_PLUS_DIR)/hash_haraka.c \
+		$(SPHINCS_PLUS_DIR)/thash_haraka_$(THASH).c
+	HEADERS += $(SPHINCS_PLUS_DIR)/haraka.h
 endif
 ifneq (,$(findstring sha2,$(PARAMS)))
 	SOURCES += \
-		$(SPHINCS_PLUS_DIR)sha2.c \
-		$(SPHINCS_PLUS_DIR)hash_sha2.c \
-		$(SPHINCS_PLUS_DIR)thash_sha2_$(THASH).c
-	HEADERS += $(SPHINCS_PLUS_DIR)sha2.h
+		$(SPHINCS_PLUS_DIR)/sha2.c \
+		$(SPHINCS_PLUS_DIR)/hash_sha2.c \
+		$(SPHINCS_PLUS_DIR)/thash_sha2_$(THASH).c
+	HEADERS += $(SPHINCS_PLUS_DIR)/sha2.h
 endif
 
 all: build/test_sphincsplus
 
-build/test_sphincsplus: tests/sphincsplus/test-ckb-sphincs-plus.c $(SOURCES) $(HEADERS)
+build/test_sphincsplus: test-ckb-sphincs-plus.c $(SOURCES) $(HEADERS)
 	mkdir -p build
 	$(CC) $(CFLAGS) -o $@ $(SOURCES) $<
 

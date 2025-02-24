@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 if [ ! -n "$1" ] ;then
   PARAMS="sphincs-shake-256f"
   THASH="robust"
@@ -9,18 +11,10 @@ else
   PARAMS="sphincs-$HASH_NAME-$HASH_SIZE$HASH_OPTION"
 fi
 
-#!/bin/bash
-workdir=$(
-  cd $(dirname $0)/../../
-  pwd
-)
-
-cd $workdir
-
 rm -rf build/*
 mkdir -p build
 
-make -f tests/sphincsplus/Makefile PARAMS=$PARAMS THASH=$THASH
+make PARAMS=$PARAMS THASH=$THASH
 if (($? == 0)); then
   echo "make success"
 else

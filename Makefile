@@ -63,11 +63,12 @@ TASK :=
 run:
 	$(MAKE) -e -C contracts/$(CONTRACT) $(TASK)
 
-# test, check, clippy and fmt here are provided for completeness,
-# there is nothing wrong invoking cargo directly instead of make.
-test:
-	cargo test $(CARGO_ARGS)
+test:	
+	bash tests/sphincsplus/all_run.sh
+	# cargo test $(CARGO_ARGS)
 
+# check, clippy and fmt here are provided for completeness,
+# there is nothing wrong invoking cargo directly instead of make.
 check:
 	cargo check $(CARGO_ARGS)
 

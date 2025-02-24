@@ -4,6 +4,9 @@ resolver = "2"
 members = [
   "build-tools/build-params-finder",
   "build-tools/script-merge-tool",
+  "tests/sphincsplus_rust",
+  "tools/ckb-sphincs-tools",
+  "tools/ckb-sphincs-utils",
 ]
 
 [profile.release]

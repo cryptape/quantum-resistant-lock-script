@@ -49,8 +49,7 @@ int main() {
                           G_TEST_DATA_PUB_KEY, sizeof(G_TEST_DATA_PUB_KEY));
   ASSERT(ret == 0);
   end = clock();
-  printf("%s-%s%s-%s  time:%f\n", xstr(NAME), xstr(size), xstr(OPTION),
-         xstr(THASH), (double)(end - start) / CLOCKS_PER_SEC);
+  printf("%s  time: %f seconds\n", xstr(TEST_DATA), (double)(end - start) / CLOCKS_PER_SEC);
 
   return 0;
 }
