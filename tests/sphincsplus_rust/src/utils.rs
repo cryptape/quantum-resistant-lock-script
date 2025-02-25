@@ -360,7 +360,7 @@ pub fn sign_tx_by_input_group(
                         use base64::prelude::*;
                         print!(
                             "--sign {}",
-                            BASE64_STANDARD.encode(&witness_buf[..config.key.get_sign_len()])
+                            BASE64_STANDARD.encode(&witness_buf[config.key.get_pk_len() + 5..])
                         )
                     }
 

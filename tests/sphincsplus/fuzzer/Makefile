@@ -1,80 +1,38 @@
+cur_dir = $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
+TOP := $(cur_dir)/../../..
 
 # Generate code, user performance analysis
-CC=clang
-LLVM_PROFDATA=llvm-profdata
-LLVM_COV=llvm-cov
+CC := clang-18
+LLVM_PROFDATA := $(subst clang,llvm-profdata,$(CC))
+LLVM_COV := $(subst clang,llvm-cov,$(CC))
 
 NPROC?=16
 
 PARAMS = sphincs-shake-256f
 THASH = robust
 
-SOURCES_DIR = ref
 COVERAGE_DIR=coverage
 CORPUS_DIR=corpus
 
-SPHINCS_PLUS_DIR = ../../../deps/sphincsplus/ref/
+LOCK_DIR := $(TOP)/contracts/c-sphincs-all-in-one-lock
+SPHINCS_PLUS_DIR := $(TOP)/deps/sphincsplus/ref
+CKB_STDLIB_DIR := $(TOP)/deps/ckb-c-stdlib
 
-SOURCES = \
-	$(SPHINCS_PLUS_DIR)address.c \
-	$(SPHINCS_PLUS_DIR)merkle.c \
-	$(SPHINCS_PLUS_DIR)wots.c \
-	$(SPHINCS_PLUS_DIR)wotsx1.c \
-	$(SPHINCS_PLUS_DIR)utils.c \
-	$(SPHINCS_PLUS_DIR)utilsx1.c \
-	$(SPHINCS_PLUS_DIR)fors.c \
-	$(SPHINCS_PLUS_DIR)sign.c \
-	$(SPHINCS_PLUS_DIR)randombytes.c \
-	../../../c/ckb-sphincsplus.c
+include $(TOP)/mk/files.mk
 
-HEADERS = \
-	$(SPHINCS_PLUS_DIR)params.h \
-	$(SPHINCS_PLUS_DIR)address.h \
-	$(SPHINCS_PLUS_DIR)merkle.h \
-	$(SPHINCS_PLUS_DIR)wots.h \
-	$(SPHINCS_PLUS_DIR)wotsx1.h \
-	$(SPHINCS_PLUS_DIR)utils.h \
-	$(SPHINCS_PLUS_DIR)utilsx1.h \
-	$(SPHINCS_PLUS_DIR)fors.h \
-	$(SPHINCS_PLUS_DIR)api.h \
-	$(SPHINCS_PLUS_DIR)hash.h \
-	$(SPHINCS_PLUS_DIR)thash.h \
-	$(SPHINCS_PLUS_DIR)randombytes.h \
-	../../../c/ckb-sphincsplus.h
-
-ifneq (,$(findstring shake,$(PARAMS)))
-	SOURCES += \
-		$(SPHINCS_PLUS_DIR)fips202.c \
-		$(SPHINCS_PLUS_DIR)hash_shake.c \
-		$(SPHINCS_PLUS_DIR)thash_shake_$(THASH).c
-	HEADERS += $(SPHINCS_PLUS_DIR)fips202.h
-endif
-ifneq (,$(findstring haraka,$(PARAMS)))
-	SOURCES += \
-		$(SPHINCS_PLUS_DIR)haraka.c \
-		$(SPHINCS_PLUS_DIR)hash_haraka.c \
-		$(SPHINCS_PLUS_DIR)thash_haraka_$(THASH).c
-	HEADERS += $(SPHINCS_PLUS_DIR)haraka.h
-endif
-ifneq (,$(findstring sha2,$(PARAMS)))
-	SOURCES += \
-		$(SPHINCS_PLUS_DIR)sha2.c \
-		$(SPHINCS_PLUS_DIR)hash_sha2.c \
-		$(SPHINCS_PLUS_DIR)thash_sha2_$(THASH).c
-	HEADERS += $(SPHINCS_PLUS_DIR)sha2.h
-endif
+SOURCES = $(COMPILING_SOURCES_BY_PARAMS) $(SPHINCS_PLUS_DIR)/randombytes.c
 
 FUZZER_FLAGS=-g -O1 -fsanitize=fuzzer,address,undefined -fsanitize-recover=address -DPARAMS=$(PARAMS) -DTEST_DATA=$(PARAMS)-$(THASH)
-FUZZER_FLAGS := $(FUZZER_FLAGS) -I ../../../c -I ../../../deps/sphincsplus/ref
+FUZZER_FLAGS := $(FUZZER_FLAGS) -I $(LOCK_DIR) -I $(SPHINCS_PLUS_DIR)
 
 COVERAGE_FLAGS=-fprofile-instr-generate -fcoverage-mapping -DPARAMS=$(PARAMS) -DTEST_DATA=$(PARAMS)-$(THASH)
-COVERAGE_FLAGS := $(COVERAGE_FLAGS) -I ../../../c -I ../../../deps/sphincsplus/ref
+COVERAGE_FLAGS := $(COVERAGE_FLAGS) -I $(LOCK_DIR) -I $(SPHINCS_PLUS_DIR)
 
 ifeq ($(OS),MacOS)
 	COVERAGE_FLAGS+=-Wl,-U,_LLVMFuzzerCustomMutator -Wl,-U,_LLVMFuzzerInitialize
 endif
 
-EXTERNAL_HEADERS=../../../deps/ckb-c-stdlib-20210801/ckb_exec.h
+EXTERNAL_HEADERS=$(TOP)/deps/ckb-c-stdlib/ckb_exec.h
 
 all: build/fuzzer build/cover
 
@@ -94,7 +52,7 @@ show: build/$(COVERAGE_DIR)/fuzzer.profdata
 	cd build && $(LLVM_COV) show --instr-profile=$(COVERAGE_DIR)/fuzzer.profdata cover
 
 report: build/$(COVERAGE_DIR)/fuzzer.profdata build/cover $(EXTERNAL_HEADERS)
-	$(LLVM_COV) report --show-functions --instr-profile=$(COVERAGE_DIR)/fuzzer.profdata build/cover $(EXTERNAL_HEADERS)
+	$(LLVM_COV) report --instr-profile=build/$(COVERAGE_DIR)/fuzzer.profdata build/cover $(EXTERNAL_HEADERS)
 
 %.profraw: build/cover
 	LLVM_PROFILE_FILE=$@ build/cover build/$(CORPUS_DIR)/*

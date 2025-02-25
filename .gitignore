@@ -1,4 +1,4 @@
-/build
+build/
 /target
 /tests/failed_txs
 /test-vector*
