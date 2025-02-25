@@ -24,16 +24,23 @@ int zero_escape_encode(const uint8_t *src, size_t src_length, uint8_t *dst,
   size_t limit = *dst_length;
 
   for (size_t i = 0; i < src_length; i++) {
-    if (src[i] == '\0' || src[i] == '\xFE') {
+    if (src[i] == '\0' || src[i] == (uint8_t)'\xFE') {
       if (wrote + 2 > limit) {
         return 90;
       }
       dst[wrote++] = '\xFE';
       dst[wrote++] = src[i] - 1;
     } else {
+      if (wrote + 1 > limit) {
+        return 90;
+      }
       dst[wrote++] = src[i];
     }
   }
+  if (wrote + 1 > limit) {
+    return 90;
+  }
+  dst[wrote++] = '\0';
 
   *dst_length = wrote;
   return 0;
@@ -44,7 +51,7 @@ int zero_escape_decode_in_place(uint8_t *buffer, size_t *length) {
   size_t limit = *length;
 
   for (size_t i = 0; i < limit;) {
-    if (buffer[i] == '\xFE') {
+    if (buffer[i] == (uint8_t)'\xFE') {
       if (i + 1 >= limit) {
         return 90;
       }
