@@ -4,7 +4,7 @@ use ckb_hash::blake2b_256;
 use ckb_jsonrpc_types as json_types;
 use ckb_jsonrpc_types::Either;
 use ckb_sdk::rpc::CkbRpcClient;
-use ckb_sphincs_utils::SphincsPlus;
+use ckb_sphincs_utils::sphincsplus::*;
 use ckb_types::{
     bytes::Bytes,
     core::{Capacity, DepType, ScriptHashType, TransactionBuilder, TransactionView},
@@ -126,13 +126,18 @@ pub fn sign_tx_by_input_group(
         .build()
 }
 
-pub fn sign_tx_sphincs_plus(tx: TransactionView, key: &SphincsPlus) -> TransactionView {
+pub fn sign_tx_sphincs_plus(
+    tx: TransactionView,
+    inputs: &[(CellOutput, Bytes)],
+    key: &SphincsPlus,
+) -> TransactionView {
     let witnesses_len = tx.witnesses().len();
-    sign_tx_by_input_group_sphincs_plus(tx, key, 0, witnesses_len)
+    sign_tx_by_input_group_sphincs_plus(tx, inputs, key, 0, witnesses_len)
 }
 
 pub fn sign_tx_by_input_group_sphincs_plus(
     tx: TransactionView,
+    inputs: &[(CellOutput, Bytes)],
     key: &SphincsPlus,
     begin_index: usize,
     len: usize,
@@ -144,21 +149,35 @@ pub fn sign_tx_by_input_group_sphincs_plus(
         .enumerate()
         .map(|(i, _)| {
             if i == begin_index {
-                let mut blake2b = ckb_hash::new_blake2b();
+                let mut blake2b = ckb_hash::Blake2bBuilder::new(32)
+                    .personal(b"ckb-sphincs+-msg")
+                    .build();
                 let mut message = [0u8; 32];
+                // CKB_TX_MESSAGE_ALL process, see: https://github.com/nervosnetwork/rfcs/pull/446
                 blake2b.update(&tx_hash.raw_data());
+                // digest input cells
+                for (cell_output, cell_data) in inputs {
+                    blake2b.update(cell_output.as_slice());
+
+                    blake2b.update(&(cell_data.len() as u32).to_le_bytes());
+                    blake2b.update(cell_data);
+                }
                 // digest the first witness
                 let witness = WitnessArgs::new_unchecked(tx.witnesses().get(i).unwrap().unpack());
-                let zero_lock: Bytes = vec![0; key.get_sign_len() + key.get_pk_len()].into();
+                let zero_lock: Bytes = vec![0; 5 + key.get_sign_len() + key.get_pk_len()].into();
 
                 let witness_for_digest = witness
                     .clone()
                     .as_builder()
                     .lock(Some(zero_lock).pack())
                     .build();
-                let witness_len = witness_for_digest.as_bytes().len() as u64;
-                blake2b.update(&witness_len.to_le_bytes());
-                blake2b.update(&witness_for_digest.as_bytes());
+
+                // digest the first witness
+                blake2b.update(&witness_for_digest.as_slice()[0..16]);
+                blake2b.update(witness_for_digest.input_type().as_slice());
+                blake2b.update(witness_for_digest.output_type().as_slice());
+
+                // digest the remaining witnesses
                 ((i + 1)..(i + len)).for_each(|n| {
                     let witness = tx.witnesses().get(n).unwrap();
                     let witness_len = witness.raw_data().len() as u64;
@@ -169,10 +188,11 @@ pub fn sign_tx_by_input_group_sphincs_plus(
                 let message = H256::from(message);
 
                 let witness_data = {
-                    let mut data = vec![0; key.get_sign_len() + key.get_pk_len()];
+                    let mut data = vec![0; 5 + key.get_sign_len() + key.get_pk_len()];
 
-                    data[..key.get_sign_len()].copy_from_slice(&key.sign(message.as_bytes()));
-                    data[key.get_sign_len()..].copy_from_slice(&key.pk);
+                    data[0..5].copy_from_slice(&single_sign_witness_prefix().unwrap());
+                    data[5..key.get_sign_len() + 5].copy_from_slice(&key.pk);
+                    data[key.get_sign_len() + 5..].copy_from_slice(&key.sign(message.as_bytes()));
 
                     Bytes::from(data)
                 };
@@ -253,8 +273,18 @@ pub fn cc_to_sphincsplus(
         .witness(witness_args.as_bytes().pack());
 
     // output cell
+    let sphincs_args: Bytes = {
+        let mut hasher = ckb_hash::Blake2bBuilder::new(32)
+            .personal(b"ckb-sphincs+-sct")
+            .build();
+        hasher.update(&single_sign_script_args_prefix().expect("prefix"));
+        hasher.update(&key.pk);
+        let mut result = [0u8; 32];
+        hasher.finalize(&mut result);
+        result.to_vec().into()
+    };
     let output_script = Script::new_builder()
-        .args(Bytes::from(blake2b_256(&key.pk).to_vec()).pack())
+        .args(sphincs_args.pack())
         .code_hash(Byte32::from_slice(&get_sphincsplus_code_hash()).unwrap())
         .hash_type(ScriptHashType::Data1.into())
         .build();
@@ -310,15 +340,24 @@ pub fn cc_to_def_lock_script(
         .transaction
         .expect("input transaction is empty");
 
-    let input_cell = {
+    let (input_cell, input_cell_data) = {
         let tx = input_tx.inner;
         match tx {
-            Either::Left(tx_view) => tx_view
-                .inner
-                .outputs
-                .get(tx_index as usize)
-                .expect("input index invade")
-                .clone(),
+            Either::Left(tx_view) => (
+                tx_view
+                    .inner
+                    .outputs
+                    .get(tx_index as usize)
+                    .expect("input index invade")
+                    .clone(),
+                tx_view
+                    .inner
+                    .outputs_data
+                    .get(tx_index as usize)
+                    .expect("input index invade")
+                    .clone()
+                    .into_bytes(),
+            ),
             Either::Right(_json_byte) => {
                 panic!("unsupport")
             }
@@ -383,7 +422,7 @@ pub fn cc_to_def_lock_script(
         .output_data(Bytes::new().pack());
 
     let tx = tx_builder.build();
-    let tx = sign_tx_sphincs_plus(tx, &key);
+    let tx = sign_tx_sphincs_plus(tx, &[(input_cell.into(), input_cell_data)], &key);
 
     println!("tx hash: {:?}", tx.hash());
     let outputs_validator = Some(json_types::OutputsValidator::Passthrough);
