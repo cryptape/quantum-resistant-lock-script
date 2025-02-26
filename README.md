@@ -1,40 +1,33 @@
 # quantum-resistant-lock-script
-Quantum resistant lock script on CKB, using [SPHINCS+](https://github.com/sphincs/sphincsplus).
+Quantum resistant lock script on CKB, based on [NIST FIPS 205](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.205.pdf) standard. 2 implementations exist:
+
+* A C lock script using [SPHINCS+](https://github.com/sphincs/sphincsplus)
+* A Rust lock script using [fips205](https://github.com/integritychain/fips205)
 
 ## Build
 
 ### Compile contract
 ``` shell
-make all-via-docker
+make build
 ```
 
-### Compile other hash type
+The built contracts can be located at `build/release`
+
+### Run all tests
 ``` shell
-make all-via-docker PARAMS=sphincs-shake-256f THASH=robust
+make test
 ```
-Different hash types will have large performance differences when verifying. For specific performance differences, please refer to the table below. You can also refer to this script to generate and execute contracts (tests/sphincsplus_rust/run_example.sh).
 
+See [ckb-script-templates](https://github.com/cryptape/ckb-script-templates) for more commands.
 
-## Performance
-Use items for tests/sphincsplus/optimization/run-all-optimization.sh.
-The script uses fixed signature data (tests/sphincsplus/test_data/), Because different signature data will have subtle differences.
+The lock script built here uses `all-in-one` mode, meaning one lock script can support all 12 paramter sets defined by NIST FIPS 205 standard. Feel free to also learn about different parameter sets [here](https://github.com/sphincs/sphincsplus#parameters).
 
-|               |  128s bit  |  128f bit  |  192s bit  |  192f bit  |  256s bit  |  256f bit  |
-| ------------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- |
-|   pubkey size |       32   |       32   |       48   |       48   |       64   |       64   |
-|signature size |     7888   |    17120   |    16256   |    35696   |    29824   |    49888   |
-|  shake simple |    16.9M   |    49.6M   |    25.4M   |    73.8M   |    37.1M   |    72.4M   |
-|  shake robust |    34.3M   |    98.4M   |    49.1M   |   147.5M   |    73.2M   |   150.3M   |
-|   sha2 simple |    10.7M   |    33.9M   |    16.8M   |    48.7M   |    24.7M   |    47.5M   |
-|   sha2 robust |    22.5M   |    64.5M   |    34.1M   |    98.6M   |    60.4M   |   130.3M   |
-| haraka simple |    27.5M   |    73.9M   |    39.2M   |   105.8M   |    60.4M   |   114.9M   |
-| haraka robust |    45.7M   |   119.8M   |    70.5M   |   182.7M   |   102.8M   |   193.3M   |
+See [Simple Usage](./docs/simple.md), or [Advanced Usage](./docs/advanced.md) for usage. Performance discussions are kept in [Performance Doc](./performance.md).
 
-Find out more information about different [parameters](https://github.com/sphincs/sphincsplus#parameters).
+## Tool (Deprecated)
 
-* Note: Default hash type: **shake-128f-simple** (Verify cycles: about 49.6M)
+**NOTE**: the following tool shall be considered deprecated, and only kept here for historic reasons.
 
-## Tool
 This tool is to **convert a default Lock(SECP256K1/blake160) to quantum resistant lock script.**. 
 
 Follow steps below:
@@ -63,51 +56,3 @@ Follow steps below:
    ``` shell
    cargo run -- cc_to_secp --tx_hash <tx-hash> --tx_index <index> --key_file key.json --lock_arg <LOCK-ARG> --sp_tx_hash <SPHINCS+ Script in step 2> --sp_tx_index <index> --fee 10000
    ```
-
-## Deployment
-
-* Mirana(mainnet)
-
-| parameter | value        |
-| --------- | ------------ |
-| code_hash | not deployed |
-| hash_type | type         |
-| tx_hash   | not deployed |
-| index     | 0            |
-| dep_type  | code         |
-
-* Pudge(testnet)
-
-[CKB Explorer](https://pudge.explorer.nervos.org/transaction/0x35f51257673c7a7edd009fa2166e6f8645156207c9da38202f04ba4d94d9e519)
-| parameter | value                                                              |
-| --------- | ------------------------------------------------------------------ |
-| code_hash | 0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8 |
-| hash_type | type                                                               |
-| tx_hash   | 0x35f51257673c7a7edd009fa2166e6f8645156207c9da38202f04ba4d94d9e519 |
-| index     | 0                                                                  |
-| dep_type  | code                                                               |
-
-## Sample Transactions
-
-### Genetate a cell locked by this script
-* Note, This script should use "hash_type=data1" or "hash_type=type" to support RISC-V B extensions.
-
-[CKB Explorer](https://pudge.explorer.nervos.org/transaction/0x1a48fb4def03465ab826e56fbf77943db65fad57db19d02279465d954e28be64)
-| parameter | value                                                              |
-| --------- | ------------------------------------------------------------------ |
-| code_hash | 0x989ab456455509a1c2ad1cb8116b7d209df228144445c741b101ec3e55ee8351 |
-| hash_type | data1                                                              |
-| tx_hash   | 0x1a48fb4def03465ab826e56fbf77943db65fad57db19d02279465d954e28be64 |
-| index     | 0                                                                  |
-| dep_type  | code                                                               |
-
-### Unlock this cell
-
-[CKB Explorer](https://pudge.explorer.nervos.org/transaction/0x1e3fcf73f02bb98e90239ed01e4fec63dc3469471309a19ee4eec7cfc00a8637)
-| parameter | value                                                              |
-| --------- | ------------------------------------------------------------------ |
-| code_hash | 0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8 |
-| hash_type | type                                                               |
-| tx_hash   | 0x1e3fcf73f02bb98e90239ed01e4fec63dc3469471309a19ee4eec7cfc00a8637 |
-| index     | 0                                                                  |
-| dep_type  | code                                                               |
