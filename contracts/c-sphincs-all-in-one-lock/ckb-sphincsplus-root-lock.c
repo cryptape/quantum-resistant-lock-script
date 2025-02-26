@@ -205,14 +205,12 @@ int main(int argc, char *argv[]) {
 
   /* Calculates signing message hash */
   uint8_t message[BLAKE2B_BLOCK_SIZE];
-  if (argc == 0) {
-    blake2b_state s;
-    init_blake2b_state(&s, PERSONAL_MESSAGE);
-    err = ckb_tx_message_all_generate_with_witness_args(write_to_blake2b, &s,
-                                                        &witness_args);
-    CHECK2(err == 0, ERROR_SPHINCSPLUS_MESSAGE);
-    blake2b_final(&s, message, BLAKE2B_BLOCK_SIZE);
-  }
+  blake2b_state s;
+  init_blake2b_state(&s, PERSONAL_MESSAGE);
+  err = ckb_tx_message_all_generate_with_witness_args(write_to_blake2b, &s,
+                                                      &witness_args);
+  CHECK2(err == 0, ERROR_SPHINCSPLUS_MESSAGE);
+  blake2b_final(&s, message, BLAKE2B_BLOCK_SIZE);
 
   /* Preliminary validations on multisig configuration */
   uint8_t actual_multisig_hash[BLAKE2B_BLOCK_SIZE];
