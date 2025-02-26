@@ -155,7 +155,7 @@ int multisig_preliminary_check(WitnessArgsType *witness_args,
   for (uint8_t i = 0; i < pubkeys; i++) {
     uint8_t id;
     CHECK(mol2_read_and_advance(&lock_bytes, &id, 1));
-    uint8_t sign_id = id & MULTISIG_PARAMS_ID_MASK;
+    uint8_t sign_id = id & MULTISIG_PARAMS_ID_SIGN_MASK;
     blake2b_update(&s, &sign_id, 1);
 
     const CkbSphincsParams *params = NULL;

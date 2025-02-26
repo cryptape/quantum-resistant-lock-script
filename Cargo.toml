@@ -4,7 +4,10 @@ resolver = "2"
 members = [
   "build-tools/build-params-finder",
   "build-tools/script-merge-tool",
+  "contracts/sphincs-all-in-one-lock",
+  "crates/ckb-fips205-utils",
   "tests/sphincsplus_rust",
+  "tests/validation-tests",
   "tools/ckb-sphincs-tools",
   "tools/ckb-sphincs-utils",
 ]

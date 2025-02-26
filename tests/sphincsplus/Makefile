@@ -6,7 +6,7 @@ TOP := $(cur_dir)/../..
 PARAMS = sphincs-shake-256f
 THASH = robust
 
-CFLAGS := -fPIC -O0 -fno-builtin-printf -fno-builtin-memcmp -fvisibility=hidden -fdata-sections -ffunction-sections -DCKB_DECLARATION_ONLY
+CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -fvisibility=hidden -fdata-sections -ffunction-sections -DCKB_DECLARATION_ONLY
 LDFLAGS := -fdata-sections -ffunction-sections
 
 CFLAGS := $(CFLAGS) -Wall -Werror -Wno-nonnull  -Wno-unused-function -g

@@ -51,6 +51,9 @@ build:
 		for contract in $(wildcard contracts/*); do \
 			$(MAKE) -e -C $$contract build; \
 		done; \
+		for crate in $(wildcard crates/*); do \
+			cargo build -p $$(basename $$crate) $(MODE_ARGS) $(CARGO_ARGS); \
+		done; \
 		for crate in $(wildcard tools/*); do \
 			cargo build -p $$(basename $$crate | tr '-' '_') $(MODE_ARGS) $(CARGO_ARGS); \
 		done; \
@@ -69,7 +72,9 @@ run:
 test:
 	bash tests/sphincsplus/all_run.sh
 	bash tests/sphincsplus_rust/all_run.sh
-	# cargo test $(CARGO_ARGS)
+	# Generating sphincs signatures takes a long time in certain configurations,
+	# we will run the tests in release mode to speed things up
+	cargo test $(CARGO_ARGS) --release -p validation-tests
 
 # check, clippy and fmt here are provided for completeness,
 # there is nothing wrong invoking cargo directly instead of make.
