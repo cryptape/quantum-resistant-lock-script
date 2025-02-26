@@ -42,20 +42,22 @@ int handle_exec(const uint8_t *command, size_t command_length) {
 
   /*
    * 'e' is followed by the following data:
-   * * 32 bytes of data denoting signing message hash,
+   * * little-endian uint32_t denoting message length
+   * * message data of variable length,
    * * little-endian uint64_t denoting witness source
    * * little-endian uint32_t denoting witenss index
    * * little-endian uint32_t denoting data offset within witness
    * * little-endian uint32_t denoting data length in witness
    */
-  CHECK2(command_length == 1 + BLAKE2B_BLOCK_SIZE + 8 + 4 + 4 + 4,
+  CHECK2(command_length >= 1 + 4 + 8 + 4 + 4 + 4, ERROR_SPHINCSPLUS_ARGV);
+  uint32_t message_length = *((uint32_t *)&command[1]);
+  CHECK2(command_length == 1 + 4 + message_length + 8 + 4 + 4 + 4,
          ERROR_SPHINCSPLUS_ARGV);
-  uint8_t message[BLAKE2B_BLOCK_SIZE];
-  memcpy(message, &command[1], BLAKE2B_BLOCK_SIZE);
-  uint64_t source = *((uint64_t *)&command[1 + BLAKE2B_BLOCK_SIZE]);
-  uint32_t index = *((uint32_t *)&command[1 + BLAKE2B_BLOCK_SIZE + 8]);
-  uint32_t offset = *((uint32_t *)&command[1 + BLAKE2B_BLOCK_SIZE + 8 + 4]);
-  uint32_t length = *((uint32_t *)&command[1 + BLAKE2B_BLOCK_SIZE + 8 + 4 + 4]);
+  const uint8_t *message = &command[1 + 4];
+  uint64_t source = *((uint64_t *)&command[1 + 4 + message_length]);
+  uint32_t index = *((uint32_t *)&command[1 + 4 + message_length + 8]);
+  uint32_t offset = *((uint32_t *)&command[1 + 4 + message_length + 8 + 4]);
+  uint32_t length = *((uint32_t *)&command[1 + 4 + message_length + 8 + 4 + 4]);
 
   mol2_data_source_t *source_ptr = (mol2_data_source_t *)buffer;
 
@@ -90,9 +92,8 @@ int handle_exec(const uint8_t *command, size_t command_length) {
       CHECK(mol2_read_and_advance(&cursor, pubkey, SPHINCS_PLUS_PK_SIZE));
       CHECK(mol2_read_and_advance(&cursor, sign, SPHINCS_PLUS_SIGN_SIZE));
 
-      err =
-          sphincs_plus_verify(sign, SPHINCS_PLUS_SIGN_SIZE, message,
-                              BLAKE2B_BLOCK_SIZE, pubkey, SPHINCS_PLUS_PK_SIZE);
+      err = sphincs_plus_verify(sign, SPHINCS_PLUS_SIGN_SIZE, message,
+                                message_length, pubkey, SPHINCS_PLUS_PK_SIZE);
       CHECK2(err == 0, ERROR_SPHINCSPLUS_VERIFY);
     } else {
       /* Skip pubkey without a signature */

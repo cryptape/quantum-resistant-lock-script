@@ -230,15 +230,17 @@ int main(int argc, char *argv[]) {
     const CkbSphincsParams *params = NULL;
     CHECK(fetch_params(multisig_params_id, &params));
 
-    uint8_t origin[1 + BLAKE2B_BLOCK_SIZE + 8 + 4 + 4 + 4];
+    uint8_t origin[1 + 4 + BLAKE2B_BLOCK_SIZE + 8 + 4 + 4 + 4];
     uint8_t escaped[sizeof(origin) * 2];
 
     origin[0] = 'e';
-    memcpy(&origin[1], message, BLAKE2B_BLOCK_SIZE);
-    *((uint64_t *)&origin[1 + BLAKE2B_BLOCK_SIZE]) = CKB_SOURCE_GROUP_INPUT;
-    *((uint32_t *)&origin[1 + BLAKE2B_BLOCK_SIZE + 8]) = 0;
-    *((uint32_t *)&origin[1 + BLAKE2B_BLOCK_SIZE + 8 + 4]) = signatures.offset;
-    *((uint32_t *)&origin[1 + BLAKE2B_BLOCK_SIZE + 8 + 4 + 4]) =
+    *((uint32_t *)&origin[1]) = BLAKE2B_BLOCK_SIZE;
+    memcpy(&origin[1 + 4], message, BLAKE2B_BLOCK_SIZE);
+    *((uint64_t *)&origin[1 + 4 + BLAKE2B_BLOCK_SIZE]) = CKB_SOURCE_GROUP_INPUT;
+    *((uint32_t *)&origin[1 + 4 + BLAKE2B_BLOCK_SIZE + 8]) = 0;
+    *((uint32_t *)&origin[1 + 4 + BLAKE2B_BLOCK_SIZE + 8 + 4]) =
+        signatures.offset;
+    *((uint32_t *)&origin[1 + 4 + BLAKE2B_BLOCK_SIZE + 8 + 4 + 4]) =
         signatures.size;
     size_t dst_length = sizeof(escaped);
     CHECK2(
