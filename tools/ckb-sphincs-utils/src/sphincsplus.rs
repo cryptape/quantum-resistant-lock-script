@@ -12,8 +12,13 @@ extern "C" {
     // int sphincs_plus_generate_keypair(uint8_t *pk, uint8_t *sk);
     fn sphincs_plus_generate_keypair(pk: *mut u8, sk: *mut u8) -> i32;
 
-    // int sphincs_plus_sign(uint8_t *message, uint8_t *sk, uint8_t *out_sign);
-    fn sphincs_plus_sign(message: *const u8, sk: *const u8, out_sign: *mut u8) -> i32;
+    // int sphincs_plus_sign(uint8_t *message, uint32_t message_size, uint8_t *sk, uint8_t *out_sign);
+    fn sphincs_plus_sign(
+        message: *const u8,
+        message_size: u32,
+        sk: *const u8,
+        out_sign: *mut u8,
+    ) -> i32;
 
     // int sphincs_plus_verify(uint8_t *sign, uint32_t sign_size, uint8_t *message,
     //                         uint32_t message_size, uint8_t *pubkey,
@@ -102,7 +107,14 @@ impl SphincsPlus {
     pub fn sign(&self, msg: &[u8]) -> Vec<u8> {
         let mut s = vec![0; self.get_sign_len()];
 
-        let ret = unsafe { sphincs_plus_sign(msg.as_ptr(), self.sk.as_ptr(), s.as_mut_ptr()) };
+        let ret = unsafe {
+            sphincs_plus_sign(
+                msg.as_ptr(),
+                msg.len() as u32,
+                self.sk.as_ptr(),
+                s.as_mut_ptr(),
+            )
+        };
         assert_eq!(ret, 0);
 
         s
