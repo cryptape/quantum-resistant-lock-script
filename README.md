@@ -24,6 +24,19 @@ The lock script built here uses `all-in-one` mode, meaning one lock script can s
 
 See [Simple Usage](./docs/simple.md), or [Advanced Usage](./docs/advanced.md) for usage. Performance discussions are kept in [Performance Doc](./docs/performance.md).
 
+The exact cycle consumptions will slightly vary from one signature to another, a ballpark estimation of cycle consumptions(here we measure cycle consumptions for the whole script, meaning CKB transaction signing is included as well) for each NIST approved parameter set, can be located below(`M` stands for million):
+
+|                      |  128s bit  |  128f bit  |  192s bit  |  192f bit  |  256s bit  |  256f bit  |
+| -------------------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- |
+|   pubkey size        |       32   |       32   |       48   |       48   |       64   |       64   |
+|signature size        |     7856   |    17088   |    16224   |    35664   |    29792   |    49856   |
+|   sha2 simple (C)    |    11.6M   |    33.5M   |    17.4M   |    49.3M   |    25.5M   |    50.4M   |
+|   sha2 simple (Rust) |    21.4M   |    60.2M   |    30.2M   |    89.5M   |    44.1M   |    90.8M   |
+|  shake simple (C)    |    19.8M   |    61.3M   |    30.2M   |    91.4M   |    46.0M   |    92.4M   |
+|  shake simple (Rust) |    36.1M   |   108.7M   |    53.5M   |   155.0M   |    80.1M   |    166.2M   |
+
+In general, the `s` variants take longer to generate a signature, but takes less cycles to verify. The `f` variants are fast in signature generation but takes longer cycles to verify.
+
 ## Tool (Deprecated)
 
 **NOTE**: the following tool shall be considered deprecated, and only kept here for historic reasons.
