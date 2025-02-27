@@ -140,7 +140,7 @@ impl<'de> serde::Deserialize<'de> for HexString {
 
 struct HexVisitor;
 
-impl<'b> serde::de::Visitor<'b> for HexVisitor {
+impl serde::de::Visitor<'_> for HexVisitor {
     type Value = HexString;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
