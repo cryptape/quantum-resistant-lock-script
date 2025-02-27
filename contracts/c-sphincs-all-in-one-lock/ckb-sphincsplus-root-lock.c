@@ -203,15 +203,6 @@ int main(int argc, char *argv[]) {
                                     CKB_SOURCE_GROUP_INPUT, 1, &witness_args);
   CHECK2(err == 0, ERROR_SPHINCSPLUS_WITNESS);
 
-  /* Calculates signing message hash */
-  uint8_t message[BLAKE2B_BLOCK_SIZE];
-  blake2b_state s;
-  init_blake2b_state(&s, PERSONAL_MESSAGE);
-  err = ckb_tx_message_all_generate_with_witness_args(write_to_blake2b, &s,
-                                                      &witness_args);
-  CHECK2(err == 0, ERROR_SPHINCSPLUS_MESSAGE);
-  blake2b_final(&s, message, BLAKE2B_BLOCK_SIZE);
-
   /* Preliminary validations on multisig configuration */
   uint8_t actual_multisig_hash[BLAKE2B_BLOCK_SIZE];
   mol2_cursor_t signatures;
@@ -222,6 +213,16 @@ int main(int argc, char *argv[]) {
                 BLAKE2B_BLOCK_SIZE) == 0,
          ERROR_SPHINCSPLUS_MULTISIG_HASH);
 
+  /*
+   * CKB_TX_MESSAGE_ALL process, we will finalize the hash when preparing
+   * args for exec / spawn.
+   */
+  blake2b_state s;
+  init_blake2b_state(&s, PERSONAL_MESSAGE);
+  err = ckb_tx_message_all_generate_with_witness_args(write_to_blake2b, &s,
+                                                      &witness_args);
+  CHECK2(err == 0, ERROR_SPHINCSPLUS_MESSAGE);
+
   /* Utilize exec or spawn for actual signature checks */
   if (multisig_params_id == 0) {
     /* TODO: use spawn to perform signature checks */
@@ -230,17 +231,27 @@ int main(int argc, char *argv[]) {
     const CkbSphincsParams *params = NULL;
     CHECK(fetch_params(multisig_params_id, &params));
 
-    uint8_t origin[1 + 4 + BLAKE2B_BLOCK_SIZE + 8 + 4 + 4 + 4];
+    /*
+     * 1 byte header, 4 bytes of message length, 34 bytes of actual
+     * message(empty FIPS 205 context is used here), 8 bytes of source,
+     * 4 bytes of witness index, 4 bytes of offset within witness,
+     * 4 bytes of actual process data length within witness.
+     */
+    uint8_t origin[1 + 4 + (2 + BLAKE2B_BLOCK_SIZE) + 8 + 4 + 4 + 4];
     uint8_t escaped[sizeof(origin) * 2];
 
     origin[0] = 'e';
-    *((uint32_t *)&origin[1]) = BLAKE2B_BLOCK_SIZE;
-    memcpy(&origin[1 + 4], message, BLAKE2B_BLOCK_SIZE);
-    *((uint64_t *)&origin[1 + 4 + BLAKE2B_BLOCK_SIZE]) = CKB_SOURCE_GROUP_INPUT;
-    *((uint32_t *)&origin[1 + 4 + BLAKE2B_BLOCK_SIZE + 8]) = 0;
-    *((uint32_t *)&origin[1 + 4 + BLAKE2B_BLOCK_SIZE + 8 + 4]) =
+    /* Empty FIPS 205 context */
+    *((uint32_t *)&origin[1]) = 2 + BLAKE2B_BLOCK_SIZE;
+    origin[1 + 4] = '\0';
+    origin[1 + 4 + 1] = '\0';
+    blake2b_final(&s, &origin[1 + 4 + 2], BLAKE2B_BLOCK_SIZE);
+    *((uint64_t *)&origin[1 + 4 + (2 + BLAKE2B_BLOCK_SIZE)]) =
+        CKB_SOURCE_GROUP_INPUT;
+    *((uint32_t *)&origin[1 + 4 + (2 + BLAKE2B_BLOCK_SIZE) + 8]) = 0;
+    *((uint32_t *)&origin[1 + 4 + (2 + BLAKE2B_BLOCK_SIZE) + 8 + 4]) =
         signatures.offset;
-    *((uint32_t *)&origin[1 + 4 + BLAKE2B_BLOCK_SIZE + 8 + 4 + 4]) =
+    *((uint32_t *)&origin[1 + 4 + (2 + BLAKE2B_BLOCK_SIZE) + 8 + 4 + 4]) =
         signatures.size;
     size_t dst_length = sizeof(escaped);
     CHECK2(

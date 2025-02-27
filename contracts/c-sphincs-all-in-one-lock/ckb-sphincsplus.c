@@ -1,4 +1,10 @@
-
+/*
+ * Glue code between CKB world and sphincsplus.
+ *
+ * Notice the message signed / verified here, is actually preprocessed
+ * message with context prepended. The call is in charge of proper handling
+ * of contexts.
+ */
 
 #include "ckb-sphincsplus.h"
 
@@ -33,14 +39,8 @@ int sphincs_plus_sign(const uint8_t *message, uint32_t message_size,
                       const uint8_t *sk, uint8_t *out_sign) {
   size_t out_sign_len = 0;
 
-  uint8_t message_with_empty_context[message_size + 2];
-  message_with_empty_context[0] = 0;
-  message_with_empty_context[1] = 0;
-  memcpy(&message_with_empty_context[2], message, message_size);
-
   int ret =
-      crypto_sign_signature(out_sign, &out_sign_len, message_with_empty_context,
-                            message_size + 2, sk);
+      crypto_sign_signature(out_sign, &out_sign_len, message, message_size, sk);
   if (ret != 0) {
     return ret;
   }
@@ -66,14 +66,8 @@ int sphincs_plus_verify(const uint8_t *sign, uint32_t sign_size,
     return SphincsPlusError_Params;
   }
 
-  uint8_t message_with_empty_context[message_size + 2];
-  message_with_empty_context[0] = 0;
-  message_with_empty_context[1] = 0;
-  memcpy(&message_with_empty_context[2], message, message_size);
-
-  int err =
-      crypto_sign_verify(sign, SPHINCS_PLUS_SIGN_SIZE,
-                         message_with_empty_context, message_size + 2, pubkey);
+  int err = crypto_sign_verify(sign, SPHINCS_PLUS_SIGN_SIZE, message,
+                               message_size, pubkey);
   if (err != 0) {
     printf("Verify faliure: %d\n", err);
     return SphincsPlusError_Verify;
