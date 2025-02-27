@@ -75,6 +75,7 @@ test:
 	# Generating sphincs signatures takes a long time in certain configurations,
 	# we will run the tests in release mode to speed things up
 	cargo test $(CARGO_ARGS) --release -p validation-tests
+	cargo test $(CARGO_ARGS) --release -p nist-test-vector-tests
 
 # check, clippy and fmt here are provided for completeness,
 # there is nothing wrong invoking cargo directly instead of make.

@@ -57,11 +57,29 @@ LDFLAGS := -static -Wl,--gc-sections
 
 default: build
 
-build: $(CUR_BUILD)/$(BINARY)
+build: $(CUR_BUILD)/$(BINARY) $(CUR_BUILD)/nist-vector-tester
 	cp $(CUR_BUILD)/$(BINARY) $(TOP)/$(BUILD_DIR)
 	cp $(CUR_BUILD)/$(BINARY).debug $(TOP)/$(BUILD_DIR)
+	cp $(CUR_BUILD)/nist-vector-tester $(TOP)/$(BUILD_DIR)
+	cp $(CUR_BUILD)/nist-vector-tester.debug $(TOP)/$(BUILD_DIR)
 
-$(CUR_BUILD)/$(BINARY): $(CUR_BUILD)/root.complete $(CUR_BUILD)/leaf.complete
+$(CUR_BUILD)/nist-vector-tester: nist-vector-tester.c $(CUR_BUILD)/params-finder.h $(CUR_BUILD)/leaf-vars.h $(CUR_BUILD)/leaf.complete $(HEADERS)
+	$(CLANG) $(CFLAGS) $(LDFLAGS) -o $@-root.debug $<
+	$(OBJCOPY) --strip-debug --strip-all $@-root.debug $@-root.stripped
+	$(TOP)/target/$(MODE)/script-merge-tool --prefix CKB_ merge \
+		--root-debug $@-root.debug \
+		--root-actual $@-root.debug \
+		--leaves $(CUR_BUILD)/leaves_debug \
+		--output $@.debug \
+		--merge
+	$(TOP)/target/$(MODE)/script-merge-tool --prefix CKB_ merge \
+		--root-debug $@-root.debug \
+		--root-actual $@-root.stripped \
+		--leaves $(CUR_BUILD)/leaves_stripped \
+		--output $@ \
+		--merge
+
+$(CUR_BUILD)/$(BINARY): $(CUR_BUILD)/root.complete $(CUR_BUILD)/leaf.complete $(HEADERS)
 	$(TOP)/target/$(MODE)/script-merge-tool --prefix CKB_ merge \
 		--root-debug $(CUR_BUILD)/root.debug \
 		--root-actual $(CUR_BUILD)/root.debug \

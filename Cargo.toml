@@ -6,6 +6,7 @@ members = [
   "build-tools/script-merge-tool",
   "contracts/sphincs-all-in-one-lock",
   "crates/ckb-fips205-utils",
+  "tests/nist-test-vector-tests",
   "tests/sphincsplus_rust",
   "tests/validation-tests",
   "tools/ckb-sphincs-tools",

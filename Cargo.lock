@@ -532,6 +532,9 @@ dependencies = [
  "fips205",
  "molecule 0.8.0",
  "rand_core 0.6.4",
+ "serde",
+ "serde_string_enum",
+ "unicase",
 ]
 
 [[package]]
@@ -2375,6 +2378,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "nist-test-vector-tests"
+version = "0.1.0"
+dependencies = [
+ "ckb-fips205-utils",
+ "ckb-testtool",
+ "hex",
+ "serde",
+ "serde_json",
+ "serde_string_enum",
+ "sha2",
+ "sha3",
+ "unicase",
+]
+
+[[package]]
 name = "num-traits"
 version = "0.2.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3116,6 +3134,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_string_enum"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc057e156c7ee0eecf104019415e2089fe55f4e8fc92d49059bcb22548b97028"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "syn 2.0.98",
+ "unicase",
+]
+
+[[package]]
 name = "serde_urlencoded"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3530,6 +3561,12 @@ name = "unarray"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eaea85b334db583fe3274d12b4cd1880032beab409c0d774be044d4480ab9a94"
+
+[[package]]
+name = "unicase"
+version = "2.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75b844d17643ee918803943289730bec8aac480150456169e647ed0b576ba539"
 
 [[package]]
 name = "unicode-ident"

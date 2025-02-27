@@ -1,4 +1,4 @@
-#![cfg_attr(not(any(feature = "signing", test)), no_std)]
+#![cfg_attr(not(any(feature = "signing", feature = "serde", test)), no_std)]
 
 #[cfg(feature = "signing")]
 pub mod ckb_tx_message_all_from_mock_tx;
@@ -9,21 +9,39 @@ pub mod signing;
 use ckb_hash::{Blake2b, Blake2bBuilder};
 use ckb_rust_std::io;
 use fips205::traits::{SerDes, Verifier};
+#[cfg(feature = "serde")]
+use serde_string_enum::{DeserializeLabeledStringEnum, SerializeLabeledStringEnum};
 
 // TODO: this should be generated from params.txs file
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(SerializeLabeledStringEnum, DeserializeLabeledStringEnum)
+)]
 pub enum ParamId {
+    #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-128f")]
     Sha2128F,
+    #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-128s")]
     Sha2128S,
+    #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-192f")]
     Sha2192F,
+    #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-192s")]
     Sha2192S,
+    #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-256f")]
     Sha2256F,
+    #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-256s")]
     Sha2256S,
+    #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-128f")]
     Shake128F,
+    #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-128s")]
     Shake128S,
+    #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-192f")]
     Shake192F,
+    #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-192s")]
     Shake192S,
+    #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-256f")]
     Shake256F,
+    #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-256s")]
     Shake256S,
 }
 
