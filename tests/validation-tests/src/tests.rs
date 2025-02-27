@@ -22,70 +22,70 @@ proptest! {
     })]
 
     #[test]
-    fn test_valid_tx_c_sha2_128f(seed: u64) {
+    fn test_c_valid_sha2_128f(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Sha2128F::new(&mut rng);
         _test_valid_tx(C_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_rust_sha2_128f(seed: u64) {
+    fn test_rust_valid_sha2_128f(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Sha2128F::new(&mut rng);
         _test_valid_tx(RUST_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_c_sha2_128s(seed: u64) {
+    fn test_c_valid_sha2_128s(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Sha2128S::new(&mut rng);
         _test_valid_tx(C_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_rust_sha2_128s(seed: u64) {
+    fn test_rust_valid_sha2_128s(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Sha2128S::new(&mut rng);
         _test_valid_tx(RUST_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_c_sha2_192f(seed: u64) {
+    fn test_c_valid_sha2_192f(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Sha2192F::new(&mut rng);
         _test_valid_tx(C_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_rust_sha2_192f(seed: u64) {
+    fn test_rust_valid_sha2_192f(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Sha2192F::new(&mut rng);
         _test_valid_tx(RUST_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_c_sha2_192s(seed: u64) {
+    fn test_c_valid_sha2_192s(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Sha2192S::new(&mut rng);
         _test_valid_tx(C_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_rust_sha2_192s(seed: u64) {
+    fn test_rust_valid_sha2_192s(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Sha2192S::new(&mut rng);
         _test_valid_tx(RUST_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_c_shake_128f(seed: u64) {
+    fn test_c_valid_shake_128f(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Shake128F::new(&mut rng);
         _test_valid_tx(C_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_rust_shake_128f(seed: u64) {
+    fn test_rust_valid_shake_128f(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Shake128F::new(&mut rng);
         _test_valid_tx(RUST_NAME, signer, rng);
@@ -93,14 +93,14 @@ proptest! {
 
 
     #[test]
-    fn test_valid_tx_c_shake_128s(seed: u64) {
+    fn test_c_valid_shake_128s(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Shake128S::new(&mut rng);
         _test_valid_tx(C_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_rust_shake_128s(seed: u64) {
+    fn test_rust_valid_shake_128s(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Shake128S::new(&mut rng);
         _test_valid_tx(RUST_NAME, signer, rng);
@@ -113,42 +113,42 @@ proptest! {
     })]
 
     #[test]
-    fn test_valid_tx_c_sha2_256f(seed: u64) {
+    fn test_c_valid_sha2_256f(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Sha2256F::new(&mut rng);
         _test_valid_tx(C_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_rust_sha2_256f(seed: u64) {
+    fn test_rust_valid_sha2_256f(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Sha2256F::new(&mut rng);
         _test_valid_tx(RUST_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_c_sha2_256s(seed: u64) {
+    fn test_c_valid_sha2_256s(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Sha2256S::new(&mut rng);
         _test_valid_tx(C_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_rust_sha2_256s(seed: u64) {
+    fn test_rust_valid_sha2_256s(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Sha2256S::new(&mut rng);
         _test_valid_tx(RUST_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_c_shake_192f(seed: u64) {
+    fn test_c_valid_shake_192f(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Shake192F::new(&mut rng);
         _test_valid_tx(C_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_rust_shake_192f(seed: u64) {
+    fn test_rust_valid_shake_192f(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Shake192F::new(&mut rng);
         _test_valid_tx(RUST_NAME, signer, rng);
@@ -156,28 +156,28 @@ proptest! {
 
 
     #[test]
-    fn test_valid_tx_c_shake_192s(seed: u64) {
+    fn test_c_valid_shake_192s(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Shake192S::new(&mut rng);
         _test_valid_tx(C_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_rust_shake_192s(seed: u64) {
+    fn test_rust_valid_shake_192s(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Shake192S::new(&mut rng);
         _test_valid_tx(RUST_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_c_shake_256f(seed: u64) {
+    fn test_c_valid_shake_256f(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Shake256F::new(&mut rng);
         _test_valid_tx(C_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_rust_shake_256f(seed: u64) {
+    fn test_rust_valid_shake_256f(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Shake256F::new(&mut rng);
         _test_valid_tx(RUST_NAME, signer, rng);
@@ -185,14 +185,14 @@ proptest! {
 
 
     #[test]
-    fn test_valid_tx_c_shake_256s(seed: u64) {
+    fn test_c_valid_shake_256s(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Shake256S::new(&mut rng);
         _test_valid_tx(C_NAME, signer, rng);
     }
 
     #[test]
-    fn test_valid_tx_rust_shake_256s(seed: u64) {
+    fn test_rust_valid_shake_256s(seed: u64) {
         let mut rng = StdRng::seed_from_u64(seed);
         let signer = Shake256S::new(&mut rng);
         _test_valid_tx(RUST_NAME, signer, rng);
