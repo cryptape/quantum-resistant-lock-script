@@ -287,7 +287,6 @@ pub fn sign_tx_by_input_group(
                 let mut blake2b = ckb_hash::Blake2bBuilder::new(32)
                     .personal(b"ckb-sphincs+-msg")
                     .build();
-                let mut message = [0u8; 32];
                 // CKB_TX_MESSAGE_ALL process, see: https://github.com/nervosnetwork/rfcs/pull/446
                 blake2b.update(&tx_hash.raw_data());
                 // digest input cells
@@ -322,12 +321,15 @@ pub fn sign_tx_by_input_group(
                     blake2b.update(&witness_len.to_le_bytes());
                     blake2b.update(&witness.raw_data());
                 });
-                blake2b.finalize(&mut message);
+
+                // The first 2 zero bytes denote empty FIPS 205 context
+                let mut message = [0u8; 34];
+                blake2b.finalize(&mut message[2..]);
 
                 // fill in actual signature
                 let witness_lock = {
                     if config.message_error {
-                        config.rng.fill(&mut message);
+                        config.rng.fill(&mut message[..]);
                     }
                     let start = std::time::Instant::now();
                     let mut witness_buf = vec![0; sign_info_len];
