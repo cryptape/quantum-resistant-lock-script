@@ -133,7 +133,7 @@ impl TxSigner for Sha2128F {
     }
 
     fn script_args_prefix() -> [u8; 5] {
-        [0x81, 0x01, 0x01, 0x01, 0x01]
+        [0x80, 0x01, 0x01, 0x01, 0x01]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -172,7 +172,7 @@ impl TxSigner for Sha2128S {
     }
 
     fn script_args_prefix() -> [u8; 5] {
-        [0x82, 0x01, 0x01, 0x01, 0x02]
+        [0x80, 0x01, 0x01, 0x01, 0x02]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -211,7 +211,7 @@ impl TxSigner for Sha2192F {
     }
 
     fn script_args_prefix() -> [u8; 5] {
-        [0x83, 0x01, 0x01, 0x01, 0x03]
+        [0x80, 0x01, 0x01, 0x01, 0x03]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -250,7 +250,7 @@ impl TxSigner for Sha2192S {
     }
 
     fn script_args_prefix() -> [u8; 5] {
-        [0x84, 0x01, 0x01, 0x01, 0x04]
+        [0x80, 0x01, 0x01, 0x01, 0x04]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -289,7 +289,7 @@ impl TxSigner for Sha2256F {
     }
 
     fn script_args_prefix() -> [u8; 5] {
-        [0x85, 0x01, 0x01, 0x01, 0x05]
+        [0x80, 0x01, 0x01, 0x01, 0x05]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -328,7 +328,7 @@ impl TxSigner for Sha2256S {
     }
 
     fn script_args_prefix() -> [u8; 5] {
-        [0x86, 0x01, 0x01, 0x01, 0x06]
+        [0x80, 0x01, 0x01, 0x01, 0x06]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -367,7 +367,7 @@ impl TxSigner for Shake128F {
     }
 
     fn script_args_prefix() -> [u8; 5] {
-        [0x87, 0x01, 0x01, 0x01, 0x07]
+        [0x80, 0x01, 0x01, 0x01, 0x07]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -406,7 +406,7 @@ impl TxSigner for Shake128S {
     }
 
     fn script_args_prefix() -> [u8; 5] {
-        [0x88, 0x01, 0x01, 0x01, 0x08]
+        [0x80, 0x01, 0x01, 0x01, 0x08]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -445,7 +445,7 @@ impl TxSigner for Shake192F {
     }
 
     fn script_args_prefix() -> [u8; 5] {
-        [0x89, 0x01, 0x01, 0x01, 0x09]
+        [0x80, 0x01, 0x01, 0x01, 0x09]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -484,7 +484,7 @@ impl TxSigner for Shake192S {
     }
 
     fn script_args_prefix() -> [u8; 5] {
-        [0x8a, 0x01, 0x01, 0x01, 0x0a]
+        [0x80, 0x01, 0x01, 0x01, 0x0a]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -523,7 +523,7 @@ impl TxSigner for Shake256F {
     }
 
     fn script_args_prefix() -> [u8; 5] {
-        [0x8b, 0x01, 0x01, 0x01, 0x0b]
+        [0x80, 0x01, 0x01, 0x01, 0x0b]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -562,7 +562,7 @@ impl TxSigner for Shake256S {
     }
 
     fn script_args_prefix() -> [u8; 5] {
-        [0x8c, 0x01, 0x01, 0x01, 0x0c]
+        [0x80, 0x01, 0x01, 0x01, 0x0c]
     }
 
     fn public_key_bytes(&self) -> Bytes {

@@ -22,10 +22,8 @@ use ckb_fips205_utils::{
 use ckb_gen_types::{packed::WitnessArgsReader, prelude::*};
 use ckb_std::{ckb_constants::Source, high_level};
 
-const MULTISIG_RESERVED_FIELD_MASK: u8 = 0x80;
 const MULTISIG_RESERVED_FIELD_VALUE: u8 = 0x80;
-const MULTISIG_PARAMS_ID_MASK: u8 = 0xF;
-const MULTISIG_PARAMS_ID_SIGN_MASK: u8 = 0x7F;
+const MULTISIG_PARAMS_ID_MASK: u8 = 0x7F;
 const MULTISIG_SIG_MASK: u8 = 1u8 << 7;
 
 pub fn program_entry() -> i8 {
@@ -45,14 +43,10 @@ pub fn program_entry() -> i8 {
     let lock = first_witness.lock().to_opt().unwrap().raw_data();
 
     assert!(lock.len() > 4);
-    let multisig_id = lock[0];
+    assert_eq!(lock[0], MULTISIG_RESERVED_FIELD_VALUE);
     let require_first_n = lock[1];
     let mut threshold = lock[2];
     let pubkeys = lock[3];
-    assert_eq!(
-        multisig_id & MULTISIG_RESERVED_FIELD_MASK,
-        MULTISIG_RESERVED_FIELD_VALUE
-    );
     assert!(pubkeys > 0);
     assert!(threshold <= pubkeys);
     assert!(threshold > 0);
@@ -64,11 +58,10 @@ pub fn program_entry() -> i8 {
     let mut i = 4;
     for pubkey_index in 0..pubkeys {
         let id = lock[i];
-        script_args_hasher.update(&[id & MULTISIG_PARAMS_ID_SIGN_MASK]);
-
         let param_id: ParamId = (id & MULTISIG_PARAMS_ID_MASK)
             .try_into()
             .expect("parse param id");
+        script_args_hasher.update(&[param_id.into()]);
 
         let (public_key_length, signature_length) = lengths(param_id);
         let public_key = &lock[i + 1..i + 1 + public_key_length];

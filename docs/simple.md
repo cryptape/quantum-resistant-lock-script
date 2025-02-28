@@ -16,18 +16,18 @@ Once a wallet utilizing SPHINCS+ has been created, a pair of public and private(
 
 For different parameter sets, a different set of 5-byte prefix will be used(listed below in hexadecimal form):
 
-1. sphincs-sha2-128f: `81 01 01 01 01`
-2. sphincs-sha2-128s: `82 01 01 01 02`
-3. sphincs-sha2-192f: `83 01 01 01 03`
-4. sphincs-sha2-192s: `84 01 01 01 04`
-5. sphincs-sha2-256f: `85 01 01 01 05`
-6. sphincs-sha2-256s: `86 01 01 01 06`
-7. sphincs-shake-128f: `87 01 01 01 07`
-8. sphincs-shake-128s: `88 01 01 01 08`
-9. sphincs-shake-192f: `89 01 01 01 09`
-10. sphincs-shake-192s: `8a 01 01 01 0a`
-11. sphincs-shake-256f: `8b 01 01 01 0b`
-12. sphincs-shake-256s: `8c 01 01 01 0c`
+1. sphincs-sha2-128f: `80 01 01 01 01`
+2. sphincs-sha2-128s: `80 01 01 01 02`
+3. sphincs-sha2-192f: `80 01 01 01 03`
+4. sphincs-sha2-192s: `80 01 01 01 04`
+5. sphincs-sha2-256f: `80 01 01 01 05`
+6. sphincs-sha2-256s: `80 01 01 01 06`
+7. sphincs-shake-128f: `80 01 01 01 07`
+8. sphincs-shake-128s: `80 01 01 01 08`
+9. sphincs-shake-192f: `80 01 01 01 09`
+10. sphincs-shake-192s: `80 01 01 01 0a`
+11. sphincs-shake-256f: `80 01 01 01 0b`
+12. sphincs-shake-256s: `80 01 01 01 0c`
 
 The defined prefix is then concatenated with the public key(could be 32, 48 or 64 bytes) to form a series of bytes:
 
@@ -49,18 +49,18 @@ The values in the `lock` field of the `WitnessArgs` structure, are of the follow
 
 The prefixes used here are also 5 bytes in length, but slightly different compared to prefixes used to calculate script args:
 
-1. sphincs-sha2-128f: `81 01 01 01 81`
-2. sphincs-sha2-128s: `82 01 01 01 82`
-3. sphincs-sha2-192f: `83 01 01 01 83`
-4. sphincs-sha2-192s: `84 01 01 01 84`
-5. sphincs-sha2-256f: `85 01 01 01 85`
-6. sphincs-sha2-256s: `86 01 01 01 86`
-7. sphincs-shake-128f: `87 01 01 01 87`
-8. sphincs-shake-128s: `88 01 01 01 88`
-9. sphincs-shake-192f: `89 01 01 01 89`
-10. sphincs-shake-192s: `8a 01 01 01 8a`
-11. sphincs-shake-256f: `8b 01 01 01 8b`
-12. sphincs-shake-256s: `8c 01 01 01 8c`
+1. sphincs-sha2-128f: `80 01 01 01 81`
+2. sphincs-sha2-128s: `80 01 01 01 82`
+3. sphincs-sha2-192f: `80 01 01 01 83`
+4. sphincs-sha2-192s: `80 01 01 01 84`
+5. sphincs-sha2-256f: `80 01 01 01 85`
+6. sphincs-sha2-256s: `80 01 01 01 86`
+7. sphincs-shake-128f: `80 01 01 01 87`
+8. sphincs-shake-128s: `80 01 01 01 88`
+9. sphincs-shake-192f: `80 01 01 01 89`
+10. sphincs-shake-192s: `80 01 01 01 8a`
+11. sphincs-shake-256f: `80 01 01 01 8b`
+12. sphincs-shake-256s: `80 01 01 01 8c`
 
 `c-sphincs-all-in-one-lock` validates that the values in the `lock` field of the `WitnessArgs` structure follow the above defined format. It then configures SPHINCS+ using the given parameter set, verifies the signature using the provided public key, against a signing message defined in the next section. The lock script completes with a success return code if the verification succeeds, otherwise an error code would be generated, denoting a failure.
 

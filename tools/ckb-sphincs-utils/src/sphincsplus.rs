@@ -144,7 +144,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_f",
         feature = "thashes_simple"
     )) {
-        return Some([0x81, 0x01, 0x01, 0x01, 0x01]);
+        return Some([0x80, 0x01, 0x01, 0x01, 0x01]);
     }
 
     if cfg!(all(
@@ -153,7 +153,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_s",
         feature = "thashes_simple"
     )) {
-        return Some([0x82, 0x01, 0x01, 0x01, 0x02]);
+        return Some([0x80, 0x01, 0x01, 0x01, 0x02]);
     }
 
     if cfg!(all(
@@ -162,7 +162,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_f",
         feature = "thashes_simple"
     )) {
-        return Some([0x83, 0x01, 0x01, 0x01, 0x03]);
+        return Some([0x80, 0x01, 0x01, 0x01, 0x03]);
     }
 
     if cfg!(all(
@@ -171,7 +171,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_s",
         feature = "thashes_simple"
     )) {
-        return Some([0x84, 0x01, 0x01, 0x01, 0x04]);
+        return Some([0x80, 0x01, 0x01, 0x01, 0x04]);
     }
 
     if cfg!(all(
@@ -180,7 +180,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_f",
         feature = "thashes_simple"
     )) {
-        return Some([0x85, 0x01, 0x01, 0x01, 0x05]);
+        return Some([0x80, 0x01, 0x01, 0x01, 0x05]);
     }
 
     if cfg!(all(
@@ -189,7 +189,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_s",
         feature = "thashes_simple"
     )) {
-        return Some([0x86, 0x01, 0x01, 0x01, 0x06]);
+        return Some([0x80, 0x01, 0x01, 0x01, 0x06]);
     }
 
     if cfg!(all(
@@ -198,7 +198,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_f",
         feature = "thashes_simple"
     )) {
-        return Some([0x87, 0x01, 0x01, 0x01, 0x07]);
+        return Some([0x80, 0x01, 0x01, 0x01, 0x07]);
     }
 
     if cfg!(all(
@@ -207,7 +207,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_s",
         feature = "thashes_simple"
     )) {
-        return Some([0x88, 0x01, 0x01, 0x01, 0x08]);
+        return Some([0x80, 0x01, 0x01, 0x01, 0x08]);
     }
 
     if cfg!(all(
@@ -216,7 +216,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_f",
         feature = "thashes_simple"
     )) {
-        return Some([0x89, 0x01, 0x01, 0x01, 0x09]);
+        return Some([0x80, 0x01, 0x01, 0x01, 0x09]);
     }
 
     if cfg!(all(
@@ -225,7 +225,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_s",
         feature = "thashes_simple"
     )) {
-        return Some([0x8a, 0x01, 0x01, 0x01, 0x0a]);
+        return Some([0x80, 0x01, 0x01, 0x01, 0x0a]);
     }
 
     if cfg!(all(
@@ -234,7 +234,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_f",
         feature = "thashes_simple"
     )) {
-        return Some([0x8b, 0x01, 0x01, 0x01, 0x0b]);
+        return Some([0x80, 0x01, 0x01, 0x01, 0x0b]);
     }
 
     if cfg!(all(
@@ -243,7 +243,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_s",
         feature = "thashes_simple"
     )) {
-        return Some([0x8c, 0x01, 0x01, 0x01, 0x0c]);
+        return Some([0x80, 0x01, 0x01, 0x01, 0x0c]);
     }
 
     None

@@ -119,10 +119,16 @@ exit:
   return err;
 }
 
+enum PARAM_ID_UPDATE_STATE {
+  PARAM_ID_STATE_UNSET = 0,
+  PARAM_ID_STATE_SET,
+  PARAM_ID_STATE_MULTIPLE,
+};
+
 int multisig_preliminary_check(WitnessArgsType *witness_args,
                                mol2_cursor_t *out_signatures,
                                uint8_t *actual_multisig_hash,
-                               uint8_t *out_multisig_params_id) {
+                               uint8_t *out_params_id) {
   int err = CKB_SUCCESS;
 
   blake2b_state s;
@@ -138,13 +144,11 @@ int multisig_preliminary_check(WitnessArgsType *witness_args,
 
   mol2_cursor_t signatures = lock_bytes;
 
-  uint8_t multisig_id = multisig_headers[0];
+  CHECK2(multisig_headers[0] == MULTISIG_RESERVED_FIELD_VALUE,
+         ERROR_SPHINCSPLUS_ENCODING);
   uint8_t require_first_n = multisig_headers[1];
   uint8_t threshold = multisig_headers[2];
   uint8_t pubkeys = multisig_headers[3];
-  CHECK2((multisig_id & MULTISIG_RESERVED_FIELD_MASK) ==
-             MULTISIG_RESERVED_FIELD_VALUE,
-         ERROR_SPHINCSPLUS_ENCODING);
   CHECK2(pubkeys > 0, ERROR_SPHINCSPLUS_ENCODING);
   CHECK2(threshold <= pubkeys, ERROR_SPHINCSPLUS_ENCODING);
   CHECK2(threshold > 0, ERROR_SPHINCSPLUS_ENCODING);
@@ -152,14 +156,17 @@ int multisig_preliminary_check(WitnessArgsType *witness_args,
 
   blake2b_update(&s, multisig_headers, 4);
 
+  int last_param_id_state = PARAM_ID_STATE_UNSET;
+  int last_param_id = 0;
+
   for (uint8_t i = 0; i < pubkeys; i++) {
     uint8_t id;
     CHECK(mol2_read_and_advance(&lock_bytes, &id, 1));
-    uint8_t sign_id = id & MULTISIG_PARAMS_ID_SIGN_MASK;
-    blake2b_update(&s, &sign_id, 1);
+    uint8_t param_id = id & MULTISIG_PARAMS_ID_MASK;
+    blake2b_update(&s, &param_id, 1);
 
     const CkbSphincsParams *params = NULL;
-    CHECK(fetch_params(id, &params));
+    CHECK(fetch_params(param_id, &params));
 
     uint8_t pubkey[params->pk_bytes];
     CHECK(mol2_read_and_advance(&lock_bytes, pubkey, params->pk_bytes));
@@ -173,13 +180,37 @@ int multisig_preliminary_check(WitnessArgsType *witness_args,
     } else {
       CHECK2(i >= require_first_n, ERROR_SPHINCSPLUS_WITNESS);
     }
+
+    /*
+     * This is actually a process to dedup param IDs from all
+     * public keys, to see if all public keys use a single param
+     * ID.
+     */
+    switch (last_param_id_state) {
+      case PARAM_ID_STATE_UNSET: {
+        last_param_id = param_id;
+        last_param_id_state = PARAM_ID_STATE_SET;
+      } break;
+      case PARAM_ID_STATE_SET: {
+        if (last_param_id != param_id) {
+          last_param_id = 0;
+          last_param_id_state = PARAM_ID_STATE_MULTIPLE;
+        }
+      } break;
+      case PARAM_ID_STATE_MULTIPLE: {
+        /* No-op here*/
+      } break;
+      default: {
+        return ERROR_SPHINCSPLUS_UNEXPECTED;
+      } break;
+    }
   }
 
   CHECK2(threshold == 0, ERROR_SPHINCSPLUS_WITNESS);
   CHECK2(lock_bytes.size == 0, ERROR_SPHINCSPLUS_WITNESS);
   blake2b_final(&s, actual_multisig_hash, BLAKE2B_BLOCK_SIZE);
   *out_signatures = signatures;
-  *out_multisig_params_id = multisig_id & MULTISIG_PARAMS_ID_MASK;
+  *out_params_id = last_param_id;
 
 exit:
   return err;
@@ -206,9 +237,9 @@ int main(int argc, char *argv[]) {
   /* Preliminary validations on multisig configuration */
   uint8_t actual_multisig_hash[BLAKE2B_BLOCK_SIZE];
   mol2_cursor_t signatures;
-  uint8_t multisig_params_id;
+  uint8_t dedup_param_id;
   CHECK(multisig_preliminary_check(&witness_args, &signatures,
-                                   actual_multisig_hash, &multisig_params_id));
+                                   actual_multisig_hash, &dedup_param_id));
   CHECK2(memcmp(expected_multisig_hash, actual_multisig_hash,
                 BLAKE2B_BLOCK_SIZE) == 0,
          ERROR_SPHINCSPLUS_MULTISIG_HASH);
@@ -224,7 +255,11 @@ int main(int argc, char *argv[]) {
   CHECK2(err == 0, ERROR_SPHINCSPLUS_MESSAGE);
 
   /* Utilize exec or spawn for actual signature checks */
-  if (multisig_params_id == 0) {
+  if (dedup_param_id == 0) {
+    /*
+     * In case multiple param IDs are used, spawn will be used to create child
+     * VMs for signature verification.
+     */
     const CkbSphincsParams *all_params[CKB_SPHINCS_SUPPORTED_PARAMS_COUNT] = {
         NULL};
     uint64_t spawned_processes[CKB_SPHINCS_SUPPORTED_PARAMS_COUNT] = {0};
@@ -322,8 +357,12 @@ int main(int argc, char *argv[]) {
       }
     }
   } else {
+    /*
+     * When a single param ID is used by all public keys in the multisig
+     * configuration, we can use exec syscalls for fewer resource usage.
+     */
     const CkbSphincsParams *params = NULL;
-    CHECK(fetch_params(multisig_params_id, &params));
+    CHECK(fetch_params(dedup_param_id, &params));
 
     /*
      * 1 byte header, 4 bytes of message length, 34 bytes of actual
