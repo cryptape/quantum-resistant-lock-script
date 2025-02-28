@@ -36,8 +36,12 @@ num_enum = "0.5.10"
 rand = "0.8.5"
 clap = { version = "4.3.2", optional = true }
 base64 = { version = "0.22.0", optional = true }
+
 # We only rely on this crate to test public key / signature lengths
-ckb-fips205-utils = { path = "../../crates/ckb-fips205-utils", default-features = false }
+[dependencies.ckb-fips205-utils]
+path = "../../crates/ckb-fips205-utils"
+default-features = false
+features = ["verifying"]
 
 [[bin]]
 name = "generate_fix_infos"

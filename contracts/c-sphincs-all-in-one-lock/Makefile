@@ -34,9 +34,6 @@ SPHINCS_PLUS_DIR := $(TOP)/deps/sphincsplus/ref
 
 include $(TOP)/mk/files.mk
 
-PARAMS_DEFINITION_FILE := $(TOP)/params.txt
-ALL_PARAM_IDS := $(shell cat $(PARAMS_DEFINITION_FILE) | cut -d" " -f1)
-
 CFLAGS := -g $(MODE_ARGS) -fPIC \
 		-Wall -Werror -Wno-nonnull -Wno-unused-function \
 		-Wno-error=unused-but-set-variable \

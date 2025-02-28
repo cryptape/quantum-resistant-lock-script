@@ -112,7 +112,7 @@ fn test_pubkey_and_signature_lengths() {
         .expect("param id must exist")
         .try_into()
         .expect("parse param id");
-    let (pubkey_length, signature_length) = ckb_fips205_utils::lengths(param_id);
+    let (pubkey_length, signature_length) = ckb_fips205_utils::verifying::lengths(param_id);
 
     let key = ckb_sphincs_utils::SphincsPlus::default();
     assert_eq!(key.get_pk_len(), pubkey_length);

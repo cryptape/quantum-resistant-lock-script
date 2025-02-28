@@ -254,10 +254,10 @@ pub fn param_id() -> Option<ParamId> {
 
 #[inline]
 pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
-    param_id().map(|param_id| ckb_fips205_utils::single_sign_script_args_prefix(param_id))
+    param_id().map(ckb_fips205_utils::single_sign_script_args_prefix)
 }
 
 #[inline]
 pub fn single_sign_witness_prefix() -> Option<[u8; 5]> {
-    param_id().map(|param_id| ckb_fips205_utils::single_sign_witness_prefix(param_id))
+    param_id().map(ckb_fips205_utils::single_sign_witness_prefix)
 }
