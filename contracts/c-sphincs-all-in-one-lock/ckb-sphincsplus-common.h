@@ -58,9 +58,43 @@ enum SPHINCSPLUS_EXAMPLE_ERROR {
   ERROR_SPHINCSPLUS_ARGV,
   ERROR_SPHINCSPLUS_PARAMS,
   ERROR_SPHINCSPLUS_UNEXPECTED,
+  ERROR_SPHINCSPLUS_LEAF_VERIFY,
 };
 
 static const char *PERSONAL_SCRIPT = "ckb-sphincs+-sct";
 static const char *PERSONAL_MESSAGE = "ckb-sphincs+-msg";
+
+#include <stdint.h>
+#include <ckb_consts.h>
+#include <ckb_syscall_apis.h>
+
+static inline int _read_all(uint64_t fd, uint8_t *buffer, size_t length) {
+  int err = CKB_SUCCESS;
+
+  size_t read = 0;
+  while (read < length) {
+    size_t current_read = length - read;
+    CHECK(ckb_read(fd, &buffer[read], &current_read));
+    read += current_read;
+  }
+
+exit:
+  return err;
+}
+
+static inline int _write_all(uint64_t fd, const uint8_t *buffer,
+                             size_t length) {
+  int err = CKB_SUCCESS;
+
+  size_t written = 0;
+  while (written < length) {
+    size_t current_written = length - written;
+    CHECK(ckb_write(fd, &buffer[written], &current_written));
+    written += current_written;
+  }
+
+exit:
+  return err;
+}
 
 #endif /* CKB_SPHINCSPLUS_COMMON_H */

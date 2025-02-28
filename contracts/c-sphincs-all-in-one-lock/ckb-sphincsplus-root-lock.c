@@ -225,8 +225,102 @@ int main(int argc, char *argv[]) {
 
   /* Utilize exec or spawn for actual signature checks */
   if (multisig_params_id == 0) {
-    /* TODO: use spawn to perform signature checks */
-    return -1;
+    const CkbSphincsParams *all_params[CKB_SPHINCS_SUPPORTED_PARAMS_COUNT] = {
+        NULL};
+    uint64_t spawned_processes[CKB_SPHINCS_SUPPORTED_PARAMS_COUNT] = {0};
+    uint64_t fds[CKB_SPHINCS_SUPPORTED_PARAMS_COUNT][2];
+
+    /*
+     * Spawn only use 1 byte header, 4 bytes of message length, and 34
+     * bytes of actual message(empty FIPS 205 context) in argv. Remaining
+     * are passed over via bytes.
+     */
+    uint8_t origin[1 + 4 + (2 + BLAKE2B_BLOCK_SIZE)];
+    uint8_t escaped[sizeof(origin) * 2];
+
+    origin[0] = 's';
+    /* Empty FIPS 205 context */
+    *((uint32_t *)&origin[1]) = 2 + BLAKE2B_BLOCK_SIZE;
+    origin[1 + 4] = '\0';
+    origin[1 + 4 + 1] = '\0';
+    blake2b_final(&s, &origin[1 + 4 + 2], BLAKE2B_BLOCK_SIZE);
+    size_t dst_length = sizeof(escaped);
+    CHECK2(
+        zero_escape_encode(origin, sizeof(origin), escaped, &dst_length) == 0,
+        ERROR_SPHINCSPLUS_ENCODING);
+
+    /*
+     * Iterate over lock data again to verify each signature.
+     */
+    while (signatures.size > 0) {
+      uint8_t header;
+      CHECK(mol2_read_and_advance(&signatures, &header, 1));
+
+      uint8_t param_id = header & MULTISIG_PARAMS_ID_MASK;
+      if (all_params[param_id] == NULL) {
+        CHECK(fetch_params(param_id, &all_params[param_id]));
+      }
+      uint32_t pk_size = all_params[param_id]->pk_bytes;
+      uint32_t sign_size = all_params[param_id]->sign_bytes;
+      CHECK2(pk_size + sign_size + 1 == (size_t)pk_size + (size_t)sign_size + 1,
+             ERROR_SPHINCSPLUS_WITNESS;);
+
+      if ((header & MULTISIG_SIG_MASK) != 0) {
+        /*
+         * Spawns a leaf process if needed, and use it to validate
+         * the signature
+         */
+        CHECK2(signatures.size >= pk_size + sign_size,
+               ERROR_SPHINCSPLUS_WITNESS);
+        /* Spawn a new proces if needed */
+        if (spawned_processes[param_id] == 0) {
+          uint64_t root_to_leaf_fds[2];
+          CHECK(ckb_pipe(root_to_leaf_fds));
+          uint64_t leaf_to_root_fds[2];
+          CHECK(ckb_pipe(leaf_to_root_fds));
+
+          /*
+           * Leaf process would read from root_to_leaf_fds[0],
+           * and write to leaf_to_root_fds[1]
+           */
+          uint64_t inherited_fds[3] = {root_to_leaf_fds[0], leaf_to_root_fds[1],
+                                       0};
+          fds[param_id][0] = root_to_leaf_fds[1];
+          fds[param_id][1] = leaf_to_root_fds[0];
+
+          const char *argv[] = {(const char *)escaped};
+          spawn_args_t spawn_args = {.argc = 1,
+                                     .argv = (const char **)argv,
+                                     .process_id = &spawned_processes[param_id],
+                                     .inherited_fds = inherited_fds};
+          CHECK(ckb_spawn_cell(code_hash, hash_type,
+                               *all_params[param_id]->offset_ptr,
+                               *all_params[param_id]->length_ptr, &spawn_args));
+        }
+        /* Sends data location to the leaf process */
+        {
+          uint8_t data[8 + 4 + 4 + 4];
+          *((uint64_t *)&data[0]) = CKB_SOURCE_GROUP_INPUT;
+          *((uint64_t *)&data[8]) = 0;
+          *((uint64_t *)&data[8 + 4]) = signatures.offset - 1;
+          *((uint64_t *)&data[8 + 4 + 4]) = 1 + pk_size + sign_size;
+
+          CHECK(_write_all(fds[param_id][0], data, sizeof(data)));
+        }
+        /* Waits for leaf process to respond */
+        {
+          uint8_t response;
+          CHECK(_read_all(fds[param_id][1], &response, 1));
+          CHECK2(response == 0, ERROR_SPHINCSPLUS_LEAF_VERIFY);
+        }
+        /* Advance to the next signature if all the above succeeds */
+        mol2_advance(&signatures, pk_size + sign_size);
+      } else {
+        /* Skip pubkey without a signature */
+        CHECK2(signatures.size >= pk_size, ERROR_SPHINCSPLUS_WITNESS);
+        mol2_advance(&signatures, pk_size);
+      }
+    }
   } else {
     const CkbSphincsParams *params = NULL;
     CHECK(fetch_params(multisig_params_id, &params));
