@@ -13,84 +13,46 @@ pub mod verifying;
 #[cfg(feature = "message")]
 pub mod message;
 
+use int_enum::IntEnum;
 #[cfg(feature = "serde")]
 use serde_string_enum::{DeserializeLabeledStringEnum, SerializeLabeledStringEnum};
 
 /// Sole truth for param ID definitions in current repository
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+/// It's trivial to write From / TryFrom trait impls ourselves. However,
+/// we leverage IntEnum so we only maintain the mapping between
+/// enum variants and the actual int values once, avoiding any potential
+/// mistakes as much as possible.
+#[repr(u8)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, IntEnum)]
 #[cfg_attr(
     feature = "serde",
     derive(SerializeLabeledStringEnum, DeserializeLabeledStringEnum)
 )]
 pub enum ParamId {
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-128f")]
-    Sha2128F,
+    Sha2128F = 1,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-128s")]
-    Sha2128S,
+    Sha2128S = 2,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-192f")]
-    Sha2192F,
+    Sha2192F = 3,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-192s")]
-    Sha2192S,
+    Sha2192S = 4,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-256f")]
-    Sha2256F,
+    Sha2256F = 5,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-256s")]
-    Sha2256S,
+    Sha2256S = 6,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-128f")]
-    Shake128F,
+    Shake128F = 7,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-128s")]
-    Shake128S,
+    Shake128S = 8,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-192f")]
-    Shake192F,
+    Shake192F = 9,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-192s")]
-    Shake192S,
+    Shake192S = 10,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-256f")]
-    Shake256F,
+    Shake256F = 11,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-256s")]
-    Shake256S,
-}
-
-impl From<ParamId> for u8 {
-    fn from(id: ParamId) -> u8 {
-        match id {
-            ParamId::Sha2128F => 1,
-            ParamId::Sha2128S => 2,
-            ParamId::Sha2192F => 3,
-            ParamId::Sha2192S => 4,
-            ParamId::Sha2256F => 5,
-            ParamId::Sha2256S => 6,
-            ParamId::Shake128F => 7,
-            ParamId::Shake128S => 8,
-            ParamId::Shake192F => 9,
-            ParamId::Shake192S => 10,
-            ParamId::Shake256F => 11,
-            ParamId::Shake256S => 12,
-        }
-    }
-}
-
-impl TryFrom<u8> for ParamId {
-    // We don't really need an error here, the only possible
-    // case where it when wrong is when an invalid param ID
-    // is used.
-    type Error = ();
-
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ParamId::Sha2128F),
-            2 => Ok(ParamId::Sha2128S),
-            3 => Ok(ParamId::Sha2192F),
-            4 => Ok(ParamId::Sha2192S),
-            5 => Ok(ParamId::Sha2256F),
-            6 => Ok(ParamId::Sha2256S),
-            7 => Ok(ParamId::Shake128F),
-            8 => Ok(ParamId::Shake128S),
-            9 => Ok(ParamId::Shake192F),
-            10 => Ok(ParamId::Shake192S),
-            11 => Ok(ParamId::Shake256F),
-            12 => Ok(ParamId::Shake256S),
-            _ => Err(()),
-        }
-    }
+    Shake256S = 12,
 }
 
 pub fn iterate_param_id<F>(mut f: F)
