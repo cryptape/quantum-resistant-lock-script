@@ -9,13 +9,16 @@ pub fn debug_printer(_script: &Byte32, msg: &str) {
 
 pub const MAX_CYCLES: u64 = std::u64::MAX;
 
+const C_NAME: &'static str = "c-sphincs-all-in-one-lock";
+const RUST_NAME: &'static str = "sphincs-all-in-one-lock";
+
 #[test]
 fn test_base() {
     let mut config = TestConfig::new();
 
     let mut dummy = DummyDataLoader::new();
 
-    let tx = gen_tx(&mut dummy, &mut config);
+    let tx = gen_tx(&mut dummy, &mut config, C_NAME);
     let tx = sign_tx(&mut dummy, tx, &mut config);
 
     let resolved_tx = build_resolved_tx(&dummy, &tx);
@@ -33,7 +36,7 @@ fn test_err_sign() {
 
     let mut dummy = DummyDataLoader::new();
 
-    let tx = gen_tx(&mut dummy, &mut config);
+    let tx = gen_tx(&mut dummy, &mut config, C_NAME);
     let tx = sign_tx(&mut dummy, tx, &mut config);
 
     let resolved_tx = build_resolved_tx(&dummy, &tx);
@@ -53,7 +56,7 @@ fn test_err_pubkey_hash() {
 
     let mut dummy = DummyDataLoader::new();
 
-    let tx = gen_tx(&mut dummy, &mut config);
+    let tx = gen_tx(&mut dummy, &mut config, C_NAME);
     let tx = sign_tx(&mut dummy, tx, &mut config);
 
     let resolved_tx = build_resolved_tx(&dummy, &tx);
@@ -73,7 +76,7 @@ fn test_err_pubkey() {
 
     let mut dummy = DummyDataLoader::new();
 
-    let tx = gen_tx(&mut dummy, &mut config);
+    let tx = gen_tx(&mut dummy, &mut config, C_NAME);
     let tx = sign_tx(&mut dummy, tx, &mut config);
 
     let resolved_tx = build_resolved_tx(&dummy, &tx);
@@ -93,7 +96,104 @@ fn test_err_message() {
 
     let mut dummy = DummyDataLoader::new();
 
-    let tx = gen_tx(&mut dummy, &mut config);
+    let tx = gen_tx(&mut dummy, &mut config, C_NAME);
+    let tx = sign_tx(&mut dummy, tx, &mut config);
+
+    let resolved_tx = build_resolved_tx(&dummy, &tx);
+    let mut verifier = TransactionScriptsVerifier::new(&resolved_tx, &dummy);
+
+    verifier.set_debug_printer(debug_printer);
+    let verify_result = verifier.verify(MAX_CYCLES);
+    if verify_result.is_ok() {
+        panic!("pass verification");
+    }
+}
+
+#[test]
+fn test_base_rust() {
+    let mut config = TestConfig::new();
+
+    let mut dummy = DummyDataLoader::new();
+
+    let tx = gen_tx(&mut dummy, &mut config, RUST_NAME);
+    let tx = sign_tx(&mut dummy, tx, &mut config);
+
+    let resolved_tx = build_resolved_tx(&dummy, &tx);
+    let mut verifier = TransactionScriptsVerifier::new(&resolved_tx, &dummy);
+
+    verifier.set_debug_printer(debug_printer);
+    let verify_result = verifier.verify(MAX_CYCLES);
+    verify_result.expect("pass verification");
+}
+
+#[test]
+fn test_err_sign_rust() {
+    let mut config = TestConfig::new();
+    config.sign_error = true;
+
+    let mut dummy = DummyDataLoader::new();
+
+    let tx = gen_tx(&mut dummy, &mut config, RUST_NAME);
+    let tx = sign_tx(&mut dummy, tx, &mut config);
+
+    let resolved_tx = build_resolved_tx(&dummy, &tx);
+    let mut verifier = TransactionScriptsVerifier::new(&resolved_tx, &dummy);
+
+    verifier.set_debug_printer(debug_printer);
+    let verify_result = verifier.verify(MAX_CYCLES);
+    if verify_result.is_ok() {
+        panic!("pass verification");
+    }
+}
+
+#[test]
+fn test_err_pubkey_hash_rust() {
+    let mut config = TestConfig::new();
+    config.pubkey_hash_error = true;
+
+    let mut dummy = DummyDataLoader::new();
+
+    let tx = gen_tx(&mut dummy, &mut config, RUST_NAME);
+    let tx = sign_tx(&mut dummy, tx, &mut config);
+
+    let resolved_tx = build_resolved_tx(&dummy, &tx);
+    let mut verifier = TransactionScriptsVerifier::new(&resolved_tx, &dummy);
+
+    verifier.set_debug_printer(debug_printer);
+    let verify_result = verifier.verify(MAX_CYCLES);
+    if verify_result.is_ok() {
+        panic!("pass verification");
+    }
+}
+
+#[test]
+fn test_err_pubkey_rust() {
+    let mut config = TestConfig::new();
+    config.pubkey_error = true;
+
+    let mut dummy = DummyDataLoader::new();
+
+    let tx = gen_tx(&mut dummy, &mut config, RUST_NAME);
+    let tx = sign_tx(&mut dummy, tx, &mut config);
+
+    let resolved_tx = build_resolved_tx(&dummy, &tx);
+    let mut verifier = TransactionScriptsVerifier::new(&resolved_tx, &dummy);
+
+    verifier.set_debug_printer(debug_printer);
+    let verify_result = verifier.verify(MAX_CYCLES);
+    if verify_result.is_ok() {
+        panic!("pass verification");
+    }
+}
+
+#[test]
+fn test_err_message_rust() {
+    let mut config = TestConfig::new();
+    config.message_error = true;
+
+    let mut dummy = DummyDataLoader::new();
+
+    let tx = gen_tx(&mut dummy, &mut config, RUST_NAME);
     let tx = sign_tx(&mut dummy, tx, &mut config);
 
     let resolved_tx = build_resolved_tx(&dummy, &tx);

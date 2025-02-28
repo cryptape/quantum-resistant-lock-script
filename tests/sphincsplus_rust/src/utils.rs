@@ -96,10 +96,6 @@ impl Loader {
     }
 }
 
-fn sphincsplus_example_bin() -> Bytes {
-    Loader::default().load_binary("c-sphincs-all-in-one-lock")
-}
-
 pub struct TestConfig {
     key: SphincsPlus,
     pub sign_error: bool,
@@ -180,20 +176,27 @@ impl TestConfig {
     }
 }
 
-pub fn gen_tx(dummy: &mut DummyDataLoader, config: &mut TestConfig) -> TransactionView {
+pub fn gen_tx(
+    dummy: &mut DummyDataLoader,
+    config: &mut TestConfig,
+    name: &'static str,
+) -> TransactionView {
     let lock_args = Bytes::from(if config.pubkey_hash_error {
         config.gen_rand_buf(32)
     } else {
         config.single_sign_script_args()
     });
-    gen_tx_with_grouped_args(dummy, vec![(lock_args, 1)], config)
+    gen_tx_with_grouped_args(dummy, vec![(lock_args, 1)], config, name)
 }
 
 pub fn gen_tx_with_grouped_args(
     dummy: &mut DummyDataLoader,
     grouped_args: Vec<(Bytes, usize)>,
     config: &mut TestConfig,
+    name: &'static str,
 ) -> TransactionView {
+    let bin = Loader::default().load_binary(name);
+
     // setup sighash_all dep
     let sighash_all_out_point = {
         let contract_tx_hash = Byte32::from_slice(&config.gen_rand_buf(32)).unwrap();
@@ -201,16 +204,12 @@ pub fn gen_tx_with_grouped_args(
     };
     // dep contract code
     let sighash_all_cell = CellOutput::new_builder()
-        .capacity(
-            Capacity::bytes(sphincsplus_example_bin().len())
-                .expect("script capacity")
-                .pack(),
-        )
+        .capacity(Capacity::bytes(bin.len()).expect("script capacity").pack())
         .build();
-    let sighash_all_cell_data_hash = CellOutput::calc_data_hash(&sphincsplus_example_bin());
+    let sighash_all_cell_data_hash = CellOutput::calc_data_hash(&bin);
     dummy.cells.insert(
         sighash_all_out_point.clone(),
-        (sighash_all_cell, sphincsplus_example_bin().clone()),
+        (sighash_all_cell, bin.clone()),
     );
 
     // setup default tx builder

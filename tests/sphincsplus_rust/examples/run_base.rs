@@ -15,7 +15,7 @@ fn main() {
 
     let mut dummy = DummyDataLoader::new();
 
-    let tx = gen_tx(&mut dummy, &mut config);
+    let tx = gen_tx(&mut dummy, &mut config, "c-sphincs-all-in-one-lock");
     let tx = sign_tx(&mut dummy, tx, &mut config);
 
     let resolved_tx = build_resolved_tx(&dummy, &tx);
