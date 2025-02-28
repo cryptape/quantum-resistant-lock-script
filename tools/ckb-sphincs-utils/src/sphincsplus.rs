@@ -1,3 +1,5 @@
+use ckb_fips205_utils::ParamId;
+
 #[link(name = "sphincsplus", kind = "static")]
 extern "C" {
     // uint32_t sphincs_plus_get_pk_size();
@@ -137,14 +139,15 @@ impl SphincsPlus {
     }
 }
 
-pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
+#[inline]
+pub fn param_id() -> Option<ParamId> {
     if cfg!(all(
         feature = "sha2",
         feature = "hash_128",
         feature = "hash_options_f",
         feature = "thashes_simple"
     )) {
-        return Some([0x80, 0x01, 0x01, 0x01, 0x01]);
+        return Some(ParamId::Sha2128F);
     }
 
     if cfg!(all(
@@ -153,7 +156,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_s",
         feature = "thashes_simple"
     )) {
-        return Some([0x80, 0x01, 0x01, 0x01, 0x02]);
+        return Some(ParamId::Sha2128S);
     }
 
     if cfg!(all(
@@ -162,7 +165,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_f",
         feature = "thashes_simple"
     )) {
-        return Some([0x80, 0x01, 0x01, 0x01, 0x03]);
+        return Some(ParamId::Sha2192F);
     }
 
     if cfg!(all(
@@ -171,7 +174,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_s",
         feature = "thashes_simple"
     )) {
-        return Some([0x80, 0x01, 0x01, 0x01, 0x04]);
+        return Some(ParamId::Sha2192S);
     }
 
     if cfg!(all(
@@ -180,7 +183,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_f",
         feature = "thashes_simple"
     )) {
-        return Some([0x80, 0x01, 0x01, 0x01, 0x05]);
+        return Some(ParamId::Sha2256F);
     }
 
     if cfg!(all(
@@ -189,7 +192,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_s",
         feature = "thashes_simple"
     )) {
-        return Some([0x80, 0x01, 0x01, 0x01, 0x06]);
+        return Some(ParamId::Sha2256S);
     }
 
     if cfg!(all(
@@ -198,7 +201,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_f",
         feature = "thashes_simple"
     )) {
-        return Some([0x80, 0x01, 0x01, 0x01, 0x07]);
+        return Some(ParamId::Shake128F);
     }
 
     if cfg!(all(
@@ -207,7 +210,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_s",
         feature = "thashes_simple"
     )) {
-        return Some([0x80, 0x01, 0x01, 0x01, 0x08]);
+        return Some(ParamId::Shake128S);
     }
 
     if cfg!(all(
@@ -216,7 +219,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_f",
         feature = "thashes_simple"
     )) {
-        return Some([0x80, 0x01, 0x01, 0x01, 0x09]);
+        return Some(ParamId::Shake192F);
     }
 
     if cfg!(all(
@@ -225,7 +228,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_s",
         feature = "thashes_simple"
     )) {
-        return Some([0x80, 0x01, 0x01, 0x01, 0x0a]);
+        return Some(ParamId::Shake192S);
     }
 
     if cfg!(all(
@@ -234,7 +237,7 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_f",
         feature = "thashes_simple"
     )) {
-        return Some([0x80, 0x01, 0x01, 0x01, 0x0b]);
+        return Some(ParamId::Shake256F);
     }
 
     if cfg!(all(
@@ -243,15 +246,18 @@ pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
         feature = "hash_options_s",
         feature = "thashes_simple"
     )) {
-        return Some([0x80, 0x01, 0x01, 0x01, 0x0c]);
+        return Some(ParamId::Shake256S);
     }
 
     None
 }
 
+#[inline]
+pub fn single_sign_script_args_prefix() -> Option<[u8; 5]> {
+    param_id().map(|param_id| ckb_fips205_utils::single_sign_script_args_prefix(param_id))
+}
+
+#[inline]
 pub fn single_sign_witness_prefix() -> Option<[u8; 5]> {
-    single_sign_script_args_prefix().map(|mut prefix| {
-        prefix[4] |= 0x80;
-        prefix
-    })
+    param_id().map(|param_id| ckb_fips205_utils::single_sign_witness_prefix(param_id))
 }

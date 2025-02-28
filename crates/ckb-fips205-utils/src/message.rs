@@ -1,6 +1,42 @@
-use crate::types::HashAlgorithm;
-use sha2::Digest;
+#[cfg(feature = "serde")]
+use serde_string_enum::{DeserializeLabeledStringEnum, SerializeLabeledStringEnum};
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(SerializeLabeledStringEnum, DeserializeLabeledStringEnum)
+)]
+pub enum HashAlgorithm {
+    #[cfg_attr(feature = "serde", string = "none")]
+    None,
+    #[cfg_attr(feature = "serde", string = "SHA2-224")]
+    Sha2224,
+    #[cfg_attr(feature = "serde", string = "SHA2-256")]
+    Sha2256,
+    #[cfg_attr(feature = "serde", string = "SHA2-384")]
+    Sha2384,
+    #[cfg_attr(feature = "serde", string = "SHA2-512")]
+    Sha2512,
+    #[cfg_attr(feature = "serde", string = "SHA2-512/224")]
+    Sha2512224,
+    #[cfg_attr(feature = "serde", string = "SHA2-512/256")]
+    Sha2512256,
+    #[cfg_attr(feature = "serde", string = "SHA3-224")]
+    Sha3224,
+    #[cfg_attr(feature = "serde", string = "SHA3-256")]
+    Sha3256,
+    #[cfg_attr(feature = "serde", string = "SHA3-384")]
+    Sha3384,
+    #[cfg_attr(feature = "serde", string = "SHA3-512")]
+    Sha3512,
+    #[cfg_attr(feature = "serde", string = "SHAKE-128")]
+    Shake128,
+    #[cfg_attr(feature = "serde", string = "SHAKE-256")]
+    Shake256,
+}
+
+/// Builds a FIPS 205 compliant final message, with optional
+/// hashing and optional context.
 pub fn build_fips205_final_message(
     algo: HashAlgorithm,
     message: &[u8],
@@ -64,6 +100,7 @@ pub fn build_fips205_final_message(
         ],
     };
 
+    use sha2::Digest;
     let hashed_message = match algo {
         HashAlgorithm::None => message.to_vec(),
         HashAlgorithm::Sha2224 => {

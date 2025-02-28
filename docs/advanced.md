@@ -44,7 +44,7 @@ Each field here serves a different purpose:
 * 11: sphincs-shake-256f
 * 12: sphincs-shake-256s
 
-This [file](../params.txt) contains the canonical source of param ID definitions. The source code also relies on this file in the compilation process, so if you have any doubt, always check this file.
+This [file](../crates/ckb-fips205-utils/src/lib.rs) contains the canonical source of param ID definitions. All other sources rely on this single file, so if you have any doubt, always check this file.
 
 Each public key must be associated with one param ID, otherwise we will not know what parameter to use for the public key, nor do we even know the length of a public key.
 

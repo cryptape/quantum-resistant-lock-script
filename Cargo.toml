@@ -2,10 +2,10 @@
 resolver = "2"
 
 members = [
-  "build-tools/build-params-finder",
-  "build-tools/script-merge-tool",
   "contracts/sphincs-all-in-one-lock",
   "crates/ckb-fips205-utils",
+  "crates/intermediate-source-generator",
+  "crates/script-merge-tool",
   "tests/nist-test-vector-tests",
   "tests/sphincsplus_rust",
   "tests/validation-tests",

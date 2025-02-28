@@ -16,8 +16,9 @@ ckb_std::entry!(program_entry);
 ckb_std::default_alloc!(16384, 1258306, 64);
 
 use ckb_fips205_utils::{
-    ckb_tx_message_all_in_ckb_vm::generate_ckb_tx_message_all_with_witness, lengths, verify,
-    Hasher, ParamId,
+    ckb_tx_message_all_in_ckb_vm::generate_ckb_tx_message_all_with_witness,
+    verifying::{lengths, verify, Hasher},
+    ParamId,
 };
 use ckb_gen_types::{packed::WitnessArgsReader, prelude::*};
 use ckb_std::{ckb_constants::Source, high_level};

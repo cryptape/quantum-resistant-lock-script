@@ -1,46 +1,7 @@
 /// This file contains the serde structure for NIST's internalProject.json file
-use ckb_fips205_utils::ParamId;
+use ckb_fips205_utils::{message::HashAlgorithm, ParamId};
 use serde::{Deserialize, Serialize};
 use serde_string_enum::{DeserializeLabeledStringEnum, SerializeLabeledStringEnum};
-
-#[derive(
-    Copy,
-    Clone,
-    Debug,
-    SerializeLabeledStringEnum,
-    DeserializeLabeledStringEnum,
-    PartialEq,
-    Eq,
-    Hash,
-)]
-pub enum HashAlgorithm {
-    #[string = "none"]
-    None,
-    #[string = "SHA2-224"]
-    Sha2224,
-    #[string = "SHA2-256"]
-    Sha2256,
-    #[string = "SHA2-384"]
-    Sha2384,
-    #[string = "SHA2-512"]
-    Sha2512,
-    #[string = "SHA2-512/224"]
-    Sha2512224,
-    #[string = "SHA2-512/256"]
-    Sha2512256,
-    #[string = "SHA3-224"]
-    Sha3224,
-    #[string = "SHA3-256"]
-    Sha3256,
-    #[string = "SHA3-384"]
-    Sha3384,
-    #[string = "SHA3-512"]
-    Sha3512,
-    #[string = "SHAKE-128"]
-    Shake128,
-    #[string = "SHAKE-256"]
-    Shake256,
-}
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]

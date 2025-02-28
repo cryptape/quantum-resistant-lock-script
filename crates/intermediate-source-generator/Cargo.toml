@@ -1,0 +1,12 @@
+[package]
+name = "intermediate-source-generator"
+description = "A tool to generate all intermediate source"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[dependencies.ckb-fips205-utils]
+path = "../../crates/ckb-fips205-utils"
+default-features = false
+features = ["serde", "std"]

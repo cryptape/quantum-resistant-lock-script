@@ -45,14 +45,11 @@ build:
 	mkdir -p $(BUILD_DIR)
 	@set -eu; \
 	if [ "x$(CONTRACT)" = "x" ]; then \
-		for crate in $(wildcard build-tools/*); do \
+		for crate in $(wildcard crates/*); do \
 			cargo build -p $$(basename $$crate) $(MODE_ARGS) $(CARGO_ARGS); \
 		done; \
 		for contract in $(wildcard contracts/*); do \
 			$(MAKE) -e -C $$contract build; \
-		done; \
-		for crate in $(wildcard crates/*); do \
-			cargo build -p $$(basename $$crate) $(MODE_ARGS) $(CARGO_ARGS); \
 		done; \
 		for crate in $(wildcard tools/*); do \
 			cargo build -p $$(basename $$crate | tr '-' '_') $(MODE_ARGS) $(CARGO_ARGS); \

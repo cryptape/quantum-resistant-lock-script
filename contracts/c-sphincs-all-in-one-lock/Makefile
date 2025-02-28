@@ -106,13 +106,14 @@ $(CUR_BUILD)/leaf-vars.h: $(CUR_BUILD)/leaf.complete
 		--language c \
 		--output $@
 
-$(CUR_BUILD)/leaf.complete: $(DETECTING_SOURCES) $(HEADERS) ckb-sphincsplus-leaf-lock.c
+$(CUR_BUILD)/leaf.complete: $(DETECTING_SOURCES) $(HEADERS) ckb-sphincsplus-leaf-lock.c $(CUR_BUILD)/params.txt
 	mkdir -p $(CUR_BUILD)
 	rm -rf $(CUR_BUILD)/leaves_debug $(CUR_BUILD)/leaves_stripped
 	mkdir -p $(CUR_BUILD)/leaves_debug $(CUR_BUILD)/leaves_stripped
 	@set -eu; \
-	for param_id in $(ALL_PARAM_IDS); do \
-		param=$$(head -n $$param_id $(PARAMS_DEFINITION_FILE) | tail -1 | cut -d" " -f2); \
+	param_ids=$$(cat $(CUR_BUILD)/params.txt | cut -d" " -f1); \
+	for param_id in $${param_ids}; do \
+		param=$$(head -n $${param_id} $(CUR_BUILD)/params.txt | tail -1 | cut -d" " -f2); \
 		if echo "$${param}" | grep "shake" - > /dev/null; then \
 			srcs="$(COMPILING_COMMON_SOURCES) $(COMPILING_SHAKE_SOURCES)"; \
 		elif echo "$${param}" | grep "sha2" - > /dev/null; then \
@@ -130,16 +131,17 @@ $(CUR_BUILD)/leaf.complete: $(DETECTING_SOURCES) $(HEADERS) ckb-sphincsplus-leaf
 	done;
 	touch $@
 
-$(CUR_BUILD)/params-finder.h: $(HEADERS) $(CUR_BUILD)/aggregated-params.h
+$(CUR_BUILD)/params-finder.h: $(TOP)/target/$(MODE)/generate-c-params-finder $(HEADERS) $(CUR_BUILD)/aggregated-params.h
 	mkdir -p $(CUR_BUILD)
-	$(TOP)/target/$(MODE)/build-params-finder --params-file $(PARAMS_DEFINITION_FILE) > $@
+	$< > $@
 
-$(CUR_BUILD)/aggregated-params.h: tools/extract-sphincs-params.c $(HEADERS)
+$(CUR_BUILD)/aggregated-params.h: tools/extract-sphincs-params.c $(HEADERS) $(CUR_BUILD)/params.txt
 	mkdir -p $(CUR_BUILD)
 	rm -f $@
 	@set -eu; \
-	for param_id in $(ALL_PARAM_IDS); do \
-		param=$$(head -n $$param_id $(PARAMS_DEFINITION_FILE) | tail -1 | cut -d" " -f2); \
+	param_ids=$$(cat $(CUR_BUILD)/params.txt | cut -d" " -f1); \
+	for param_id in $${param_ids}; do \
+		param=$$(head -n $${param_id} $(CUR_BUILD)/params.txt | tail -1 | cut -d" " -f2); \
 		set -x; \
 		$(CLANG) -g -O3 $< -o $(CUR_BUILD)/extract-params_$${param} \
 			-DPARAMS_ID=$${param_id} -DPARAMS=$${param} \
@@ -147,6 +149,10 @@ $(CUR_BUILD)/aggregated-params.h: tools/extract-sphincs-params.c $(HEADERS)
 		$(CUR_BUILD)/extract-params_$${param} >> $@; \
 		set +x; \
 	done;
+
+$(CUR_BUILD)/params.txt: $(TOP)/target/$(MODE)/generate-params-txt
+	mkdir -p $(CUR_BUILD)
+	$< > $@
 
 fmt:
 	$(CLANG_FORMAT) -i --style='{BasedOnStyle: google, SortIncludes: false}' *.c *.h tools/*.c utils/*.h

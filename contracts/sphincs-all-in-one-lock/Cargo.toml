@@ -5,8 +5,12 @@ edition = "2021"
 
 [dependencies]
 ckb-std = "0.16.3"
-ckb-fips205-utils = { path = "../../crates/ckb-fips205-utils", default-features = false }
 ckb-gen-types = { version = "0.119.0", default-features = false }
+
+[dependencies.ckb-fips205-utils]
+path = "../../crates/ckb-fips205-utils"
+default-features = false
+features = ["verifying"]
 
 [features]
 # This is a dummy feature we won't use here

@@ -15,7 +15,6 @@ use std::str::FromStr;
 mod tests;
 
 pub mod types;
-pub mod utils;
 
 // The exact same Loader code from capsule's template, except that
 // now we use MODE as the environment variable

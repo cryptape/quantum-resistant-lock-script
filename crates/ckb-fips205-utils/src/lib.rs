@@ -1,18 +1,22 @@
-#![cfg_attr(not(any(feature = "signing", feature = "serde", test)), no_std)]
+#![cfg_attr(not(any(feature = "std", test)), no_std)]
 
 #[cfg(feature = "signing")]
 pub mod ckb_tx_message_all_from_mock_tx;
-pub mod ckb_tx_message_all_in_ckb_vm;
 #[cfg(feature = "signing")]
 pub mod signing;
 
-use ckb_hash::{Blake2b, Blake2bBuilder};
-use ckb_rust_std::io;
-use fips205::traits::{SerDes, Verifier};
+#[cfg(feature = "verifying")]
+pub mod ckb_tx_message_all_in_ckb_vm;
+#[cfg(feature = "verifying")]
+pub mod verifying;
+
+#[cfg(feature = "message")]
+pub mod message;
+
 #[cfg(feature = "serde")]
 use serde_string_enum::{DeserializeLabeledStringEnum, SerializeLabeledStringEnum};
 
-// TODO: this should be generated from params.txs file
+/// Sole truth for param ID definitions in current repository
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(
     feature = "serde",
@@ -89,318 +93,32 @@ impl TryFrom<u8> for ParamId {
     }
 }
 
-pub struct Hasher(Blake2b);
-
-impl Hasher {
-    pub fn hash(self) -> [u8; 32] {
-        let mut result = [0u8; 32];
-        self.0.finalize(&mut result);
-        result
-    }
-
-    #[inline]
-    pub fn update(&mut self, data: &[u8]) {
-        self.0.update(data);
-    }
-
-    pub fn script_args_hasher() -> Self {
-        Hasher(
-            Blake2bBuilder::new(32)
-                .personal(b"ckb-sphincs+-sct")
-                .build(),
-        )
-    }
-
-    pub fn message_hasher() -> Self {
-        Hasher(
-            Blake2bBuilder::new(32)
-                .personal(b"ckb-sphincs+-msg")
-                .build(),
-        )
+pub fn iterate_param_id<F>(mut f: F)
+where
+    F: FnMut(ParamId),
+{
+    for i in 0..=u8::MAX {
+        if let Ok(param_id) = i.try_into() {
+            f(param_id);
+        }
     }
 }
 
-impl io::Write for Hasher {
-    fn write(&mut self, data: &[u8]) -> Result<usize, io::Error> {
-        self.0.update(data);
-        Ok(data.len())
-    }
+#[cfg(feature = "std")]
+pub fn collect_param_ids() -> Vec<ParamId> {
+    let mut res = vec![];
 
-    fn flush(&mut self) -> Result<(), io::Error> {
-        Ok(())
-    }
+    iterate_param_id(|param_id| res.push(param_id));
+
+    res
 }
 
-#[cfg(feature = "signing")]
-impl std::io::Write for Hasher {
-    fn write(&mut self, data: &[u8]) -> Result<usize, std::io::Error> {
-        self.0.update(data);
-        Ok(data.len())
-    }
-
-    fn flush(&mut self) -> Result<(), std::io::Error> {
-        Ok(())
-    }
+pub fn single_sign_script_args_prefix(param_id: ParamId) -> [u8; 5] {
+    [0x80, 0x01, 0x01, 0x01, param_id.into()]
 }
 
-pub fn lengths(param_id: ParamId) -> (usize, usize) {
-    match param_id {
-        ParamId::Sha2128F => (
-            fips205::slh_dsa_sha2_128f::PK_LEN,
-            fips205::slh_dsa_sha2_128f::SIG_LEN,
-        ),
-        ParamId::Sha2128S => (
-            fips205::slh_dsa_sha2_128s::PK_LEN,
-            fips205::slh_dsa_sha2_128s::SIG_LEN,
-        ),
-        ParamId::Sha2192F => (
-            fips205::slh_dsa_sha2_192f::PK_LEN,
-            fips205::slh_dsa_sha2_192f::SIG_LEN,
-        ),
-        ParamId::Sha2192S => (
-            fips205::slh_dsa_sha2_192s::PK_LEN,
-            fips205::slh_dsa_sha2_192s::SIG_LEN,
-        ),
-        ParamId::Sha2256F => (
-            fips205::slh_dsa_sha2_256f::PK_LEN,
-            fips205::slh_dsa_sha2_256f::SIG_LEN,
-        ),
-        ParamId::Sha2256S => (
-            fips205::slh_dsa_sha2_256s::PK_LEN,
-            fips205::slh_dsa_sha2_256s::SIG_LEN,
-        ),
-        ParamId::Shake128F => (
-            fips205::slh_dsa_shake_128f::PK_LEN,
-            fips205::slh_dsa_shake_128f::SIG_LEN,
-        ),
-        ParamId::Shake128S => (
-            fips205::slh_dsa_shake_128s::PK_LEN,
-            fips205::slh_dsa_shake_128s::SIG_LEN,
-        ),
-        ParamId::Shake192F => (
-            fips205::slh_dsa_shake_192f::PK_LEN,
-            fips205::slh_dsa_shake_192f::SIG_LEN,
-        ),
-        ParamId::Shake192S => (
-            fips205::slh_dsa_shake_192s::PK_LEN,
-            fips205::slh_dsa_shake_192s::SIG_LEN,
-        ),
-        ParamId::Shake256F => (
-            fips205::slh_dsa_shake_256f::PK_LEN,
-            fips205::slh_dsa_shake_256f::SIG_LEN,
-        ),
-        ParamId::Shake256S => (
-            fips205::slh_dsa_shake_256s::PK_LEN,
-            fips205::slh_dsa_shake_256s::SIG_LEN,
-        ),
-    }
-}
-
-pub fn verify(param_id: ParamId, public_key: &[u8], signature: &[u8], message: &[u8]) -> bool {
-    match param_id {
-        ParamId::Sha2128F => {
-            use fips205::slh_dsa_sha2_128f as slh;
-
-            assert_eq!(public_key.len(), slh::PK_LEN);
-            let public_key = {
-                let mut data = [0u8; slh::PK_LEN];
-                data.copy_from_slice(public_key);
-                slh::PublicKey::try_from_bytes(&data).expect("parse public key")
-            };
-            assert_eq!(signature.len(), slh::SIG_LEN);
-            let signature = {
-                let mut data = [0u8; slh::SIG_LEN];
-                data.copy_from_slice(signature);
-                data
-            };
-            public_key.verify(message, &signature, &[])
-        }
-        ParamId::Sha2128S => {
-            use fips205::slh_dsa_sha2_128s as slh;
-
-            assert_eq!(public_key.len(), slh::PK_LEN);
-            let public_key = {
-                let mut data = [0u8; slh::PK_LEN];
-                data.copy_from_slice(public_key);
-                slh::PublicKey::try_from_bytes(&data).expect("parse public key")
-            };
-            assert_eq!(signature.len(), slh::SIG_LEN);
-            let signature = {
-                let mut data = [0u8; slh::SIG_LEN];
-                data.copy_from_slice(signature);
-                data
-            };
-            public_key.verify(message, &signature, &[])
-        }
-        ParamId::Sha2192F => {
-            use fips205::slh_dsa_sha2_192f as slh;
-
-            assert_eq!(public_key.len(), slh::PK_LEN);
-            let public_key = {
-                let mut data = [0u8; slh::PK_LEN];
-                data.copy_from_slice(public_key);
-                slh::PublicKey::try_from_bytes(&data).expect("parse public key")
-            };
-            assert_eq!(signature.len(), slh::SIG_LEN);
-            let signature = {
-                let mut data = [0u8; slh::SIG_LEN];
-                data.copy_from_slice(signature);
-                data
-            };
-            public_key.verify(message, &signature, &[])
-        }
-        ParamId::Sha2192S => {
-            use fips205::slh_dsa_sha2_192s as slh;
-
-            assert_eq!(public_key.len(), slh::PK_LEN);
-            let public_key = {
-                let mut data = [0u8; slh::PK_LEN];
-                data.copy_from_slice(public_key);
-                slh::PublicKey::try_from_bytes(&data).expect("parse public key")
-            };
-            assert_eq!(signature.len(), slh::SIG_LEN);
-            let signature = {
-                let mut data = [0u8; slh::SIG_LEN];
-                data.copy_from_slice(signature);
-                data
-            };
-            public_key.verify(message, &signature, &[])
-        }
-        ParamId::Sha2256F => {
-            use fips205::slh_dsa_sha2_256f as slh;
-
-            assert_eq!(public_key.len(), slh::PK_LEN);
-            let public_key = {
-                let mut data = [0u8; slh::PK_LEN];
-                data.copy_from_slice(public_key);
-                slh::PublicKey::try_from_bytes(&data).expect("parse public key")
-            };
-            assert_eq!(signature.len(), slh::SIG_LEN);
-            let signature = {
-                let mut data = [0u8; slh::SIG_LEN];
-                data.copy_from_slice(signature);
-                data
-            };
-            public_key.verify(message, &signature, &[])
-        }
-        ParamId::Sha2256S => {
-            use fips205::slh_dsa_sha2_256s as slh;
-
-            assert_eq!(public_key.len(), slh::PK_LEN);
-            let public_key = {
-                let mut data = [0u8; slh::PK_LEN];
-                data.copy_from_slice(public_key);
-                slh::PublicKey::try_from_bytes(&data).expect("parse public key")
-            };
-            assert_eq!(signature.len(), slh::SIG_LEN);
-            let signature = {
-                let mut data = [0u8; slh::SIG_LEN];
-                data.copy_from_slice(signature);
-                data
-            };
-            public_key.verify(message, &signature, &[])
-        }
-        ParamId::Shake128F => {
-            use fips205::slh_dsa_shake_128f as slh;
-
-            assert_eq!(public_key.len(), slh::PK_LEN);
-            let public_key = {
-                let mut data = [0u8; slh::PK_LEN];
-                data.copy_from_slice(public_key);
-                slh::PublicKey::try_from_bytes(&data).expect("parse public key")
-            };
-            assert_eq!(signature.len(), slh::SIG_LEN);
-            let signature = {
-                let mut data = [0u8; slh::SIG_LEN];
-                data.copy_from_slice(signature);
-                data
-            };
-            public_key.verify(message, &signature, &[])
-        }
-        ParamId::Shake128S => {
-            use fips205::slh_dsa_shake_128s as slh;
-
-            assert_eq!(public_key.len(), slh::PK_LEN);
-            let public_key = {
-                let mut data = [0u8; slh::PK_LEN];
-                data.copy_from_slice(public_key);
-                slh::PublicKey::try_from_bytes(&data).expect("parse public key")
-            };
-            assert_eq!(signature.len(), slh::SIG_LEN);
-            let signature = {
-                let mut data = [0u8; slh::SIG_LEN];
-                data.copy_from_slice(signature);
-                data
-            };
-            public_key.verify(message, &signature, &[])
-        }
-        ParamId::Shake192F => {
-            use fips205::slh_dsa_shake_192f as slh;
-
-            assert_eq!(public_key.len(), slh::PK_LEN);
-            let public_key = {
-                let mut data = [0u8; slh::PK_LEN];
-                data.copy_from_slice(public_key);
-                slh::PublicKey::try_from_bytes(&data).expect("parse public key")
-            };
-            assert_eq!(signature.len(), slh::SIG_LEN);
-            let signature = {
-                let mut data = [0u8; slh::SIG_LEN];
-                data.copy_from_slice(signature);
-                data
-            };
-            public_key.verify(message, &signature, &[])
-        }
-        ParamId::Shake192S => {
-            use fips205::slh_dsa_shake_192s as slh;
-
-            assert_eq!(public_key.len(), slh::PK_LEN);
-            let public_key = {
-                let mut data = [0u8; slh::PK_LEN];
-                data.copy_from_slice(public_key);
-                slh::PublicKey::try_from_bytes(&data).expect("parse public key")
-            };
-            assert_eq!(signature.len(), slh::SIG_LEN);
-            let signature = {
-                let mut data = [0u8; slh::SIG_LEN];
-                data.copy_from_slice(signature);
-                data
-            };
-            public_key.verify(message, &signature, &[])
-        }
-        ParamId::Shake256F => {
-            use fips205::slh_dsa_shake_256f as slh;
-
-            assert_eq!(public_key.len(), slh::PK_LEN);
-            let public_key = {
-                let mut data = [0u8; slh::PK_LEN];
-                data.copy_from_slice(public_key);
-                slh::PublicKey::try_from_bytes(&data).expect("parse public key")
-            };
-            assert_eq!(signature.len(), slh::SIG_LEN);
-            let signature = {
-                let mut data = [0u8; slh::SIG_LEN];
-                data.copy_from_slice(signature);
-                data
-            };
-            public_key.verify(message, &signature, &[])
-        }
-        ParamId::Shake256S => {
-            use fips205::slh_dsa_shake_256s as slh;
-
-            assert_eq!(public_key.len(), slh::PK_LEN);
-            let public_key = {
-                let mut data = [0u8; slh::PK_LEN];
-                data.copy_from_slice(public_key);
-                slh::PublicKey::try_from_bytes(&data).expect("parse public key")
-            };
-            assert_eq!(signature.len(), slh::SIG_LEN);
-            let signature = {
-                let mut data = [0u8; slh::SIG_LEN];
-                data.copy_from_slice(signature);
-                data
-            };
-            public_key.verify(message, &signature, &[])
-        }
-    }
+pub fn single_sign_witness_prefix(param_id: ParamId) -> [u8; 5] {
+    let mut prefix = single_sign_script_args_prefix(param_id);
+    prefix[4] |= 0x80;
+    prefix
 }

@@ -1,6 +1,7 @@
 use crate::{
     ckb_tx_message_all_from_mock_tx::{generate_ckb_tx_message_all, ScriptOrIndex},
-    lengths, Hasher, ParamId,
+    verifying::{lengths, Hasher},
+    ParamId,
 };
 use ckb_gen_types::{bytes::Bytes, packed::*, prelude::*};
 use fips205::traits::{SerDes, Signer, Verifier};

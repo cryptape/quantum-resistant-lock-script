@@ -203,13 +203,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ee741d62dcaf41ca303576ef890989ccb01d5dd77f8ce1a6d6c7846ab5d09efb"
 
 [[package]]
-name = "build-params-finder"
-version = "0.1.0"
-dependencies = [
- "clap",
-]
-
-[[package]]
 name = "bumpalo"
 version = "3.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -534,6 +527,8 @@ dependencies = [
  "rand_core 0.6.4",
  "serde",
  "serde_string_enum",
+ "sha2",
+ "sha3",
  "unicase",
 ]
 
@@ -1375,6 +1370,7 @@ version = "0.1.0"
 dependencies = [
  "base64 0.22.1",
  "cc",
+ "ckb-fips205-utils",
 ]
 
 [[package]]
@@ -2156,6 +2152,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "intermediate-source-generator"
+version = "0.1.0"
+dependencies = [
+ "ckb-fips205-utils",
+]
+
+[[package]]
 name = "ipnet"
 version = "2.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2387,8 +2390,6 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_string_enum",
- "sha2",
- "sha3",
  "unicase",
 ]
 
@@ -3273,6 +3274,7 @@ version = "0.1.0"
 dependencies = [
  "base64 0.22.1",
  "ckb-chain-spec 0.107.0",
+ "ckb-fips205-utils",
  "ckb-hash 0.107.0",
  "ckb-script 0.107.0",
  "ckb-traits 0.107.0",

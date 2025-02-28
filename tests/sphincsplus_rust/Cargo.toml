@@ -1,6 +1,7 @@
 [package]
 edition = "2021"
 name = "sphincsplus_rust_test"
+description = "This crate uses sphincsplus to sign signatures and feed to on-chain contracts"
 version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -35,7 +36,8 @@ num_enum = "0.5.10"
 rand = "0.8.5"
 clap = { version = "4.3.2", optional = true }
 base64 = { version = "0.22.0", optional = true }
-
+# We only rely on this crate to test public key / signature lengths
+ckb-fips205-utils = { path = "../../crates/ckb-fips205-utils", default-features = false }
 
 [[bin]]
 name = "generate_fix_infos"

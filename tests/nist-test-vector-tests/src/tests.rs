@@ -1,5 +1,5 @@
-use crate::{types::TestSuite, utils::build_fips205_final_message, Loader};
-use ckb_fips205_utils::ParamId;
+use crate::{types::TestSuite, Loader};
+use ckb_fips205_utils::{message::build_fips205_final_message, ParamId};
 use ckb_testtool::{
     ckb_types::{bytes::Bytes, core::TransactionBuilder, packed::*, prelude::*},
     context::Context,
