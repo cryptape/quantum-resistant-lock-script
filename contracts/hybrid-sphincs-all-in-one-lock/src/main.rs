@@ -160,7 +160,8 @@ pub fn program_entry() -> i8 {
                                 let inherited_fds = [root_to_leaf_fd0, leaf_to_root_fd1, 0];
                                 let mut spgs = syscalls::SpawnArgs {
                                     argc: 1,
-                                    argv: argv.as_ptr(),
+                                    #[allow(clippy::unnecessary_cast)]
+                                    argv: argv.as_ptr() as *const *const _,
                                     process_id: &mut process_id as *mut u64,
                                     inherited_fds: inherited_fds.as_ptr(),
                                 };
