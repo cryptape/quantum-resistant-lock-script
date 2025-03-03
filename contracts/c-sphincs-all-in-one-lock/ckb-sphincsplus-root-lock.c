@@ -371,7 +371,7 @@ int main(int argc, char *argv[]) {
      * 4 bytes of actual process data length within witness.
      */
     uint8_t origin[1 + 4 + (2 + BLAKE2B_BLOCK_SIZE) + 8 + 4 + 4 + 4];
-    uint8_t escaped[sizeof(origin) * 2];
+    uint8_t escaped[sizeof(origin) * 2 + 1];
 
     origin[0] = 'e';
     /* Empty FIPS 205 context */

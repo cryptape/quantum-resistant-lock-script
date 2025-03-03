@@ -95,10 +95,10 @@ $(CUR_BUILD)/root.complete: ckb-sphincsplus-root-lock.c $(CUR_BUILD)/params-find
 	$(OBJCOPY) --strip-debug --strip-all $(CUR_BUILD)/root.debug $(CUR_BUILD)/root.stripped
 	touch $@
 
-$(CUR_BUILD)/leaf-vars.h: $(CUR_BUILD)/leaf.complete
+$(CUR_BUILD)/leaf-vars.h: $(TOP)/target/$(MODE)/script-merge-tool $(CUR_BUILD)/leaf.complete
 	# leaf-vars.h only need script names, either debug or stripped directory will work,
 	# no need to do it twice
-	$(TOP)/target/$(MODE)/script-merge-tool --prefix CKB_ generate \
+	$< --prefix CKB_ generate \
 		--leaves $(CUR_BUILD)/leaves_stripped \
 		--language c \
 		--output $@

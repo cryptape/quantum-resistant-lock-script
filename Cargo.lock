@@ -1078,6 +1078,7 @@ dependencies = [
  "buddy-alloc",
  "cc",
  "ckb-gen-types",
+ "ckb-x64-simulator",
  "gcd",
 ]
 
@@ -1324,6 +1325,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c280bf1d589d23ab0358f58601c2187fc6be86a131644583ef72ea96a0a13ddd"
 dependencies = [
  "paste",
+]
+
+[[package]]
+name = "ckb-x64-simulator"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd4734273cff42f99205f5d3b6d6673786339443ca169ed5ff85bfc69730d910"
+dependencies = [
+ "cc",
+ "ckb-mock-tx-types",
+ "ckb-types 0.119.0",
+ "faster-hex",
+ "lazy_static",
+ "libc",
+ "libloading",
+ "serde",
+ "serde_derive",
+ "serde_json",
 ]
 
 [[package]]
@@ -1946,6 +1965,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
 
 [[package]]
+name = "hybrid-sphincs-all-in-one-lock"
+version = "0.1.0"
+dependencies = [
+ "ckb-fips205-utils",
+ "ckb-gen-types",
+ "ckb-std",
+]
+
+[[package]]
 name = "hyper"
 version = "0.14.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2235,6 +2263,16 @@ name = "libc"
 version = "0.2.170"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "875b3680cb2f8f71bdcf9a30f38d48282f5d3c95cbf9b3fa57269bb5d5c06828"
+
+[[package]]
+name = "libloading"
+version = "0.8.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc2f4eb4bc735547cfed7c0a4922cbd04a4655978c09b54f1f7b228750664c34"
+dependencies = [
+ "cfg-if 1.0.0",
+ "windows-targets 0.48.5",
+]
 
 [[package]]
 name = "linked-hash-map"

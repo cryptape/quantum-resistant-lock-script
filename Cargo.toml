@@ -2,6 +2,7 @@
 resolver = "2"
 
 members = [
+  "contracts/hybrid-sphincs-all-in-one-lock",
   "contracts/sphincs-all-in-one-lock",
   "crates/ckb-fips205-utils",
   "crates/intermediate-source-generator",

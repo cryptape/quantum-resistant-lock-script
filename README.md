@@ -26,14 +26,16 @@ See [Simple Usage](./docs/simple.md), or [Advanced Usage](./docs/advanced.md) fo
 
 The exact cycle consumptions will slightly vary from one signature to another, a ballpark estimation of cycle consumptions(here we measure cycle consumptions for the whole script, meaning CKB transaction signing is included as well) for each NIST approved parameter set, can be located below(`M` stands for million):
 
-|                      |  128s bit  |  128f bit  |  192s bit  |  192f bit  |  256s bit  |  256f bit  |
-| -------------------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- |
-|   pubkey size        |       32   |       32   |       48   |       48   |       64   |       64   |
-|signature size        |     7856   |    17088   |    16224   |    35664   |    29792   |    49856   |
-|   sha2 simple (C)    |    11.6M   |    33.5M   |    17.4M   |    49.3M   |    25.5M   |    50.4M   |
-|   sha2 simple (Rust) |    21.4M   |    60.2M   |    30.2M   |    89.5M   |    44.1M   |    90.8M   |
-|  shake simple (C)    |    19.8M   |    61.3M   |    30.2M   |    91.4M   |    46.0M   |    92.4M   |
-|  shake simple (Rust) |    36.1M   |   108.7M   |    53.5M   |   155.0M   |    80.1M   |    166.2M   |
+|                        |  128s bit  |  128f bit  |  192s bit  |  192f bit  |  256s bit  |  256f bit  |
+| ---------------------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- |
+|   pubkey size          |       32   |       32   |       48   |       48   |       64   |       64   |
+|signature size          |     7856   |    17088   |    16224   |    35664   |    29792   |    49856   |
+|   sha2 simple (C)      |    11.5M   |    32.2M   |    17.6M   |    49.4M   |    25.7M   |    49.7M   |
+|   sha2 simple (Hybrid) |    11.6M   |    34.5M   |    18.5M   |    49.4M   |    25.7M   |    49.0M   |
+|   sha2 simple (Rust)   |    21.9M   |    59.2M   |    31.5M   |    87.1M   |    45.3M   |    92.6M   |
+|  shake simple (C)      |    20.5M   |    60.4M   |    31.7M   |    91.9M   |    46.5M   |    91.5M   |
+|  shake simple (Hybrid) |    20.8M   |    62.0M   |    31.7M   |    89.9M   |    48.1M   |    92.4M   |
+|  shake simple (Rust)   |    37.6M   |   111.6M   |    53.3M   |   156.6M   |    76.5M   |   157.6M   |
 
 In general, the `s` variants take longer to generate a signature, but takes less cycles to verify. The `f` variants are fast in signature generation but takes longer cycles to verify.
 

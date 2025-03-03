@@ -48,7 +48,8 @@ build:
 		for crate in $(wildcard crates/*); do \
 			cargo build -p $$(basename $$crate) $(MODE_ARGS) $(CARGO_ARGS); \
 		done; \
-		for contract in $(wildcard contracts/*); do \
+		# Sort by contract names here so 'c-*' builds before 'hybrid-*' \
+		for contract in $(sort $(wildcard contracts/*)); do \
 			$(MAKE) -e -C $$contract build; \
 		done; \
 		for crate in $(wildcard tools/*); do \
@@ -99,11 +100,8 @@ cargo:
 	cargo $(CARGO_CMD) $(CARGO_ARGS)
 
 clean:
-	rm -rf build
+	rm -rf build contracts/*/build
 	cargo clean
-	@for contract in $(wildcard contracts/c-*); do \
-		$(MAKE) -e -C $$contract clean; \
-	done; \
 
 TEMPLATE_TYPE := --git
 TEMPLATE_REPO := https://github.com/cryptape/ckb-script-templates
