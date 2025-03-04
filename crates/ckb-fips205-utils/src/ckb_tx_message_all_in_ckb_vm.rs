@@ -98,8 +98,9 @@ pub fn generate_ckb_tx_message_all_with_witness<W: io::Write>(
     }
 
     // Hash the first witness of current script group
-    writer.write_all(&first_witness.as_slice()[0..16])?;
+    write_length(first_witness.input_type().as_slice().len(), writer)?;
     writer.write_all(first_witness.input_type().as_slice())?;
+    write_length(first_witness.output_type().as_slice().len(), writer)?;
     writer.write_all(first_witness.output_type().as_slice())?;
 
     // Hash the remaining witnesses in current script group

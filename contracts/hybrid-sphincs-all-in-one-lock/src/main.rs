@@ -180,8 +180,12 @@ pub fn program_entry() -> i8 {
                         let (root_to_leaf_fd, leaf_to_root_fd) = spawned_vms[param_index].unwrap();
                         // Writes data to verify to child VM
                         {
-                            let mut data = [0u8; 8 + 4 + 4 + 4];
-                            data[0..8]
+                            let mut data = [0u8; 3 + 8 + 4 + 4 + 4];
+                            // ckb-script-ipc compatible headers
+                            data[0] = 0; // Version in VLQ encoding
+                            data[1] = 1; // Method ID in VLQ encoding
+                            data[2] = 20; // Length in VLQ encoding
+                            data[3..3 + 8]
                                 .copy_from_slice(&(Source::GroupInput as u64).to_le_bytes()[..]);
 
                             let offset: u32 = (public_key.as_ptr() as u64
@@ -189,11 +193,11 @@ pub fn program_entry() -> i8 {
                                 - 1)
                             .try_into()
                             .expect("overflow");
-                            data[8 + 4..8 + 4 + 4].copy_from_slice(&offset.to_le_bytes());
+                            data[3 + 8 + 4..3 + 8 + 4 + 4].copy_from_slice(&offset.to_le_bytes());
                             let length: u32 = (1 + public_key.len() + signature.len())
                                 .try_into()
                                 .expect("overflow");
-                            data[8 + 4 + 4..].copy_from_slice(&length.to_le_bytes());
+                            data[3 + 8 + 4 + 4..].copy_from_slice(&length.to_le_bytes());
 
                             let mut written = 0;
                             while written < data.len() {

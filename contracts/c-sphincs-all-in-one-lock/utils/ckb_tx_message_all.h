@@ -71,22 +71,15 @@ static int ckb_tx_message_all_generate_with_witness_args(
   {
     uint8_t buffer[CKB_TX_MESSAGE_CKB_LOAD_BUFFER_SIZE];
     {
-      uint32_t read_len = mol2_read_at(&first_witness->cur, buffer, 16);
-      if (read_len != 16) {
-        MOL2_PANIC(MOL2_ERR_DATA);
-        return MOL2_ERR_DATA;
-      }
-      err = writer(buffer, 16, context);
+      mol2_cursor_t input_type =
+          first_witness->t->input_type(first_witness).cur;
+      uint32_t total_size = input_type.size;
+      err = writer((const uint8_t*)&total_size, 4, context);
       if (err != 0) {
         return err;
       }
-    }
 
-    {
-      mol2_cursor_t input_type =
-          first_witness->t->input_type(first_witness).cur;
       uint32_t read = 0;
-      uint32_t total_size = input_type.size;
       while (read < total_size) {
         uint32_t current = mol2_read_at(&input_type, buffer,
                                         CKB_TX_MESSAGE_CKB_LOAD_BUFFER_SIZE);
@@ -103,8 +96,13 @@ static int ckb_tx_message_all_generate_with_witness_args(
     {
       mol2_cursor_t output_type =
           first_witness->t->output_type(first_witness).cur;
-      uint32_t read = 0;
       uint32_t total_size = output_type.size;
+      err = writer((const uint8_t*)&total_size, 4, context);
+      if (err != 0) {
+        return err;
+      }
+
+      uint32_t read = 0;
       while (read < total_size) {
         uint32_t current = mol2_read_at(&output_type, buffer,
                                         CKB_TX_MESSAGE_CKB_LOAD_BUFFER_SIZE);

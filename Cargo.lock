@@ -2416,6 +2416,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "multisig-tests"
+version = "0.1.0"
+dependencies = [
+ "ckb-fips205-utils",
+ "ckb-testtool",
+ "ckb_sphincs_utils",
+ "proptest",
+ "rand 0.8.5",
+ "rand_core 0.6.4",
+ "serde_json",
+]
+
+[[package]]
 name = "native-tls"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"

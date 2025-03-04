@@ -8,33 +8,34 @@ use fips205::traits::{SerDes, Signer, Verifier};
 use rand_core::CryptoRngCore;
 
 pub trait TxSigner {
-    fn param_id() -> ParamId;
-    fn script_args_prefix() -> [u8; 5];
+    fn param_id(&self) -> ParamId;
+    fn script_args_prefix(&self) -> [u8; 5];
 
     fn sign_message<R: CryptoRngCore>(&self, rng: &mut R, message: &[u8]) -> Bytes;
     fn public_key_bytes(&self) -> Bytes;
 
-    fn signature_length() -> usize {
-        lengths(Self::param_id()).1
+    fn signature_length(&self) -> usize {
+        lengths(self.param_id()).1
     }
 
-    fn public_key_length() -> usize {
-        lengths(Self::param_id()).0
+    fn public_key_length(&self) -> usize {
+        lengths(self.param_id()).0
     }
 
-    fn message_prefix() -> [u8; 5] {
-        let mut prefix = Self::script_args_prefix();
+    fn message_prefix(&self) -> [u8; 5] {
+        let mut prefix = self.script_args_prefix();
         prefix[4] |= 0x80;
         prefix
     }
 
     fn script_args(&self) -> Bytes {
         let mut hasher = Hasher::script_args_hasher();
-        hasher.update(&Self::script_args_prefix());
+        hasher.update(&self.script_args_prefix());
         hasher.update(&self.public_key_bytes());
         hasher.hash().to_vec().into()
     }
 
+    /// Sign provided transaction using single-sign design
     fn sign_tx<R: CryptoRngCore>(
         &self,
         rng: &mut R,
@@ -42,39 +43,9 @@ pub trait TxSigner {
         inputs: &[(CellOutput, Bytes)],
         first_script_group_index: usize,
     ) -> Transaction {
-        let pubkey_len = self.public_key_bytes().len();
-
-        // First, fill the lock field of the first group witness
-        // with adequent zeros
-        let mut witnesses: Vec<_> = tx.witnesses().into_iter().collect();
-        let original_witnesss = WitnessArgs::from_slice(
-            &witnesses
-                .get(first_script_group_index)
-                .expect("indexing first group witness")
-                .raw_data(),
-        )
-        .expect("parse witness args");
-        let updated_witness = original_witnesss
-            .as_builder()
-            .lock(
-                Some(Bytes::from(vec![
-                    0;
-                    5 + pubkey_len + Self::signature_length()
-                ]))
-                .pack(),
-            )
-            .build();
-        witnesses[first_script_group_index] = updated_witness.as_bytes().pack();
-
-        let tx = tx
-            .clone()
-            .as_builder()
-            .witnesses(BytesVec::new_builder().set(witnesses).build())
-            .build();
-
         let mut hasher = Hasher::message_hasher();
         generate_ckb_tx_message_all(
-            &tx,
+            tx,
             inputs,
             ScriptOrIndex::Index(first_script_group_index),
             &mut hasher,
@@ -94,8 +65,9 @@ pub trait TxSigner {
         )
         .expect("parse witness args");
 
-        let mut data = vec![0; 5 + pubkey_len + Self::signature_length()];
-        data[0..5].copy_from_slice(&Self::message_prefix());
+        let pubkey_len = self.public_key_length();
+        let mut data = vec![0; 5 + pubkey_len + self.signature_length()];
+        data[0..5].copy_from_slice(&self.message_prefix());
         data[5..pubkey_len + 5].copy_from_slice(&self.public_key_bytes());
         data[pubkey_len + 5..].copy_from_slice(&signature);
 
@@ -129,11 +101,11 @@ impl Sha2128F {
 }
 
 impl TxSigner for Sha2128F {
-    fn param_id() -> ParamId {
+    fn param_id(&self) -> ParamId {
         ParamId::Sha2128F
     }
 
-    fn script_args_prefix() -> [u8; 5] {
+    fn script_args_prefix(&self) -> [u8; 5] {
         [0x80, 0x01, 0x01, 0x01, 0x01]
     }
 
@@ -168,11 +140,11 @@ impl Sha2128S {
 }
 
 impl TxSigner for Sha2128S {
-    fn param_id() -> ParamId {
+    fn param_id(&self) -> ParamId {
         ParamId::Sha2128S
     }
 
-    fn script_args_prefix() -> [u8; 5] {
+    fn script_args_prefix(&self) -> [u8; 5] {
         [0x80, 0x01, 0x01, 0x01, 0x02]
     }
 
@@ -207,11 +179,11 @@ impl Sha2192F {
 }
 
 impl TxSigner for Sha2192F {
-    fn param_id() -> ParamId {
+    fn param_id(&self) -> ParamId {
         ParamId::Sha2192F
     }
 
-    fn script_args_prefix() -> [u8; 5] {
+    fn script_args_prefix(&self) -> [u8; 5] {
         [0x80, 0x01, 0x01, 0x01, 0x03]
     }
 
@@ -246,11 +218,11 @@ impl Sha2192S {
 }
 
 impl TxSigner for Sha2192S {
-    fn param_id() -> ParamId {
+    fn param_id(&self) -> ParamId {
         ParamId::Sha2192S
     }
 
-    fn script_args_prefix() -> [u8; 5] {
+    fn script_args_prefix(&self) -> [u8; 5] {
         [0x80, 0x01, 0x01, 0x01, 0x04]
     }
 
@@ -285,11 +257,11 @@ impl Sha2256F {
 }
 
 impl TxSigner for Sha2256F {
-    fn param_id() -> ParamId {
+    fn param_id(&self) -> ParamId {
         ParamId::Sha2256F
     }
 
-    fn script_args_prefix() -> [u8; 5] {
+    fn script_args_prefix(&self) -> [u8; 5] {
         [0x80, 0x01, 0x01, 0x01, 0x05]
     }
 
@@ -324,11 +296,11 @@ impl Sha2256S {
 }
 
 impl TxSigner for Sha2256S {
-    fn param_id() -> ParamId {
+    fn param_id(&self) -> ParamId {
         ParamId::Sha2256S
     }
 
-    fn script_args_prefix() -> [u8; 5] {
+    fn script_args_prefix(&self) -> [u8; 5] {
         [0x80, 0x01, 0x01, 0x01, 0x06]
     }
 
@@ -363,11 +335,11 @@ impl Shake128F {
 }
 
 impl TxSigner for Shake128F {
-    fn param_id() -> ParamId {
+    fn param_id(&self) -> ParamId {
         ParamId::Shake128F
     }
 
-    fn script_args_prefix() -> [u8; 5] {
+    fn script_args_prefix(&self) -> [u8; 5] {
         [0x80, 0x01, 0x01, 0x01, 0x07]
     }
 
@@ -402,11 +374,11 @@ impl Shake128S {
 }
 
 impl TxSigner for Shake128S {
-    fn param_id() -> ParamId {
+    fn param_id(&self) -> ParamId {
         ParamId::Shake128S
     }
 
-    fn script_args_prefix() -> [u8; 5] {
+    fn script_args_prefix(&self) -> [u8; 5] {
         [0x80, 0x01, 0x01, 0x01, 0x08]
     }
 
@@ -441,11 +413,11 @@ impl Shake192F {
 }
 
 impl TxSigner for Shake192F {
-    fn param_id() -> ParamId {
+    fn param_id(&self) -> ParamId {
         ParamId::Shake192F
     }
 
-    fn script_args_prefix() -> [u8; 5] {
+    fn script_args_prefix(&self) -> [u8; 5] {
         [0x80, 0x01, 0x01, 0x01, 0x09]
     }
 
@@ -480,11 +452,11 @@ impl Shake192S {
 }
 
 impl TxSigner for Shake192S {
-    fn param_id() -> ParamId {
+    fn param_id(&self) -> ParamId {
         ParamId::Shake192S
     }
 
-    fn script_args_prefix() -> [u8; 5] {
+    fn script_args_prefix(&self) -> [u8; 5] {
         [0x80, 0x01, 0x01, 0x01, 0x0a]
     }
 
@@ -519,11 +491,11 @@ impl Shake256F {
 }
 
 impl TxSigner for Shake256F {
-    fn param_id() -> ParamId {
+    fn param_id(&self) -> ParamId {
         ParamId::Shake256F
     }
 
-    fn script_args_prefix() -> [u8; 5] {
+    fn script_args_prefix(&self) -> [u8; 5] {
         [0x80, 0x01, 0x01, 0x01, 0x0b]
     }
 
@@ -558,11 +530,11 @@ impl Shake256S {
 }
 
 impl TxSigner for Shake256S {
-    fn param_id() -> ParamId {
+    fn param_id(&self) -> ParamId {
         ParamId::Shake256S
     }
 
-    fn script_args_prefix() -> [u8; 5] {
+    fn script_args_prefix(&self) -> [u8; 5] {
         [0x80, 0x01, 0x01, 0x01, 0x0c]
     }
 

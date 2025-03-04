@@ -11,8 +11,16 @@ extern "C" {
     // uint32_t sphincs_plus_get_sign_size();
     fn sphincs_plus_get_sign_size() -> u32;
 
+    // uint32_t sphincs_plus_get_seed_size();
+    // Only used in tests
+    pub fn sphincs_plus_get_seed_size() -> u32;
+
     // int sphincs_plus_generate_keypair(uint8_t *pk, uint8_t *sk);
     fn sphincs_plus_generate_keypair(pk: *mut u8, sk: *mut u8) -> i32;
+
+    // int sphincs_plus_generate_keypair_from_seed(uint8_t *pk, uint8_t *sk,
+    //                                             const uint8_t *seed);
+    fn sphincs_plus_generate_keypair_from_seed(pk: *mut u8, sk: *mut u8, seed: *const u8) -> i32;
 
     // int sphincs_plus_sign(uint8_t *message, uint32_t message_size, uint8_t *sk, uint8_t *out_sign);
     fn sphincs_plus_sign(
@@ -57,6 +65,26 @@ impl SphincsPlus {
 
     pub fn get_sign_len(&self) -> usize {
         unsafe { sphincs_plus_get_sign_size() as usize }
+    }
+
+    pub fn from(seed: &[u8]) -> Self {
+        assert_eq!(unsafe { sphincs_plus_get_seed_size() as usize }, seed.len(),);
+
+        let mut s = Self {
+            pk: vec![0u8; unsafe { sphincs_plus_get_pk_size() as usize }],
+            sk: vec![0u8; unsafe { sphincs_plus_get_sk_size() as usize }],
+        };
+
+        let ret = unsafe {
+            sphincs_plus_generate_keypair_from_seed(
+                s.pk.as_mut_ptr(),
+                s.sk.as_mut_ptr(),
+                seed.as_ptr(),
+            )
+        };
+        assert_eq!(ret, 0, "gen keypair from seed failed");
+
+        s
     }
 
     pub fn new() -> Self {

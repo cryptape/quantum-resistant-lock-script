@@ -309,8 +309,13 @@ pub fn sign_tx_by_input_group(
                     .as_builder()
                     .lock(Some(zero_lock).pack())
                     .build();
-                blake2b.update(&witness_for_digest.as_slice()[0..16]);
+                blake2b.update(
+                    &(witness_for_digest.input_type().as_slice().len() as u32).to_le_bytes()[..],
+                );
                 blake2b.update(witness_for_digest.input_type().as_slice());
+                blake2b.update(
+                    &(witness_for_digest.output_type().as_slice().len() as u32).to_le_bytes()[..],
+                );
                 blake2b.update(witness_for_digest.output_type().as_slice());
 
                 // digest the remaining witnesses

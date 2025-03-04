@@ -314,7 +314,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2128F::new(&mut rng);
-        let public_key_length = Sha2128F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -335,7 +335,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2128F::new(&mut rng);
-        let public_key_length = Sha2128F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -421,7 +421,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2128S::new(&mut rng);
-        let public_key_length = Sha2128S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -442,7 +442,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2128S::new(&mut rng);
-        let public_key_length = Sha2128S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -529,7 +529,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2192F::new(&mut rng);
-        let public_key_length = Sha2192F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -550,7 +550,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2192F::new(&mut rng);
-        let public_key_length = Sha2192F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -636,7 +636,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2192S::new(&mut rng);
-        let public_key_length = Sha2192S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -657,7 +657,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2192S::new(&mut rng);
-        let public_key_length = Sha2192S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -744,7 +744,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2256F::new(&mut rng);
-        let public_key_length = Sha2256F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -765,7 +765,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2256F::new(&mut rng);
-        let public_key_length = Sha2256F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -851,7 +851,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2256S::new(&mut rng);
-        let public_key_length = Sha2256S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -872,7 +872,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2256S::new(&mut rng);
-        let public_key_length = Sha2256S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -959,7 +959,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake128F::new(&mut rng);
-        let public_key_length = Shake128F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -980,7 +980,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake128F::new(&mut rng);
-        let public_key_length = Shake128F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -1066,7 +1066,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake128S::new(&mut rng);
-        let public_key_length = Shake128S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -1087,7 +1087,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake128S::new(&mut rng);
-        let public_key_length = Shake128S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -1174,7 +1174,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake192F::new(&mut rng);
-        let public_key_length = Shake192F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -1195,7 +1195,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake192F::new(&mut rng);
-        let public_key_length = Shake192F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -1281,7 +1281,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake192S::new(&mut rng);
-        let public_key_length = Shake192S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -1302,7 +1302,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake192S::new(&mut rng);
-        let public_key_length = Shake192S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -1389,7 +1389,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake256F::new(&mut rng);
-        let public_key_length = Shake256F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -1410,7 +1410,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake256F::new(&mut rng);
-        let public_key_length = Shake256F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -1496,7 +1496,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake256S::new(&mut rng);
-        let public_key_length = Shake256S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -1517,7 +1517,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake256S::new(&mut rng);
-        let public_key_length = Shake256S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(C_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -1604,7 +1604,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2128F::new(&mut rng);
-        let public_key_length = Sha2128F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -1625,7 +1625,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2128F::new(&mut rng);
-        let public_key_length = Sha2128F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -1711,7 +1711,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2128S::new(&mut rng);
-        let public_key_length = Sha2128S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -1732,7 +1732,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2128S::new(&mut rng);
-        let public_key_length = Sha2128S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -1819,7 +1819,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2192F::new(&mut rng);
-        let public_key_length = Sha2192F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -1840,7 +1840,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2192F::new(&mut rng);
-        let public_key_length = Sha2192F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -1926,7 +1926,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2192S::new(&mut rng);
-        let public_key_length = Sha2192S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -1947,7 +1947,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2192S::new(&mut rng);
-        let public_key_length = Sha2192S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -2034,7 +2034,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2256F::new(&mut rng);
-        let public_key_length = Sha2256F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -2055,7 +2055,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2256F::new(&mut rng);
-        let public_key_length = Sha2256F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -2141,7 +2141,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2256S::new(&mut rng);
-        let public_key_length = Sha2256S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -2162,7 +2162,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2256S::new(&mut rng);
-        let public_key_length = Sha2256S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -2249,7 +2249,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake128F::new(&mut rng);
-        let public_key_length = Shake128F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -2270,7 +2270,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake128F::new(&mut rng);
-        let public_key_length = Shake128F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -2356,7 +2356,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake128S::new(&mut rng);
-        let public_key_length = Shake128S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -2377,7 +2377,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake128S::new(&mut rng);
-        let public_key_length = Shake128S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -2464,7 +2464,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake192F::new(&mut rng);
-        let public_key_length = Shake192F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -2485,7 +2485,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake192F::new(&mut rng);
-        let public_key_length = Shake192F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -2571,7 +2571,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake192S::new(&mut rng);
-        let public_key_length = Shake192S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -2592,7 +2592,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake192S::new(&mut rng);
-        let public_key_length = Shake192S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -2679,7 +2679,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake256F::new(&mut rng);
-        let public_key_length = Shake256F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -2700,7 +2700,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake256F::new(&mut rng);
-        let public_key_length = Shake256F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -2786,7 +2786,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake256S::new(&mut rng);
-        let public_key_length = Shake256S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -2807,7 +2807,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake256S::new(&mut rng);
-        let public_key_length = Shake256S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(RUST_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -2894,7 +2894,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2128F::new(&mut rng);
-        let public_key_length = Sha2128F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -2915,7 +2915,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2128F::new(&mut rng);
-        let public_key_length = Sha2128F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -3001,7 +3001,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2128S::new(&mut rng);
-        let public_key_length = Sha2128S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -3022,7 +3022,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2128S::new(&mut rng);
-        let public_key_length = Sha2128S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -3109,7 +3109,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2192F::new(&mut rng);
-        let public_key_length = Sha2192F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -3130,7 +3130,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2192F::new(&mut rng);
-        let public_key_length = Sha2192F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -3216,7 +3216,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2192S::new(&mut rng);
-        let public_key_length = Sha2192S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -3237,7 +3237,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2192S::new(&mut rng);
-        let public_key_length = Sha2192S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -3324,7 +3324,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2256F::new(&mut rng);
-        let public_key_length = Sha2256F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -3345,7 +3345,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2256F::new(&mut rng);
-        let public_key_length = Sha2256F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -3431,7 +3431,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2256S::new(&mut rng);
-        let public_key_length = Sha2256S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -3452,7 +3452,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Sha2256S::new(&mut rng);
-        let public_key_length = Sha2256S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -3539,7 +3539,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake128F::new(&mut rng);
-        let public_key_length = Shake128F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -3560,7 +3560,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake128F::new(&mut rng);
-        let public_key_length = Shake128F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -3646,7 +3646,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake128S::new(&mut rng);
-        let public_key_length = Shake128S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -3667,7 +3667,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake128S::new(&mut rng);
-        let public_key_length = Shake128S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -3754,7 +3754,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake192F::new(&mut rng);
-        let public_key_length = Shake192F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -3775,7 +3775,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake192F::new(&mut rng);
-        let public_key_length = Shake192F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -3861,7 +3861,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake192S::new(&mut rng);
-        let public_key_length = Shake192S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -3882,7 +3882,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake192S::new(&mut rng);
-        let public_key_length = Shake192S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -3969,7 +3969,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake256F::new(&mut rng);
-        let public_key_length = Shake256F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -3990,7 +3990,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake256F::new(&mut rng);
-        let public_key_length = Shake256F::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..20 {
@@ -4076,7 +4076,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake256S::new(&mut rng);
-        let public_key_length = Shake256S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..15 {
@@ -4097,7 +4097,7 @@ proptest! {
         let mut rng2 = StdRng::seed_from_u64(rng.gen());
 
         let signer = Shake256S::new(&mut rng);
-        let public_key_length = Shake256S::public_key_length();
+        let public_key_length = signer.public_key_length();
         let (context, valid_tx) = _build_valid_tx(HYBRID_NAME, signer, rng);
 
         for _ in 0..20 {

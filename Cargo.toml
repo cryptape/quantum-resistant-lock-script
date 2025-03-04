@@ -7,6 +7,7 @@ members = [
   "crates/ckb-fips205-utils",
   "crates/intermediate-source-generator",
   "crates/script-merge-tool",
+  "tests/multisig-tests",
   "tests/nist-test-vector-tests",
   "tests/sphincsplus_rust",
   "tests/validation-tests",

@@ -156,10 +156,14 @@ int handle_spawn(const uint8_t *command, size_t command_length) {
   uint64_t leaf_to_root_fd = fds[1];
 
   while (1) {
-    uint8_t data[8 + 4 + 4 + 4];
+    uint8_t data[3 + 8 + 4 + 4 + 4];
     CHECK(_read_all(root_to_leaf_fd, data, sizeof(data)));
+    /* ckb-script-ipc compatible headers in VLQ encoding. */
+    CHECK2(data[0] == 0, ERROR_SPHINCSPLUS_ARGV);
+    CHECK2(data[1] == 1, ERROR_SPHINCSPLUS_ARGV);
+    CHECK2(data[2] == 20, ERROR_SPHINCSPLUS_ARGV);
 
-    mol2_cursor_t cursor = _build_cursor_from_data(buffer, data);
+    mol2_cursor_t cursor = _build_cursor_from_data(buffer, &data[3]);
     int verify_err = verify(message, message_length, cursor);
     if (verify_err != 0) {
       /*
