@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ckb-std = "0.16.3"
-ckb-gen-types = { version = "0.119.0", default-features = false }
+ckb-std = "0.17.0"
+ckb-gen-types = { version = "0.200.0-rc1", default-features = false }
 
 [dependencies.ckb-fips205-utils]
 path = "../../crates/ckb-fips205-utils"
