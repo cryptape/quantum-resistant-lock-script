@@ -340,9 +340,9 @@ int main(int argc, char *argv[]) {
           data[1] = 1;  /* Method ID(1) in VLQ encoding */
           data[2] = 20; /* Length of Payload(20) in VLQ encoding */
           *((uint64_t *)&data[3]) = CKB_SOURCE_GROUP_INPUT;
-          *((uint64_t *)&data[3 + 8]) = 0;
-          *((uint64_t *)&data[3 + 8 + 4]) = signatures.offset - 1;
-          *((uint64_t *)&data[3 + 8 + 4 + 4]) = 1 + pk_size + sign_size;
+          *((uint32_t *)&data[3 + 8]) = 0;
+          *((uint32_t *)&data[3 + 8 + 4]) = signatures.offset - 1;
+          *((uint32_t *)&data[3 + 8 + 4 + 4]) = 1 + pk_size + sign_size;
 
           CHECK(_write_all(fds[param_id][0], data, sizeof(data)));
         }
