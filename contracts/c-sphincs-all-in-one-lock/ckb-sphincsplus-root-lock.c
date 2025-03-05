@@ -109,11 +109,10 @@ static int write_to_blake2b(const uint8_t *data, size_t length, void *context) {
 
 int fetch_params(uint8_t id, const CkbSphincsParams **params) {
   int err = CKB_SUCCESS;
-  id &= MULTISIG_PARAMS_ID_MASK;
-  /* id uses offset by 1 */
-  CHECK2(id >= 1 && id <= CKB_SPHINCS_SUPPORTED_PARAMS_COUNT,
+  uint8_t index = MULTISIG_PARAM_ID_TO_INDEX(id);
+  CHECK2(index >= 0 && index < CKB_SPHINCS_SUPPORTED_PARAMS_COUNT,
          ERROR_SPHINCSPLUS_WITNESS);
-  *params = &ckb_sphincs_supported_params[id - 1];
+  *params = &ckb_sphincs_supported_params[index];
 
 exit:
   return err;
@@ -160,10 +159,11 @@ int multisig_preliminary_check(WitnessArgsType *witness_args,
   int last_param_id = 0;
 
   for (uint8_t i = 0; i < pubkeys; i++) {
-    uint8_t id;
-    CHECK(mol2_read_and_advance(&lock_bytes, &id, 1));
-    uint8_t param_id = id & MULTISIG_PARAMS_ID_MASK;
-    blake2b_update(&s, &param_id, 1);
+    uint8_t flag;
+    CHECK(mol2_read_and_advance(&lock_bytes, &flag, 1));
+    uint8_t param_id = MULTISIG_FLAG_TO_PARAM_ID(flag);
+    uint8_t sign_flag = MULTISIG_SIGN_FLAG(flag);
+    blake2b_update(&s, &sign_flag, 1);
 
     const CkbSphincsParams *params = NULL;
     CHECK(fetch_params(param_id, &params));
@@ -172,7 +172,7 @@ int multisig_preliminary_check(WitnessArgsType *witness_args,
     CHECK(mol2_read_and_advance(&lock_bytes, pubkey, params->pk_bytes));
     blake2b_update(&s, pubkey, params->pk_bytes);
 
-    if ((id & MULTISIG_SIG_MASK) != 0) {
+    if (MULTISIG_HAS_SIGNATURE(flag)) {
       mol2_advance(&lock_bytes, params->sign_bytes);
 
       CHECK2(threshold > 0, ERROR_SPHINCSPLUS_WITNESS);
@@ -288,19 +288,20 @@ int main(int argc, char *argv[]) {
      * Iterate over lock data again to verify each signature.
      */
     while (signatures.size > 0) {
-      uint8_t header;
-      CHECK(mol2_read_and_advance(&signatures, &header, 1));
+      uint8_t flag;
+      CHECK(mol2_read_and_advance(&signatures, &flag, 1));
 
-      uint8_t param_id = header & MULTISIG_PARAMS_ID_MASK;
-      if (all_params[param_id] == NULL) {
-        CHECK(fetch_params(param_id, &all_params[param_id]));
+      uint8_t param_index = MULTISIG_FLAG_TO_PARAM_INDEX(flag);
+      if (all_params[param_index] == NULL) {
+        CHECK(fetch_params(MULTISIG_FLAG_TO_PARAM_ID(flag),
+                           &all_params[param_index]));
       }
-      uint32_t pk_size = all_params[param_id]->pk_bytes;
-      uint32_t sign_size = all_params[param_id]->sign_bytes;
+      uint32_t pk_size = all_params[param_index]->pk_bytes;
+      uint32_t sign_size = all_params[param_index]->sign_bytes;
       CHECK2(pk_size + sign_size + 1 == (size_t)pk_size + (size_t)sign_size + 1,
              ERROR_SPHINCSPLUS_WITNESS;);
 
-      if ((header & MULTISIG_SIG_MASK) != 0) {
+      if (MULTISIG_HAS_SIGNATURE(flag)) {
         /*
          * Spawns a leaf process if needed, and use it to validate
          * the signature
@@ -308,7 +309,7 @@ int main(int argc, char *argv[]) {
         CHECK2(signatures.size >= pk_size + sign_size,
                ERROR_SPHINCSPLUS_WITNESS);
         /* Spawn a new proces if needed */
-        if (spawned_processes[param_id] == 0) {
+        if (spawned_processes[param_index] == 0) {
           uint64_t root_to_leaf_fds[2];
           CHECK(ckb_pipe(root_to_leaf_fds));
           uint64_t leaf_to_root_fds[2];
@@ -320,17 +321,18 @@ int main(int argc, char *argv[]) {
            */
           uint64_t inherited_fds[3] = {root_to_leaf_fds[0], leaf_to_root_fds[1],
                                        0};
-          fds[param_id][0] = root_to_leaf_fds[1];
-          fds[param_id][1] = leaf_to_root_fds[0];
+          fds[param_index][0] = root_to_leaf_fds[1];
+          fds[param_index][1] = leaf_to_root_fds[0];
 
           const char *argv[] = {(const char *)escaped};
-          spawn_args_t spawn_args = {.argc = 1,
-                                     .argv = (const char **)argv,
-                                     .process_id = &spawned_processes[param_id],
-                                     .inherited_fds = inherited_fds};
-          CHECK(ckb_spawn_cell(code_hash, hash_type,
-                               *all_params[param_id]->offset_ptr,
-                               *all_params[param_id]->length_ptr, &spawn_args));
+          spawn_args_t spawn_args = {
+              .argc = 1,
+              .argv = (const char **)argv,
+              .process_id = &spawned_processes[param_index],
+              .inherited_fds = inherited_fds};
+          CHECK(ckb_spawn_cell(
+              code_hash, hash_type, *all_params[param_index]->offset_ptr,
+              *all_params[param_index]->length_ptr, &spawn_args));
         }
         /* Sends data location to the leaf process */
         {
@@ -344,13 +346,14 @@ int main(int argc, char *argv[]) {
           *((uint32_t *)&data[3 + 8 + 4]) = signatures.offset - 1;
           *((uint32_t *)&data[3 + 8 + 4 + 4]) = 1 + pk_size + sign_size;
 
-          CHECK(_write_all(fds[param_id][0], data, sizeof(data)));
+          CHECK(_write_all(fds[param_index][0], data, sizeof(data)));
         }
         /* Waits for leaf process to respond */
         {
-          uint8_t response;
-          CHECK(_read_all(fds[param_id][1], &response, 1));
-          CHECK2(response == 0, ERROR_SPHINCSPLUS_LEAF_VERIFY);
+          uint8_t response[3];
+          CHECK(_read_all(fds[param_index][1], response, 3));
+          CHECK2(response[0] == 0 && response[1] == 0 && response[2] == 0,
+                 ERROR_SPHINCSPLUS_LEAF_VERIFY);
         }
         /* Advance to the next signature if all the above succeeds */
         mol2_advance(&signatures, pk_size + sign_size);

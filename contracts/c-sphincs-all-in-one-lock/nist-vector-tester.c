@@ -40,11 +40,10 @@
 
 int fetch_params(uint8_t id, const CkbSphincsParams **params) {
   int err = CKB_SUCCESS;
-  id &= MULTISIG_PARAMS_ID_MASK;
-  /* id uses offset by 1 */
-  CHECK2(id >= 1 && id <= CKB_SPHINCS_SUPPORTED_PARAMS_COUNT,
+  uint8_t index = MULTISIG_PARAM_ID_TO_INDEX(id);
+  CHECK2(index >= 0 && index < CKB_SPHINCS_SUPPORTED_PARAMS_COUNT,
          ERROR_SPHINCSPLUS_WITNESS);
-  *params = &ckb_sphincs_supported_params[id - 1];
+  *params = &ckb_sphincs_supported_params[index];
 
 exit:
   return err;
@@ -89,8 +88,8 @@ int main() {
          ERROR_SPHINCSPLUS_ENCODING);
 
   const CkbSphincsParams *params = NULL;
-  CHECK(
-      fetch_params(second_witness_data[0] & MULTISIG_PARAMS_ID_MASK, &params));
+  uint8_t param_id = MULTISIG_FLAG_TO_PARAM_ID(second_witness_data[0]);
+  CHECK(fetch_params(param_id, &params));
 
   uint8_t script_data[MAX_SCRIPT_SIZE];
   size_t script_len = MAX_SCRIPT_SIZE;

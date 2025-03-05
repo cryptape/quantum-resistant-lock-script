@@ -1,5 +1,5 @@
 use crate::{Loader, utils::*};
-use ckb_fips205_utils::{Hasher, signing::TxSigner};
+use ckb_fips205_utils::{Hasher, construct_flag, signing::TxSigner};
 use ckb_testtool::{
     ckb_error::Error,
     ckb_types::{
@@ -475,7 +475,7 @@ fn _sign_multisig_tx<R: Rng + CryptoRngCore>(
             lock.extend(&single_lock[4..]);
         } else {
             // Only append param Id & public key
-            lock.push(signer.param_id() as u8);
+            lock.push(construct_flag(signer.param_id(), false));
             lock.extend(&signer.public_key_bytes());
         }
     }

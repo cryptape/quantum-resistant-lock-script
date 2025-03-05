@@ -41,13 +41,13 @@ int verify(const uint8_t *message, size_t message_length,
   int err = CKB_SUCCESS;
 
   while (data_cursor.size > 0) {
-    uint8_t param_id;
-    CHECK(mol2_read_and_advance(&data_cursor, &param_id, 1));
+    uint8_t flag;
+    CHECK(mol2_read_and_advance(&data_cursor, &flag, 1));
 
-    CHECK2((param_id & MULTISIG_PARAMS_ID_MASK) == PARAMS_ID,
+    CHECK2(MULTISIG_FLAG_TO_PARAM_ID(flag) == PARAMS_ID,
            ERROR_SPHINCSPLUS_PARAMS);
 
-    if ((param_id & MULTISIG_SIG_MASK) != 0) {
+    if (MULTISIG_HAS_SIGNATURE(flag)) {
       /* Validate a signature when we see one */
       CHECK2(data_cursor.size >= SPHINCS_PLUS_PK_SIZE + SPHINCS_PLUS_SIGN_SIZE,
              ERROR_SPHINCSPLUS_WITNESS);
@@ -174,14 +174,14 @@ int handle_spawn(const uint8_t *command, size_t command_length) {
        * 2. Both fds are closed
        * 3. Current script terminates with non-zero exit code
        */
-      uint8_t failure_response = 1;
-      CHECK(_write_all(leaf_to_root_fd, &failure_response, 1));
+      uint8_t failure_response[3] = {0, 1, 0};
+      CHECK(_write_all(leaf_to_root_fd, failure_response, 3));
       CHECK(ckb_close(root_to_leaf_fd));
       CHECK(ckb_close(leaf_to_root_fd));
       return verify_err;
     } else {
-      uint8_t success_response = 0;
-      CHECK(_write_all(leaf_to_root_fd, &success_response, 1));
+      uint8_t success_response[3] = {0, 0, 0};
+      CHECK(_write_all(leaf_to_root_fd, success_response, 3));
     }
   }
 

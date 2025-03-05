@@ -1,5 +1,5 @@
 use ckb_fips205_utils::{
-    ParamId,
+    ParamId, construct_flag,
     message::{HashAlgorithm, build_fips205_final_message},
     signing::{Sha2128F, Sha2128S, Sha2192F, Sha2256F, Shake128F, TxSigner},
 };
@@ -31,19 +31,6 @@ impl TxSigner for Signer {
             Signer::Rust256F(s) => s.param_id(),
             Signer::Rust128S(s) => s.param_id(),
             Signer::RustShake128F(s) => s.param_id(),
-        }
-    }
-
-    fn script_args_prefix(&self) -> [u8; 5] {
-        match self {
-            Signer::C(_) => {
-                ckb_sphincs_utils::sphincsplus::single_sign_script_args_prefix().unwrap()
-            }
-            Signer::Rust128F(s) => s.script_args_prefix(),
-            Signer::Rust192F(s) => s.script_args_prefix(),
-            Signer::Rust256F(s) => s.script_args_prefix(),
-            Signer::Rust128S(s) => s.script_args_prefix(),
-            Signer::RustShake128F(s) => s.script_args_prefix(),
         }
     }
 
@@ -108,7 +95,7 @@ pub fn build_multisig_configuration(
     res.extend(&build_multisig_header(signers, threshold, require_first_n));
 
     for signer in signers {
-        res.push(signer.param_id() as u8);
+        res.push(construct_flag(signer.param_id(), false));
         res.extend(&signer.public_key_bytes());
     }
 

@@ -1,5 +1,5 @@
 use crate::{types::TestSuite, Loader};
-use ckb_fips205_utils::{message::build_fips205_final_message, ParamId};
+use ckb_fips205_utils::{construct_flag, message::build_fips205_final_message, ParamId};
 use ckb_testtool::{
     ckb_types::{bytes::Bytes, core::TransactionBuilder, packed::*, prelude::*},
     context::Context,
@@ -52,9 +52,8 @@ fn _run_nist_vector(
     signature: &[u8],
     final_message: Vec<u8>,
 ) {
-    let param_id: u8 = param_id.into();
     let mut second_witness_data = vec![0u8; 1 + public_key.len() + signature.len()];
-    second_witness_data[0] = param_id | (1 << 7);
+    second_witness_data[0] = construct_flag(param_id, true);
     second_witness_data[1..1 + public_key.len()].copy_from_slice(public_key);
     second_witness_data[1 + public_key.len()..].copy_from_slice(signature);
 

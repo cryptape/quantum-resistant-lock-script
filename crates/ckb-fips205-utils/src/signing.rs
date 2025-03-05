@@ -1,5 +1,6 @@
 use crate::{
     ckb_tx_message_all_from_mock_tx::{generate_ckb_tx_message_all, ScriptOrIndex},
+    single_sign_script_args_prefix, single_sign_witness_prefix,
     verifying::lengths,
     Hasher, ParamId,
 };
@@ -9,7 +10,6 @@ use rand_core::CryptoRngCore;
 
 pub trait TxSigner {
     fn param_id(&self) -> ParamId;
-    fn script_args_prefix(&self) -> [u8; 5];
 
     fn sign_message<R: CryptoRngCore>(&self, rng: &mut R, message: &[u8]) -> Bytes;
     fn public_key_bytes(&self) -> Bytes;
@@ -22,10 +22,12 @@ pub trait TxSigner {
         lengths(self.param_id()).0
     }
 
+    fn script_args_prefix(&self) -> [u8; 5] {
+        single_sign_script_args_prefix(self.param_id())
+    }
+
     fn message_prefix(&self) -> [u8; 5] {
-        let mut prefix = self.script_args_prefix();
-        prefix[4] |= 0x80;
-        prefix
+        single_sign_witness_prefix(self.param_id())
     }
 
     fn script_args(&self) -> Bytes {
@@ -105,10 +107,6 @@ impl TxSigner for Sha2128F {
         ParamId::Sha2128F
     }
 
-    fn script_args_prefix(&self) -> [u8; 5] {
-        [0x80, 0x01, 0x01, 0x01, 0x01]
-    }
-
     fn public_key_bytes(&self) -> Bytes {
         self.public_key.clone().into_bytes().to_vec().into()
     }
@@ -142,10 +140,6 @@ impl Sha2128S {
 impl TxSigner for Sha2128S {
     fn param_id(&self) -> ParamId {
         ParamId::Sha2128S
-    }
-
-    fn script_args_prefix(&self) -> [u8; 5] {
-        [0x80, 0x01, 0x01, 0x01, 0x02]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -183,10 +177,6 @@ impl TxSigner for Sha2192F {
         ParamId::Sha2192F
     }
 
-    fn script_args_prefix(&self) -> [u8; 5] {
-        [0x80, 0x01, 0x01, 0x01, 0x03]
-    }
-
     fn public_key_bytes(&self) -> Bytes {
         self.public_key.clone().into_bytes().to_vec().into()
     }
@@ -220,10 +210,6 @@ impl Sha2192S {
 impl TxSigner for Sha2192S {
     fn param_id(&self) -> ParamId {
         ParamId::Sha2192S
-    }
-
-    fn script_args_prefix(&self) -> [u8; 5] {
-        [0x80, 0x01, 0x01, 0x01, 0x04]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -261,10 +247,6 @@ impl TxSigner for Sha2256F {
         ParamId::Sha2256F
     }
 
-    fn script_args_prefix(&self) -> [u8; 5] {
-        [0x80, 0x01, 0x01, 0x01, 0x05]
-    }
-
     fn public_key_bytes(&self) -> Bytes {
         self.public_key.clone().into_bytes().to_vec().into()
     }
@@ -298,10 +280,6 @@ impl Sha2256S {
 impl TxSigner for Sha2256S {
     fn param_id(&self) -> ParamId {
         ParamId::Sha2256S
-    }
-
-    fn script_args_prefix(&self) -> [u8; 5] {
-        [0x80, 0x01, 0x01, 0x01, 0x06]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -339,10 +317,6 @@ impl TxSigner for Shake128F {
         ParamId::Shake128F
     }
 
-    fn script_args_prefix(&self) -> [u8; 5] {
-        [0x80, 0x01, 0x01, 0x01, 0x07]
-    }
-
     fn public_key_bytes(&self) -> Bytes {
         self.public_key.clone().into_bytes().to_vec().into()
     }
@@ -376,10 +350,6 @@ impl Shake128S {
 impl TxSigner for Shake128S {
     fn param_id(&self) -> ParamId {
         ParamId::Shake128S
-    }
-
-    fn script_args_prefix(&self) -> [u8; 5] {
-        [0x80, 0x01, 0x01, 0x01, 0x08]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -417,10 +387,6 @@ impl TxSigner for Shake192F {
         ParamId::Shake192F
     }
 
-    fn script_args_prefix(&self) -> [u8; 5] {
-        [0x80, 0x01, 0x01, 0x01, 0x09]
-    }
-
     fn public_key_bytes(&self) -> Bytes {
         self.public_key.clone().into_bytes().to_vec().into()
     }
@@ -454,10 +420,6 @@ impl Shake192S {
 impl TxSigner for Shake192S {
     fn param_id(&self) -> ParamId {
         ParamId::Shake192S
-    }
-
-    fn script_args_prefix(&self) -> [u8; 5] {
-        [0x80, 0x01, 0x01, 0x01, 0x0a]
     }
 
     fn public_key_bytes(&self) -> Bytes {
@@ -495,10 +457,6 @@ impl TxSigner for Shake256F {
         ParamId::Shake256F
     }
 
-    fn script_args_prefix(&self) -> [u8; 5] {
-        [0x80, 0x01, 0x01, 0x01, 0x0b]
-    }
-
     fn public_key_bytes(&self) -> Bytes {
         self.public_key.clone().into_bytes().to_vec().into()
     }
@@ -532,10 +490,6 @@ impl Shake256S {
 impl TxSigner for Shake256S {
     fn param_id(&self) -> ParamId {
         ParamId::Shake256S
-    }
-
-    fn script_args_prefix(&self) -> [u8; 5] {
-        [0x80, 0x01, 0x01, 0x01, 0x0c]
     }
 
     fn public_key_bytes(&self) -> Bytes {

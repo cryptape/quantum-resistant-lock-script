@@ -31,29 +31,29 @@ use serde_string_enum::{DeserializeLabeledStringEnum, SerializeLabeledStringEnum
 )]
 pub enum ParamId {
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-128f")]
-    Sha2128F = 1,
+    Sha2128F = 48,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-128s")]
-    Sha2128S = 2,
+    Sha2128S = 49,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-192f")]
-    Sha2192F = 3,
+    Sha2192F = 50,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-192s")]
-    Sha2192S = 4,
+    Sha2192S = 51,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-256f")]
-    Sha2256F = 5,
+    Sha2256F = 52,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHA2-256s")]
-    Sha2256S = 6,
+    Sha2256S = 53,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-128f")]
-    Shake128F = 7,
+    Shake128F = 54,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-128s")]
-    Shake128S = 8,
+    Shake128S = 55,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-192f")]
-    Shake192F = 9,
+    Shake192F = 56,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-192s")]
-    Shake192S = 10,
+    Shake192S = 57,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-256f")]
-    Shake256F = 11,
+    Shake256F = 58,
     #[cfg_attr(feature = "serde", string = "SLH-DSA-SHAKE-256s")]
-    Shake256S = 12,
+    Shake256S = 59,
 }
 
 pub fn iterate_param_id<F>(mut f: F)
@@ -77,12 +77,12 @@ pub fn collect_param_ids() -> Vec<ParamId> {
 }
 
 pub fn single_sign_script_args_prefix(param_id: ParamId) -> [u8; 5] {
-    [0x80, 0x01, 0x01, 0x01, param_id.into()]
+    [0x80, 0x01, 0x01, 0x01, construct_flag(param_id, false)]
 }
 
 pub fn single_sign_witness_prefix(param_id: ParamId) -> [u8; 5] {
     let mut prefix = single_sign_script_args_prefix(param_id);
-    prefix[4] |= 0x80;
+    prefix[4] |= construct_flag(param_id, true);
     prefix
 }
 
@@ -140,9 +140,20 @@ impl std::io::Write for Hasher {
     }
 }
 
-const MULTISIG_RESERVED_FIELD_VALUE: u8 = 0x80;
-const MULTISIG_PARAMS_ID_MASK: u8 = 0x7F;
-const MULTISIG_SIG_MASK: u8 = 1u8 << 7;
+pub fn construct_flag(param_id: ParamId, has_signature: bool) -> u8 {
+    let value: u8 = param_id.into();
+    (value << 1) | if has_signature { 1 } else { 0 }
+}
+
+pub fn destruct_flag(flag: u8) -> (ParamId, bool) {
+    let has_signature = flag & 1 != 0;
+    let param_id: ParamId = (flag >> 1).try_into().expect("parse param id");
+    (param_id, has_signature)
+}
+
+pub fn sign_flag(flag: u8) -> u8 {
+    (flag >> 1) << 1
+}
 
 /// For now a slice version suffices, later we might add one that works on
 /// iterator when lazy reader is good for our use case.
@@ -151,11 +162,11 @@ pub fn iterate_public_key_with_optional_signature<F, G>(
     mut data_processor: F,
     length_fetcher: G,
 ) where
-    F: FnMut(usize, ParamId, &[u8], Option<&[u8]>),
+    F: FnMut(usize, ParamId, u8, &[u8], Option<&[u8]>),
     G: Fn(ParamId) -> (usize, usize),
 {
     assert!(lock.len() > 4);
-    assert_eq!(lock[0], MULTISIG_RESERVED_FIELD_VALUE);
+    assert_eq!(lock[0], 0x80);
     let require_first_n = lock[1];
     let mut threshold = lock[2];
     let pubkeys = lock[3];
@@ -166,23 +177,27 @@ pub fn iterate_public_key_with_optional_signature<F, G>(
 
     let mut i = 4;
     for pubkey_index in 0..pubkeys {
-        let id = lock[i];
-        let param_id: ParamId = (id & MULTISIG_PARAMS_ID_MASK)
-            .try_into()
-            .expect("parse param id");
+        let (param_id, has_signature) = destruct_flag(lock[i]);
+        let sign_flag = sign_flag(lock[i]);
         let (public_key_length, signature_length) = length_fetcher(param_id);
         let public_key = &lock[i + 1..i + 1 + public_key_length];
 
-        if (id & MULTISIG_SIG_MASK) != 0 {
+        if has_signature {
             let signature =
                 &lock[i + 1 + public_key_length..i + 1 + public_key_length + signature_length];
-            data_processor(pubkey_index as usize, param_id, public_key, Some(signature));
+            data_processor(
+                pubkey_index as usize,
+                param_id,
+                sign_flag,
+                public_key,
+                Some(signature),
+            );
 
             assert!(threshold > 0);
             threshold -= 1;
             i += 1 + public_key_length + signature_length;
         } else {
-            data_processor(pubkey_index as usize, param_id, public_key, None);
+            data_processor(pubkey_index as usize, param_id, sign_flag, public_key, None);
 
             assert!(pubkey_index >= require_first_n);
             i += 1 + public_key_length;

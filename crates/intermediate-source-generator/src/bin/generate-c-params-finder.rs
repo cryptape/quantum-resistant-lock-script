@@ -20,12 +20,14 @@ typedef struct {{
 CkbSphincsParams ckb_sphincs_supported_params[] = {{"#
     );
 
+    let mut min_nid = u8::MAX;
     for param_id in collect_param_ids() {
         let name = format!("CKB_{}", param_id)
             .replace("-", "_")
             .replace("SLH_DSA", "SPHINCS")
             .to_uppercase();
         let nid: u8 = param_id.into();
+        min_nid = std::cmp::min(min_nid, nid);
         println!(
             r#"  {{
     .pk_bytes = CKB_SPHINCS_PARAM{nid}_PK_BYTES,
@@ -39,6 +41,7 @@ CkbSphincsParams ckb_sphincs_supported_params[] = {{"#
 
     println!(
         r#"}};
-#define CKB_SPHINCS_SUPPORTED_PARAMS_COUNT (sizeof(ckb_sphincs_supported_params) / sizeof(CkbSphincsParams))"#
+#define CKB_SPHINCS_SUPPORTED_PARAMS_COUNT (sizeof(ckb_sphincs_supported_params) / sizeof(CkbSphincsParams))
+#define CKB_SPHINCS_MIN_PARAM_ID {min_nid}"#
     )
 }

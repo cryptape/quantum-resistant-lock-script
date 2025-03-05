@@ -110,7 +110,7 @@ $(CUR_BUILD)/leaf.complete: $(DETECTING_SOURCES) $(HEADERS) ckb-sphincsplus-leaf
 	@set -eu; \
 	param_ids=$$(cat $(CUR_BUILD)/params.txt | cut -d" " -f1); \
 	for param_id in $${param_ids}; do \
-		param=$$(head -n $${param_id} $(CUR_BUILD)/params.txt | tail -1 | cut -d" " -f2); \
+		param=$$(grep ^$${param_id} $(CUR_BUILD)/params.txt | head -1 | cut -d" " -f2); \
 		if echo "$${param}" | grep "shake" - > /dev/null; then \
 			srcs="$(COMPILING_COMMON_SOURCES) $(COMPILING_SHAKE_SOURCES)"; \
 		elif echo "$${param}" | grep "sha2" - > /dev/null; then \
@@ -138,7 +138,7 @@ $(CUR_BUILD)/aggregated-params.h: tools/extract-sphincs-params.c $(HEADERS) $(CU
 	@set -eu; \
 	param_ids=$$(cat $(CUR_BUILD)/params.txt | cut -d" " -f1); \
 	for param_id in $${param_ids}; do \
-		param=$$(head -n $${param_id} $(CUR_BUILD)/params.txt | tail -1 | cut -d" " -f2); \
+		param=$$(grep ^$${param_id} $(CUR_BUILD)/params.txt | head -1 | cut -d" " -f2); \
 		set -x; \
 		$(CLANG) -g -O3 $< -o $(CUR_BUILD)/extract-params_$${param} \
 			-DPARAMS_ID=$${param_id} -DPARAMS=$${param} \

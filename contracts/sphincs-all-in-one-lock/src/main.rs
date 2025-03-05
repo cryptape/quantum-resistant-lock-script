@@ -45,8 +45,8 @@ pub fn program_entry() -> i8 {
 
     iterate_public_key_with_optional_signature(
         lock,
-        |_i, param_id, public_key, signature| {
-            script_args_hasher.update(&[param_id.into()]);
+        |_i, param_id, sign_flag, public_key, signature| {
+            script_args_hasher.update(&[sign_flag]);
             script_args_hasher.update(public_key);
 
             if let Some(signature) = signature {

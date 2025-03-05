@@ -17,7 +17,7 @@ ckb_std::default_alloc!(16384, 1258306, 64);
 
 mod generated;
 
-use crate::generated::params::{lengths, PARAM_IDS_COUNT};
+use crate::generated::params::{indices, lengths, PARAM_IDS_COUNT};
 use ckb_fips205_utils::{
     ckb_tx_message_all_in_ckb_vm::generate_ckb_tx_message_all_with_witness,
     iterate_public_key_with_optional_signature, Hasher, ParamId,
@@ -55,8 +55,8 @@ pub fn program_entry() -> i8 {
 
     iterate_public_key_with_optional_signature(
         lock,
-        |_i, param_id, public_key, _signature| {
-            script_args_hasher.update(&[param_id.into()]);
+        |_i, param_id, sign_flag, public_key, _signature| {
+            script_args_hasher.update(&[sign_flag]);
             script_args_hasher.update(public_key);
 
             match parsed_param_id {
@@ -141,9 +141,9 @@ pub fn program_entry() -> i8 {
 
             iterate_public_key_with_optional_signature(
                 lock,
-                |_i, param_id, public_key, signature| {
+                |_i, param_id, _sign_flag, public_key, signature| {
                     if let Some(signature) = signature {
-                        let param_index = u8::from(param_id) as usize;
+                        let param_index = indices(param_id);
                         if spawned_vms[param_index].is_none() {
                             // Spawns a new VM for a param ID
                             let (binary_offset, binary_length) = load_binary_infos(param_id);
@@ -209,7 +209,7 @@ pub fn program_entry() -> i8 {
                         }
                         // Reads reasponse from child VM
                         {
-                            let mut response = [0u8; 1];
+                            let mut response = [0u8; 3];
 
                             let mut read = 0;
                             while read < response.len() {
@@ -220,6 +220,8 @@ pub fn program_entry() -> i8 {
                             }
 
                             assert_eq!(response[0], 0);
+                            assert_eq!(response[1], 0);
+                            assert_eq!(response[2], 0);
                         }
                     }
                 },

@@ -15,7 +15,7 @@ The `multisig configuration` used by `c-sphincs-all-in-one-lock` is highly inspi
 A multisig configuration uses the following structure:
 
 ```
-<S(1 byte)> <R(1 byte)> <M<(1 byte)> <N(1 byte)> <param id 1> <public key 1> <param id 2> <public key 2> ...
+<S(1 byte)> <R(1 byte)> <M<(1 byte)> <N(1 byte)> <param flag 1> <public key 1> <param flag 2> <public key 2> ...
 ```
 
 Each field here serves a different purpose:
@@ -25,24 +25,24 @@ Each field here serves a different purpose:
 * `M`: `M` represents the threshold, meaning how many signatures must be provided to unlock the cell. For instance, in a 3-of-5 setup, `M` must be 3.
 * `N`: `N` represents the avialble public keys, in a 3-of-5 setup, `N` must be 5.
 
-`N` also denotes how many pairs of `param id` and `public key` will follow. Each `param id` will be 1 byte,representing the actual parameter set to use. A public key can range from 48 to 64 depending on the parameter set. The exact of value in `param id` indicates the length of public key followed.
+`N` also denotes how many pairs of `param flag` and `public key` will follow. Each `param id` will be 1 byte, the higher 7 bit represents `param ID`, denoting the parameter set to use, the lowest bit is a signature flag, for multisig configuration, this bit is always 0. A public key can range from 48 to 64 depending on the parameter set. The exact of value in `param id` indicates the length of public key followed.
 
 ## Multisig ID, Param ID
 
 `Param ID` determines the SPHINCS+ parameter set to be used for a public key. There are 12 possible values:
 
-* 1: sphincs-sha2-128f
-* 2: sphincs-sha2-128s
-* 3: sphincs-sha2-192f
-* 4: sphincs-sha2-192s
-* 5: sphincs-sha2-256f
-* 6: sphincs-sha2-256s
-* 7: sphincs-shake-128f
-* 8: sphincs-shake-128s
-* 9: sphincs-shake-192f
-* 10: sphincs-shake-192s
-* 11: sphincs-shake-256f
-* 12: sphincs-shake-256s
+* 48: sphincs-sha2-128f
+* 49: sphincs-sha2-128s
+* 50: sphincs-sha2-192f
+* 51: sphincs-sha2-192s
+* 52: sphincs-sha2-256f
+* 53: sphincs-sha2-256s
+* 54: sphincs-shake-128f
+* 55: sphincs-shake-128s
+* 56: sphincs-shake-192f
+* 57: sphincs-shake-192s
+* 58: sphincs-shake-256f
+* 59: sphincs-shake-256s
 
 This [file](../crates/ckb-fips205-utils/src/lib.rs) contains the canonical source of param ID definitions. All other sources rely on this single file, so if you have any doubt, always check this file.
 
@@ -53,7 +53,7 @@ Each public key must be associated with one param ID, otherwise we will not know
 Now we can explain the secret prefixes included in [simple introduction](./simple.md). Take `sphincs-sha2-256s` for example, the prefix used in script args is:
 
 ```
-80 01 01 01 06
+80 01 01 01 6a
 ```
 
 Let's break them one byte at once:
@@ -62,9 +62,9 @@ Let's break them one byte at once:
 2. `R` is `0x01`, which is simply 1, this means the first public key must have a corresponding signature available.
 3. `M` is `0x01`, which is simply 1, this means one signature must be available to unlock the cell.
 4. `N` is `0x01`, which is simply 1, this means one public key is available. In other words, this is a 1-of-1 configuration, also requiring the signature for first public key must be available(actually this is redundant requirement for a 1-of-1 configuration).
-5. Finally, `0x06` is in fact the param ID for the first public key, which is `sphincs-sha2-256s`.
+5. Finally, the lowest 1 bit of `0x6a` is 0, meaning a signature is missing, the higher 7 bit is `0x35` or 53, which is the param ID for `sphincs-sha2-256s`.
 
-Now it's clear that the 5-byte prefix is merely 4 bytes of multisig configuration header for 1-of-1 configuration, and another byte for the param ID. This concludes that the single-signature case, is simply a special case of the multi-signature configuration.
+Now it's clear that the 5-byte prefix is merely 4 bytes of multisig configuration header for 1-of-1 configuration, and another byte for the param ID and signature flag. This concludes that the single-signature case, is simply a special case of the multi-signature configuration.
 
 # Witness
 
@@ -83,16 +83,16 @@ Please refer to `Script Args` section for the explanation of `S`, `R`, `M`, `N`,
 As a result, a `PWOS` can be either one of the following 2 structures:
 
 ```
-<param flag with signature bit set> <public key> <signature>
+<param flag> <public key> <signature>
 ```
 
 or:
 
 ```
-<param flag without signature bit set> <public key>
+<param flag> <public key>
 ```
 
-Notice here `param flag` precedes public key, which is slightly different than `multisig configuration` defined in `Script Args` section. The lower 7-bit of `param flag` contains `param ID`. since `param ID` only has 12 possible values, storing `param ID` in 7 bits is totally fine. The highest bit of `param set`, could either be set, meaning a signature is present, or the bit can be cleared, meaning no signature is available for current public key.
+`param flag` is defined similarly to the one in `multisig configuration`: the higher 7-bit represent `param ID`, while the lowest bit is a signature flag, meaning if a signature is present for current public key.
 
 There must be the same number of `PWOS` objects here as the value stored in `N`. Of the `N` `PWOS` objects, there must be exactly `M` of them with signatures present. And the first `R` `PWOS` objects, must all have signatures.
 
