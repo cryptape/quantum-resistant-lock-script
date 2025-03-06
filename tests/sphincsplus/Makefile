@@ -1,6 +1,6 @@
 cur_dir = $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
-CC := clang-18
+CLANG := clang-18
 TOP := $(cur_dir)/../..
 
 PARAMS = sphincs-shake-256f
@@ -25,7 +25,7 @@ all: build/test_sphincsplus
 
 build/test_sphincsplus: test-ckb-sphincs-plus.c $(SOURCES) $(HEADERS)
 	mkdir -p build
-	$(CC) $(CFLAGS) -o $@ $(SOURCES) $<
+	$(CLANG) $(CFLAGS) -o $@ $(SOURCES) $<
 
 clean:
 	rm -rf build/test_sphincsplus
