@@ -1,7 +1,7 @@
 cur_dir = $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 TOP := $(cur_dir)/../../..
 
-CC := clang-18
+CLANG := $(shell $(TOP)/scripts/find_clang)
 
 PARAMS = sphincs-shake-128f
 THASH = simple

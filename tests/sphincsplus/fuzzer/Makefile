@@ -2,7 +2,7 @@ cur_dir = $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 TOP := $(cur_dir)/../../..
 
 # Generate code, user performance analysis
-CC := clang-18
+CLANG := $(shell $(TOP)/scripts/find_clang)
 LLVM_PROFDATA := $(subst clang,llvm-profdata,$(CC))
 LLVM_COV := $(subst clang,llvm-cov,$(CC))
 
