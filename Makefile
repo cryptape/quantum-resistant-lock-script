@@ -37,6 +37,7 @@ export BUILD_DIR
 
 default: build test
 
+# Note that contract names are sorted so 'c-*' builds before 'hybrid-*'
 build:
 	@if [ "x$(CLEAN_BUILD_DIR_FIRST)" = "xtrue" ]; then \
 		echo "Cleaning $(BUILD_DIR) directory..."; \
@@ -48,7 +49,6 @@ build:
 		for crate in $(wildcard crates/*); do \
 			cargo build -p $$(basename $$crate) $(MODE_ARGS) $(CARGO_ARGS); \
 		done; \
-		# Sort by contract names here so 'c-*' builds before 'hybrid-*' \
 		for contract in $(sort $(wildcard contracts/*)); do \
 			$(MAKE) -e -C $$contract build; \
 		done; \
