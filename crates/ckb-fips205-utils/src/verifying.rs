@@ -1,4 +1,5 @@
-use crate::ParamId;
+use crate::{Error, ParamId};
+use ckb_std::assert_eq;
 use fips205::traits::{SerDes, Verifier};
 
 pub fn lengths(param_id: ParamId) -> (usize, usize) {
@@ -59,13 +60,13 @@ pub fn verify(param_id: ParamId, public_key: &[u8], signature: &[u8], message: &
         ParamId::Sha2128F => {
             use fips205::slh_dsa_sha2_128f as slh;
 
-            assert_eq!(public_key.len(), slh::PK_LEN);
+            assert_eq!(Error::InvalidPubkeyLength, public_key.len(), slh::PK_LEN);
             let public_key = {
                 let mut data = [0u8; slh::PK_LEN];
                 data.copy_from_slice(public_key);
                 slh::PublicKey::try_from_bytes(&data).expect("parse public key")
             };
-            assert_eq!(signature.len(), slh::SIG_LEN);
+            assert_eq!(Error::InvalidSignatureLength, signature.len(), slh::SIG_LEN);
             let signature = {
                 let mut data = [0u8; slh::SIG_LEN];
                 data.copy_from_slice(signature);
@@ -76,13 +77,13 @@ pub fn verify(param_id: ParamId, public_key: &[u8], signature: &[u8], message: &
         ParamId::Sha2128S => {
             use fips205::slh_dsa_sha2_128s as slh;
 
-            assert_eq!(public_key.len(), slh::PK_LEN);
+            assert_eq!(Error::InvalidPubkeyLength, public_key.len(), slh::PK_LEN);
             let public_key = {
                 let mut data = [0u8; slh::PK_LEN];
                 data.copy_from_slice(public_key);
                 slh::PublicKey::try_from_bytes(&data).expect("parse public key")
             };
-            assert_eq!(signature.len(), slh::SIG_LEN);
+            assert_eq!(Error::InvalidSignatureLength, signature.len(), slh::SIG_LEN);
             let signature = {
                 let mut data = [0u8; slh::SIG_LEN];
                 data.copy_from_slice(signature);
@@ -93,13 +94,13 @@ pub fn verify(param_id: ParamId, public_key: &[u8], signature: &[u8], message: &
         ParamId::Sha2192F => {
             use fips205::slh_dsa_sha2_192f as slh;
 
-            assert_eq!(public_key.len(), slh::PK_LEN);
+            assert_eq!(Error::InvalidPubkeyLength, public_key.len(), slh::PK_LEN);
             let public_key = {
                 let mut data = [0u8; slh::PK_LEN];
                 data.copy_from_slice(public_key);
                 slh::PublicKey::try_from_bytes(&data).expect("parse public key")
             };
-            assert_eq!(signature.len(), slh::SIG_LEN);
+            assert_eq!(Error::InvalidSignatureLength, signature.len(), slh::SIG_LEN);
             let signature = {
                 let mut data = [0u8; slh::SIG_LEN];
                 data.copy_from_slice(signature);
@@ -110,13 +111,13 @@ pub fn verify(param_id: ParamId, public_key: &[u8], signature: &[u8], message: &
         ParamId::Sha2192S => {
             use fips205::slh_dsa_sha2_192s as slh;
 
-            assert_eq!(public_key.len(), slh::PK_LEN);
+            assert_eq!(Error::InvalidPubkeyLength, public_key.len(), slh::PK_LEN);
             let public_key = {
                 let mut data = [0u8; slh::PK_LEN];
                 data.copy_from_slice(public_key);
                 slh::PublicKey::try_from_bytes(&data).expect("parse public key")
             };
-            assert_eq!(signature.len(), slh::SIG_LEN);
+            assert_eq!(Error::InvalidSignatureLength, signature.len(), slh::SIG_LEN);
             let signature = {
                 let mut data = [0u8; slh::SIG_LEN];
                 data.copy_from_slice(signature);
@@ -127,13 +128,13 @@ pub fn verify(param_id: ParamId, public_key: &[u8], signature: &[u8], message: &
         ParamId::Sha2256F => {
             use fips205::slh_dsa_sha2_256f as slh;
 
-            assert_eq!(public_key.len(), slh::PK_LEN);
+            assert_eq!(Error::InvalidPubkeyLength, public_key.len(), slh::PK_LEN);
             let public_key = {
                 let mut data = [0u8; slh::PK_LEN];
                 data.copy_from_slice(public_key);
                 slh::PublicKey::try_from_bytes(&data).expect("parse public key")
             };
-            assert_eq!(signature.len(), slh::SIG_LEN);
+            assert_eq!(Error::InvalidSignatureLength, signature.len(), slh::SIG_LEN);
             let signature = {
                 let mut data = [0u8; slh::SIG_LEN];
                 data.copy_from_slice(signature);
@@ -144,13 +145,13 @@ pub fn verify(param_id: ParamId, public_key: &[u8], signature: &[u8], message: &
         ParamId::Sha2256S => {
             use fips205::slh_dsa_sha2_256s as slh;
 
-            assert_eq!(public_key.len(), slh::PK_LEN);
+            assert_eq!(Error::InvalidPubkeyLength, public_key.len(), slh::PK_LEN);
             let public_key = {
                 let mut data = [0u8; slh::PK_LEN];
                 data.copy_from_slice(public_key);
                 slh::PublicKey::try_from_bytes(&data).expect("parse public key")
             };
-            assert_eq!(signature.len(), slh::SIG_LEN);
+            assert_eq!(Error::InvalidSignatureLength, signature.len(), slh::SIG_LEN);
             let signature = {
                 let mut data = [0u8; slh::SIG_LEN];
                 data.copy_from_slice(signature);
@@ -161,13 +162,13 @@ pub fn verify(param_id: ParamId, public_key: &[u8], signature: &[u8], message: &
         ParamId::Shake128F => {
             use fips205::slh_dsa_shake_128f as slh;
 
-            assert_eq!(public_key.len(), slh::PK_LEN);
+            assert_eq!(Error::InvalidPubkeyLength, public_key.len(), slh::PK_LEN);
             let public_key = {
                 let mut data = [0u8; slh::PK_LEN];
                 data.copy_from_slice(public_key);
                 slh::PublicKey::try_from_bytes(&data).expect("parse public key")
             };
-            assert_eq!(signature.len(), slh::SIG_LEN);
+            assert_eq!(Error::InvalidSignatureLength, signature.len(), slh::SIG_LEN);
             let signature = {
                 let mut data = [0u8; slh::SIG_LEN];
                 data.copy_from_slice(signature);
@@ -178,13 +179,13 @@ pub fn verify(param_id: ParamId, public_key: &[u8], signature: &[u8], message: &
         ParamId::Shake128S => {
             use fips205::slh_dsa_shake_128s as slh;
 
-            assert_eq!(public_key.len(), slh::PK_LEN);
+            assert_eq!(Error::InvalidPubkeyLength, public_key.len(), slh::PK_LEN);
             let public_key = {
                 let mut data = [0u8; slh::PK_LEN];
                 data.copy_from_slice(public_key);
                 slh::PublicKey::try_from_bytes(&data).expect("parse public key")
             };
-            assert_eq!(signature.len(), slh::SIG_LEN);
+            assert_eq!(Error::InvalidSignatureLength, signature.len(), slh::SIG_LEN);
             let signature = {
                 let mut data = [0u8; slh::SIG_LEN];
                 data.copy_from_slice(signature);
@@ -195,13 +196,13 @@ pub fn verify(param_id: ParamId, public_key: &[u8], signature: &[u8], message: &
         ParamId::Shake192F => {
             use fips205::slh_dsa_shake_192f as slh;
 
-            assert_eq!(public_key.len(), slh::PK_LEN);
+            assert_eq!(Error::InvalidPubkeyLength, public_key.len(), slh::PK_LEN);
             let public_key = {
                 let mut data = [0u8; slh::PK_LEN];
                 data.copy_from_slice(public_key);
                 slh::PublicKey::try_from_bytes(&data).expect("parse public key")
             };
-            assert_eq!(signature.len(), slh::SIG_LEN);
+            assert_eq!(Error::InvalidSignatureLength, signature.len(), slh::SIG_LEN);
             let signature = {
                 let mut data = [0u8; slh::SIG_LEN];
                 data.copy_from_slice(signature);
@@ -212,13 +213,13 @@ pub fn verify(param_id: ParamId, public_key: &[u8], signature: &[u8], message: &
         ParamId::Shake192S => {
             use fips205::slh_dsa_shake_192s as slh;
 
-            assert_eq!(public_key.len(), slh::PK_LEN);
+            assert_eq!(Error::InvalidPubkeyLength, public_key.len(), slh::PK_LEN);
             let public_key = {
                 let mut data = [0u8; slh::PK_LEN];
                 data.copy_from_slice(public_key);
                 slh::PublicKey::try_from_bytes(&data).expect("parse public key")
             };
-            assert_eq!(signature.len(), slh::SIG_LEN);
+            assert_eq!(Error::InvalidSignatureLength, signature.len(), slh::SIG_LEN);
             let signature = {
                 let mut data = [0u8; slh::SIG_LEN];
                 data.copy_from_slice(signature);
@@ -229,13 +230,13 @@ pub fn verify(param_id: ParamId, public_key: &[u8], signature: &[u8], message: &
         ParamId::Shake256F => {
             use fips205::slh_dsa_shake_256f as slh;
 
-            assert_eq!(public_key.len(), slh::PK_LEN);
+            assert_eq!(Error::InvalidPubkeyLength, public_key.len(), slh::PK_LEN);
             let public_key = {
                 let mut data = [0u8; slh::PK_LEN];
                 data.copy_from_slice(public_key);
                 slh::PublicKey::try_from_bytes(&data).expect("parse public key")
             };
-            assert_eq!(signature.len(), slh::SIG_LEN);
+            assert_eq!(Error::InvalidSignatureLength, signature.len(), slh::SIG_LEN);
             let signature = {
                 let mut data = [0u8; slh::SIG_LEN];
                 data.copy_from_slice(signature);
@@ -246,13 +247,13 @@ pub fn verify(param_id: ParamId, public_key: &[u8], signature: &[u8], message: &
         ParamId::Shake256S => {
             use fips205::slh_dsa_shake_256s as slh;
 
-            assert_eq!(public_key.len(), slh::PK_LEN);
+            assert_eq!(Error::InvalidPubkeyLength, public_key.len(), slh::PK_LEN);
             let public_key = {
                 let mut data = [0u8; slh::PK_LEN];
                 data.copy_from_slice(public_key);
                 slh::PublicKey::try_from_bytes(&data).expect("parse public key")
             };
-            assert_eq!(signature.len(), slh::SIG_LEN);
+            assert_eq!(Error::InvalidSignatureLength, signature.len(), slh::SIG_LEN);
             let signature = {
                 let mut data = [0u8; slh::SIG_LEN];
                 data.copy_from_slice(signature);

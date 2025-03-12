@@ -22,23 +22,51 @@ use ckb_fips205_utils::{
     Hasher,
 };
 use ckb_gen_types::{packed::WitnessArgsReader, prelude::*};
-use ckb_std::{ckb_constants::Source, high_level};
+use ckb_std::{
+    assert, assert_eq,
+    asserts::{expect_result, unwrap_option},
+    ckb_constants::Source,
+    high_level,
+};
+
+#[repr(i8)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub enum Error {
+    Syscall = 71,
+    CkbTxMessageAll,
+    LockMissing,
+    Fips205Verify,
+    ScriptArgsMismatch,
+}
+
+impl From<Error> for i8 {
+    fn from(e: Error) -> i8 {
+        e as i8
+    }
+}
 
 pub fn program_entry() -> i8 {
     // Unfortunately, till lazy reader with validator mode is coming, we will
     // have to stick with this. Fortunately, all data in the first witness will
     // be loaded one way or another. What we really pay here, is merely (*cough*)
     // ~600K memory space.
-    let first_witness_data = high_level::load_witness(0, Source::GroupInput).expect("load witness");
+    let first_witness_data = expect_result(
+        Error::Syscall,
+        high_level::load_witness(0, Source::GroupInput),
+        "load witness",
+    );
 
     let mut message_hasher = Hasher::message_hasher();
-    generate_ckb_tx_message_all_with_witness(&mut message_hasher, &first_witness_data)
-        .expect("ckb tx message all");
+    expect_result(
+        Error::CkbTxMessageAll,
+        generate_ckb_tx_message_all_with_witness(&mut message_hasher, &first_witness_data),
+        "ckb tx message all",
+    );
     let message = message_hasher.hash();
 
     // The first witness is already validated to be in correct format
     let first_witness = WitnessArgsReader::new_unchecked(&first_witness_data);
-    let lock = first_witness.lock().to_opt().unwrap().raw_data();
+    let lock = unwrap_option(Error::LockMissing, first_witness.lock().to_opt()).raw_data();
 
     let mut script_args_hasher = Hasher::script_args_hasher();
     script_args_hasher.update(&lock[0..4]);
@@ -50,15 +78,19 @@ pub fn program_entry() -> i8 {
             script_args_hasher.update(public_key);
 
             if let Some(signature) = signature {
-                assert!(verify(param_id, public_key, signature, &message));
+                assert!(
+                    Error::Fips205Verify,
+                    verify(param_id, public_key, signature, &message)
+                );
             }
         },
         lengths,
     );
 
     let actual_script_args_hash = script_args_hasher.hash();
-    let current_script = high_level::load_script().expect("load script");
+    let current_script = expect_result(Error::Syscall, high_level::load_script(), "load script");
     assert_eq!(
+        Error::ScriptArgsMismatch,
         &current_script.args().raw_data(),
         &actual_script_args_hash[..]
     );

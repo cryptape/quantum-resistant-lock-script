@@ -23,7 +23,12 @@ use ckb_fips205_utils::{
     iterate_public_key_with_optional_signature, Hasher, ParamId,
 };
 use ckb_gen_types::{core::ScriptHashType, packed::WitnessArgsReader, prelude::*};
-use ckb_std::{ckb_constants::Source, high_level, syscalls};
+use ckb_std::{
+    assert_eq,
+    asserts::{expect_result, unwrap_option},
+    ckb_constants::Source,
+    high_level, syscalls,
+};
 use core::ffi::CStr;
 
 enum ParsedParamId {
@@ -32,21 +37,48 @@ enum ParsedParamId {
     Multiple,
 }
 
+#[repr(i8)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub enum Error {
+    Syscall = 71,
+    CkbTxMessageAll,
+    LockMissing,
+    SphincsplusVerify,
+    ScriptArgsMismatch,
+    Overflow,
+    PipeCreationFailure,
+    SpawnFailure,
+    IOFailure,
+}
+
+impl From<Error> for i8 {
+    fn from(e: Error) -> i8 {
+        e as i8
+    }
+}
+
 pub fn program_entry() -> i8 {
     // Unfortunately, till lazy reader with validator mode is coming, we will
     // have to stick with this. Fortunately, all data in the first witness will
     // be loaded one way or another. What we really pay here, is merely (*cough*)
     // ~600K memory space.
-    let first_witness_data = high_level::load_witness(0, Source::GroupInput).expect("load witness");
+    let first_witness_data = expect_result(
+        Error::Syscall,
+        high_level::load_witness(0, Source::GroupInput),
+        "load witness",
+    );
 
     let mut message_hasher = Hasher::message_hasher();
-    generate_ckb_tx_message_all_with_witness(&mut message_hasher, &first_witness_data)
-        .expect("ckb tx message all");
+    expect_result(
+        Error::CkbTxMessageAll,
+        generate_ckb_tx_message_all_with_witness(&mut message_hasher, &first_witness_data),
+        "ckb tx message all",
+    );
     let message = message_hasher.hash();
 
     // The first witness is already validated to be in correct format
     let first_witness = WitnessArgsReader::new_unchecked(&first_witness_data);
-    let lock = first_witness.lock().to_opt().unwrap().raw_data();
+    let lock = unwrap_option(Error::LockMissing, first_witness.lock().to_opt()).raw_data();
 
     let mut script_args_hasher = Hasher::script_args_hasher();
     script_args_hasher.update(&lock[0..4]);
@@ -75,23 +107,27 @@ pub fn program_entry() -> i8 {
     );
 
     let actual_script_args_hash = script_args_hasher.hash();
-    let current_script = high_level::load_script().expect("load script");
+    let current_script = expect_result(Error::Syscall, high_level::load_script(), "load script");
     assert_eq!(
+        Error::ScriptArgsMismatch,
         &current_script.args().raw_data(),
         &actual_script_args_hash[..]
     );
-    let cell_index = high_level::look_for_dep_with_hash2(
-        &current_script.code_hash().raw_data(),
-        if current_script.hash_type().as_slice()[0]
-            == core::convert::Into::<u8>::into(ScriptHashType::Type)
-        {
-            ScriptHashType::Type
-        } else {
-            // It does not really matter which dataN is used
-            ScriptHashType::Data2
-        },
-    )
-    .expect("look for current script");
+    let cell_index = expect_result(
+        Error::Syscall,
+        high_level::look_for_dep_with_hash2(
+            &current_script.code_hash().raw_data(),
+            if current_script.hash_type().as_slice()[0]
+                == core::convert::Into::<u8>::into(ScriptHashType::Type)
+            {
+                ScriptHashType::Type
+            } else {
+                // It does not really matter which dataN is used
+                ScriptHashType::Data2
+            },
+        ),
+        "look for current script",
+    );
 
     match parsed_param_id {
         ParsedParamId::Single(param_id) => {
@@ -107,11 +143,14 @@ pub fn program_entry() -> i8 {
             encoder.extend(&(Source::GroupInput as u64).to_le_bytes()[..]);
             encoder.extend(&0u32.to_le_bytes()[..]);
 
-            let offset: u32 = (lock[4..].as_ptr() as usize - first_witness_data.as_ptr() as usize)
-                .try_into()
-                .expect("overflow");
+            let offset: u32 = expect_result(
+                Error::Overflow,
+                (lock[4..].as_ptr() as usize - first_witness_data.as_ptr() as usize).try_into(),
+                "overflow",
+            );
             encoder.extend(&offset.to_le_bytes()[..]);
-            let length: u32 = (lock.len() - 4).try_into().expect("overflow");
+            let length: u32 =
+                expect_result(Error::Overflow, (lock.len() - 4).try_into(), "overflow");
             encoder.extend(&length.to_le_bytes()[..]);
 
             let (binary_offset, binary_length) = load_binary_infos(param_id);
@@ -150,9 +189,9 @@ pub fn program_entry() -> i8 {
                             let bounds = ((binary_offset as u64) << 32) | (binary_length as u64);
 
                             let (root_to_leaf_fd0, root_to_leaf_fd1) =
-                                syscalls::pipe().expect("pipe");
+                                expect_result(Error::PipeCreationFailure, syscalls::pipe(), "pipe");
                             let (leaf_to_root_fd0, leaf_to_root_fd1) =
-                                syscalls::pipe().expect("pipe");
+                                expect_result(Error::PipeCreationFailure, syscalls::pipe(), "pipe");
 
                             let mut process_id: u64 = 0;
                             {
@@ -165,14 +204,17 @@ pub fn program_entry() -> i8 {
                                     process_id: &mut process_id as *mut u64,
                                     inherited_fds: inherited_fds.as_ptr(),
                                 };
-                                syscalls::spawn(
-                                    cell_index,
-                                    Source::CellDep,
-                                    0,
-                                    bounds as usize,
-                                    &mut spgs,
-                                )
-                                .expect("spawn");
+                                expect_result(
+                                    Error::SpawnFailure,
+                                    syscalls::spawn(
+                                        cell_index,
+                                        Source::CellDep,
+                                        0,
+                                        bounds as usize,
+                                        &mut spgs,
+                                    ),
+                                    "spawn",
+                                );
                             }
                             spawned_vms[param_index] = Some((root_to_leaf_fd1, leaf_to_root_fd0));
                         }
@@ -188,22 +230,29 @@ pub fn program_entry() -> i8 {
                             data[3..3 + 8]
                                 .copy_from_slice(&(Source::GroupInput as u64).to_le_bytes()[..]);
 
-                            let offset: u32 = (public_key.as_ptr() as u64
-                                - first_witness_data.as_ptr() as u64
-                                - 1)
-                            .try_into()
-                            .expect("overflow");
+                            let offset: u32 = expect_result(
+                                Error::Overflow,
+                                (public_key.as_ptr() as u64
+                                    - first_witness_data.as_ptr() as u64
+                                    - 1)
+                                .try_into(),
+                                "overflow",
+                            );
                             data[3 + 8 + 4..3 + 8 + 4 + 4].copy_from_slice(&offset.to_le_bytes());
-                            let length: u32 = (1 + public_key.len() + signature.len())
-                                .try_into()
-                                .expect("overflow");
+                            let length: u32 = expect_result(
+                                Error::Overflow,
+                                (1 + public_key.len() + signature.len()).try_into(),
+                                "overflow",
+                            );
                             data[3 + 8 + 4 + 4..].copy_from_slice(&length.to_le_bytes());
 
                             let mut written = 0;
                             while written < data.len() {
-                                let current_written =
-                                    syscalls::write(root_to_leaf_fd, &data[written..])
-                                        .expect("write");
+                                let current_written = expect_result(
+                                    Error::IOFailure,
+                                    syscalls::write(root_to_leaf_fd, &data[written..]),
+                                    "write",
+                                );
                                 written += current_written;
                             }
                         }
@@ -213,15 +262,17 @@ pub fn program_entry() -> i8 {
 
                             let mut read = 0;
                             while read < response.len() {
-                                let current_read =
-                                    syscalls::read(leaf_to_root_fd, &mut response[read..])
-                                        .expect("read");
+                                let current_read = expect_result(
+                                    Error::IOFailure,
+                                    syscalls::read(leaf_to_root_fd, &mut response[read..]),
+                                    "read",
+                                );
                                 read += current_read;
                             }
 
-                            assert_eq!(response[0], 0);
-                            assert_eq!(response[1], 0);
-                            assert_eq!(response[2], 0);
+                            assert_eq!(Error::SphincsplusVerify, response[0], 0);
+                            assert_eq!(Error::SphincsplusVerify, response[1], 0);
+                            assert_eq!(Error::SphincsplusVerify, response[2], 0);
                         }
                     }
                 },

@@ -14,6 +14,7 @@ pub mod message;
 
 use ckb_hash::{Blake2b, Blake2bBuilder};
 use ckb_rust_std::io;
+use ckb_std::{assert, assert_eq, asserts::expect_result};
 use int_enum::IntEnum;
 #[cfg(feature = "serde")]
 use serde_string_enum::{DeserializeLabeledStringEnum, SerializeLabeledStringEnum};
@@ -140,6 +141,25 @@ impl std::io::Write for Hasher {
     }
 }
 
+#[repr(i8)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub enum Error {
+    InvalidParamId = 40,
+    InvalidMultisigHeader,
+    ThresholdNotMet,
+    RequireFirstNNotMet,
+    LeftOverData,
+    InvalidPubkeyLength,
+    InvalidSignatureLength,
+    ContextTooLong,
+}
+
+impl From<Error> for i8 {
+    fn from(e: Error) -> i8 {
+        e as i8
+    }
+}
+
 pub fn construct_flag(param_id: ParamId, has_signature: bool) -> u8 {
     let value: u8 = param_id.into();
     (value << 1) | if has_signature { 1 } else { 0 }
@@ -147,7 +167,11 @@ pub fn construct_flag(param_id: ParamId, has_signature: bool) -> u8 {
 
 pub fn destruct_flag(flag: u8) -> (ParamId, bool) {
     let has_signature = flag & 1 != 0;
-    let param_id: ParamId = (flag >> 1).try_into().expect("parse param id");
+    let param_id: ParamId = expect_result(
+        Error::InvalidParamId,
+        (flag >> 1).try_into(),
+        "parse param id",
+    );
     (param_id, has_signature)
 }
 
@@ -165,15 +189,15 @@ pub fn iterate_public_key_with_optional_signature<F, G>(
     F: FnMut(usize, ParamId, u8, &[u8], Option<&[u8]>),
     G: Fn(ParamId) -> (usize, usize),
 {
-    assert!(lock.len() > 4);
-    assert_eq!(lock[0], 0x80);
+    assert!(Error::InvalidMultisigHeader, lock.len() > 4);
+    assert_eq!(Error::InvalidMultisigHeader, lock[0], 0x80);
     let require_first_n = lock[1];
     let mut threshold = lock[2];
     let pubkeys = lock[3];
-    assert!(pubkeys > 0);
-    assert!(threshold <= pubkeys);
-    assert!(threshold > 0);
-    assert!(require_first_n <= threshold);
+    assert!(Error::InvalidMultisigHeader, pubkeys > 0);
+    assert!(Error::InvalidMultisigHeader, threshold <= pubkeys);
+    assert!(Error::InvalidMultisigHeader, threshold > 0);
+    assert!(Error::InvalidMultisigHeader, require_first_n <= threshold);
 
     let mut i = 4;
     for pubkey_index in 0..pubkeys {
@@ -193,17 +217,17 @@ pub fn iterate_public_key_with_optional_signature<F, G>(
                 Some(signature),
             );
 
-            assert!(threshold > 0);
+            assert!(Error::ThresholdNotMet, threshold > 0);
             threshold -= 1;
             i += 1 + public_key_length + signature_length;
         } else {
             data_processor(pubkey_index as usize, param_id, sign_flag, public_key, None);
 
-            assert!(pubkey_index >= require_first_n);
+            assert!(Error::RequireFirstNNotMet, pubkey_index >= require_first_n);
             i += 1 + public_key_length;
         }
     }
 
-    assert!(threshold == 0);
-    assert!(i == lock.len());
+    assert!(Error::ThresholdNotMet, threshold == 0);
+    assert!(Error::LeftOverData, i == lock.len());
 }

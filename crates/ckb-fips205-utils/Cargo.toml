@@ -6,7 +6,7 @@ edition = "2021"
 
 [dependencies]
 int-enum = "1.1.2"
-ckb-std = "0.17.0"
+ckb-std = "0.17.1"
 ckb-rust-std = "1.0.0"
 ckb-gen-types = { version = "0.200.0-rc1", default-features = false }
 ckb-hash = { version = "0.200.0-rc1", default-features = false, features = ["ckb-contract"] }

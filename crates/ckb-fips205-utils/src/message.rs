@@ -1,3 +1,5 @@
+use crate::Error;
+use ckb_std::assert;
 #[cfg(feature = "serde")]
 use serde_string_enum::{DeserializeLabeledStringEnum, SerializeLabeledStringEnum};
 
@@ -50,7 +52,7 @@ pub fn build_fips205_final_message(
 
     let context_prefix = match context {
         Some(context) => {
-            assert!(context.len() <= 255);
+            assert!(Error::ContextTooLong, context.len() <= 255);
             let mut res = vec![0u8; context.len() + 2];
             res[0] = prehash;
             res[1] = context.len() as u8;
