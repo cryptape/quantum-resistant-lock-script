@@ -75,7 +75,7 @@ fn main() {
         run_command(tracer_command);
 
         let locators: HashMap<String, Locator> = {
-            let json = std::fs::read(&tmp_dir.join("locators.json")).expect("read locator");
+            let json = std::fs::read(tmp_dir.join("locators.json")).expect("read locator");
             serde_json::from_slice(&json).expect("parse locators")
         };
 
