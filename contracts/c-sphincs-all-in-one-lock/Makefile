@@ -68,12 +68,14 @@ $(CUR_BUILD)/nist-vector-tester: nist-vector-tester.c $(CUR_BUILD)/params-finder
 		--root-actual $@-root.debug \
 		--leaves $(CUR_BUILD)/leaves_debug \
 		--output $@.debug \
+		--metadata-file $@_metadata_debug.json \
 		--merge
 	$(TOP)/target/$(MODE)/script-merge-tool --prefix CKB_ merge \
 		--root-debug $@-root.debug \
 		--root-actual $@-root.stripped \
 		--leaves $(CUR_BUILD)/leaves_stripped \
 		--output $@ \
+		--metadata-file $@_metadata_stripped.json \
 		--merge
 
 $(CUR_BUILD)/$(BINARY): $(CUR_BUILD)/root.complete $(CUR_BUILD)/leaf.complete $(HEADERS)
@@ -82,12 +84,14 @@ $(CUR_BUILD)/$(BINARY): $(CUR_BUILD)/root.complete $(CUR_BUILD)/leaf.complete $(
 		--root-actual $(CUR_BUILD)/root.debug \
 		--leaves $(CUR_BUILD)/leaves_debug \
 		--output $@.debug \
+		--metadata-file $@_metadata_debug.json \
 		--merge
 	$(TOP)/target/$(MODE)/script-merge-tool --prefix CKB_ merge \
 		--root-debug $(CUR_BUILD)/root.debug \
 		--root-actual $(CUR_BUILD)/root.stripped \
 		--leaves $(CUR_BUILD)/leaves_stripped \
 		--output $@ \
+		--metadata-file $@_metadata_stripped.json \
 		--merge
 
 $(CUR_BUILD)/root.complete: ckb-sphincsplus-root-lock.c $(CUR_BUILD)/params-finder.h $(CUR_BUILD)/leaf-vars.h

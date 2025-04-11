@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand, ValueEnum};
 use goblin::elf::Elf;
+use serde::Serialize;
 use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
@@ -60,6 +61,10 @@ enum Commands {
         #[arg(long)]
         output: String,
 
+        /// Output metadata file
+        #[arg(long)]
+        metadata_file: String,
+
         /// Merge leaf binaries into root
         #[arg(long, default_value_t = true)]
         merge: bool,
@@ -67,6 +72,29 @@ enum Commands {
 }
 
 const SYMBOL_COMMON_PART: &str = "_BINARY_";
+
+#[derive(Serialize)]
+pub struct Meta {
+    pub filename: String,
+    pub offset: u32,
+    pub length: u32,
+}
+
+impl Meta {
+    pub fn new(path: &str, offset: usize, length: usize) -> Self {
+        let filename = Path::new(path)
+            .file_name()
+            .expect("filename")
+            .to_str()
+            .expect("to_str")
+            .to_string();
+        Self {
+            filename,
+            offset: offset.try_into().expect("offset overflow"),
+            length: length.try_into().expect("offset overflow"),
+        }
+    }
+}
 
 fn main() {
     let cli = Cli::parse();
@@ -147,6 +175,7 @@ fn main() {
             root_actual,
             leaves,
             output,
+            metadata_file,
             merge,
         } => {
             let root_debug_binary = fs::read(&root_debug).expect("read debug binary");
@@ -178,8 +207,11 @@ fn main() {
                 })
                 .collect();
 
+            let mut metadata = vec![];
             let mut root_binary = fs::read(&root_actual).expect("read actual binary");
             let mut offset = root_binary.len();
+
+            metadata.push(Meta::new(&root_actual, 0, root_binary.len()));
 
             for leaf_name in fetch_leaf_names(&leaves) {
                 let leaf_binary = fs::read(&leaf_name).expect("read leaf binary");
@@ -209,6 +241,8 @@ fn main() {
                 if offset_symbol_offset.is_none() && length_symbol_offset.is_none() {
                     println!("Both symbols are missing for leaf {}, we are not merging this leaf script into the final script!", leaf_name);
                 } else {
+                    metadata.push(Meta::new(&leaf_name, offset, leaf_binary.len()));
+
                     offset += leaf_size;
 
                     if merge {
@@ -218,6 +252,10 @@ fn main() {
             }
 
             fs::write(&output, &root_binary).expect("write final binary");
+
+            let metadata_json =
+                serde_json::to_string_pretty(&metadata).expect("serializing metadata");
+            fs::write(&metadata_file, metadata_json).expect("write metadata");
         }
     }
 }

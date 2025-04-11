@@ -447,6 +447,25 @@ fn _run_valid_tx<R: Rng + CryptoRngCore>(
         &mut rng,
     );
 
+    if let Some(path) = std::env::var_os("DUMP_TXS_PATH") {
+        if let Ok(s) = std::env::var("DUMP_PROBABILITY") {
+            let prob = u16::from_str_radix(&s, 10).expect("parse dump probability");
+            if prob > 256 {
+                panic!("DUMP_PROBABILITY can only range from 0 to 256!");
+            }
+            let val = signed_tx.hash().nth0().as_slice()[0] as u16;
+            if val < prob {
+                let directory = std::path::Path::new(&path);
+                std::fs::create_dir_all(&directory).expect("mkdir -p");
+
+                let path = directory.join(format!("0x{:x}.json", signed_tx.hash()));
+                let mock_tx = context.dump_tx(&signed_tx).expect("dump failed tx");
+                let json = serde_json::to_string_pretty(&mock_tx).expect("json");
+                std::fs::write(path, json).expect("write");
+            }
+        }
+    }
+
     context.verify_tx(&signed_tx, 1_000_000_000)
 }
 

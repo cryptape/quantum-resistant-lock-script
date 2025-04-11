@@ -63,7 +63,6 @@ uint32_t sphincs_plus_get_seed_size() { return CRYPTO_SEEDBYTES; }
 
 #endif  // CKB_VM
 
-#include <stdio.h>
 int sphincs_plus_verify(const uint8_t *sign, uint32_t sign_size,
                         const uint8_t *message, uint32_t message_size,
                         const uint8_t *pubkey, uint32_t pubkey_size) {
@@ -75,7 +74,6 @@ int sphincs_plus_verify(const uint8_t *sign, uint32_t sign_size,
   int err = crypto_sign_verify(sign, SPHINCS_PLUS_SIGN_SIZE, message,
                                message_size, pubkey);
   if (err != 0) {
-    printf("Verify faliure: %d\n", err);
     return SphincsPlusError_Verify;
   }
 

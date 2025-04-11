@@ -2,3 +2,12 @@ build/
 /target
 /tests/failed_txs
 /test-vector*
+
+/fuzzing/fuzzing_syscalls_all_in_one.h
+/fuzzing/dumps
+/fuzzing/corpus*
+/fuzzing/*.o
+/fuzzing/leaf*.complete
+/fuzzing/leaf*intermediate/
+/fuzzing/*_fuzzer
+/fuzzing/binary_to_text_converter

@@ -23,7 +23,7 @@
  * and cursor has been provided.
  */
 
-#include <ckb_syscalls.h>
+#include <ckb_syscall_utils.h>
 #include <molecule/blockchain-api2.h>
 
 void mol2_advance(mol2_cursor_t *cursor, uint32_t len) {

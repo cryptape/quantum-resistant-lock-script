@@ -1,3 +1,7 @@
+#ifdef FUZZING
+#define mol2_printf(...)
+#include <fuzzing_syscalls_all_in_one.h>
+#else
 /*
  * Root lock calculates signing message hash, validates multisig
  * structure & logics, ensures multisig config hash is correctly calculated.
@@ -16,11 +20,12 @@
 #undef CKB_DECLARATION_ONLY
 #include "entry.h"
 #define CKB_DECLARATION_ONLY
+#include <ckb_syscalls.h>
+#endif
 
 #include "ckb-sphincsplus-common.h"
 
 #include <blake2b.h>
-#include <ckb_syscalls.h>
 #include <molecule/blockchain-api2.h>
 
 #define CKB_SCRIPT_MERGE_TOOL_DEFINE_VARS
@@ -292,6 +297,9 @@ int main(int argc, char *argv[]) {
       CHECK(mol2_read_and_advance(&signatures, &flag, 1));
 
       uint8_t param_index = MULTISIG_FLAG_TO_PARAM_INDEX(flag);
+      CHECK2(
+          param_index >= 0 && param_index < CKB_SPHINCS_SUPPORTED_PARAMS_COUNT,
+          ERROR_SPHINCSPLUS_WITNESS);
       if (all_params[param_index] == NULL) {
         CHECK(fetch_params(MULTISIG_FLAG_TO_PARAM_ID(flag),
                            &all_params[param_index]));
@@ -299,7 +307,7 @@ int main(int argc, char *argv[]) {
       uint32_t pk_size = all_params[param_index]->pk_bytes;
       uint32_t sign_size = all_params[param_index]->sign_bytes;
       CHECK2(pk_size + sign_size + 1 == (size_t)pk_size + (size_t)sign_size + 1,
-             ERROR_SPHINCSPLUS_WITNESS;);
+             ERROR_SPHINCSPLUS_WITNESS);
 
       if (MULTISIG_HAS_SIGNATURE(flag)) {
         /*

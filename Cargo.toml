@@ -5,6 +5,7 @@ members = [
   "contracts/hybrid-sphincs-all-in-one-lock",
   "contracts/sphincs-all-in-one-lock",
   "crates/ckb-fips205-utils",
+  "crates/fuzzing-corpus-generator",
   "crates/intermediate-source-generator",
   "crates/script-merge-tool",
   "tests/multisig-tests",
@@ -13,6 +14,10 @@ members = [
   "tests/validation-tests",
   "tools/ckb-sphincs-tools",
   "tools/ckb-sphincs-utils",
+]
+
+exclude = [
+  "fuzzing/ckb-script-fuzzing-toolkit/tools/flattener"
 ]
 
 [profile.release]

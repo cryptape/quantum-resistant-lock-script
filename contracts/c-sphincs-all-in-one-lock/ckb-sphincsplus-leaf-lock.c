@@ -1,3 +1,7 @@
+#ifdef FUZZING
+#define mol2_printf(...)
+#include <fuzzing_syscalls_all_in_one.h>
+#else
 /*
  * Leaf lock takes calculated message hash, together with a range in
  * witness as input. It runs sphincs+ signature verifications based on
@@ -20,6 +24,8 @@
 #undef CKB_DECLARATION_ONLY
 #include "entry.h"
 #define CKB_DECLARATION_ONLY
+#include <ckb_syscalls.h>
+#endif
 
 #include "ckb-sphincsplus-common.h"
 

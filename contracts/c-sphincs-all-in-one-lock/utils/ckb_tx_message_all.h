@@ -1,7 +1,7 @@
 #ifndef CKB_CKB_TX_MESSAGE_ALL_H_
 #define CKB_CKB_TX_MESSAGE_ALL_H_
 
-#include <ckb_syscalls.h>
+#include <ckb_syscall_utils.h>
 
 #include "witness_args_lazy_utils.h"
 

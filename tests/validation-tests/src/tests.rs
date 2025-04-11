@@ -12,6 +12,7 @@ use ckb_testtool::{
 use proptest::prelude::*;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use rand_core::CryptoRngCore;
+use std::path::Path;
 
 const C_NAME: &'static str = "c-sphincs-all-in-one-lock";
 const HYBRID_NAME: &'static str = "hybrid-sphincs-all-in-one-lock";
@@ -303,8 +304,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -324,8 +324,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -346,8 +345,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -369,8 +367,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -390,8 +387,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -410,8 +406,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -431,8 +426,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -453,8 +447,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -476,8 +469,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -497,8 +489,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -518,8 +509,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -539,8 +529,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -561,8 +550,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -584,8 +572,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -605,8 +592,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -625,8 +611,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -646,8 +631,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -668,8 +652,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -691,8 +674,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -712,8 +694,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -733,8 +714,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -754,8 +734,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -776,8 +755,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -799,8 +777,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -820,8 +797,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -840,8 +816,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -861,8 +836,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -883,8 +857,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -906,8 +879,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -927,8 +899,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -948,8 +919,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -969,8 +939,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -991,8 +960,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1014,8 +982,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1035,8 +1002,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1055,8 +1021,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1076,8 +1041,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1098,8 +1062,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1121,8 +1084,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1142,8 +1104,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1163,8 +1124,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1184,8 +1144,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1206,8 +1165,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1229,8 +1187,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1250,8 +1207,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1270,8 +1226,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1291,8 +1246,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1313,8 +1267,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1336,8 +1289,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1357,8 +1309,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1378,8 +1329,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1399,8 +1349,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1421,8 +1370,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1444,8 +1392,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1465,8 +1412,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1485,8 +1431,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1506,8 +1451,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1528,8 +1472,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1551,8 +1494,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1572,8 +1514,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1593,8 +1534,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1614,8 +1554,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1636,8 +1575,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1659,8 +1597,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1680,8 +1617,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1700,8 +1636,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1721,8 +1656,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1743,8 +1677,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1766,8 +1699,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1787,8 +1719,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1808,8 +1739,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1829,8 +1759,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1851,8 +1780,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1874,8 +1802,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1895,8 +1822,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1915,8 +1841,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1936,8 +1861,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1958,8 +1882,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -1981,8 +1904,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2002,8 +1924,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2023,8 +1944,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2044,8 +1964,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2066,8 +1985,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2089,8 +2007,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2110,8 +2027,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2130,8 +2046,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2151,8 +2066,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2173,8 +2087,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2196,8 +2109,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2217,8 +2129,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2238,8 +2149,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2259,8 +2169,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2281,8 +2190,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2304,8 +2212,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2325,8 +2232,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2345,8 +2251,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2366,8 +2271,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2388,8 +2292,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2411,8 +2314,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2432,8 +2334,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2453,8 +2354,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2474,8 +2374,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2496,8 +2395,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2519,8 +2417,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2540,8 +2437,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2560,8 +2456,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2581,8 +2476,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2603,8 +2497,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2626,8 +2519,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2647,8 +2539,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2668,8 +2559,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2689,8 +2579,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2711,8 +2600,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2734,8 +2622,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2755,8 +2642,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2775,8 +2661,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2796,8 +2681,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2818,8 +2702,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2841,8 +2724,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2862,8 +2744,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2883,8 +2764,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2904,8 +2784,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2926,8 +2805,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2949,8 +2827,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2970,8 +2847,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -2990,8 +2866,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3011,8 +2886,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3033,8 +2907,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3056,8 +2929,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3077,8 +2949,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3098,8 +2969,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3119,8 +2989,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3141,8 +3010,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3164,8 +3032,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3185,8 +3052,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3205,8 +3071,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3226,8 +3091,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3248,8 +3112,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3271,8 +3134,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3292,8 +3154,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3313,8 +3174,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3334,8 +3194,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3356,8 +3215,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3379,8 +3237,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3400,8 +3257,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3420,8 +3276,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3441,8 +3296,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3463,8 +3317,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3486,8 +3339,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3507,8 +3359,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3528,8 +3379,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3549,8 +3399,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3571,8 +3420,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3594,8 +3442,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3615,8 +3462,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3635,8 +3481,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3656,8 +3501,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3678,8 +3522,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3701,8 +3544,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3722,8 +3564,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3743,8 +3584,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3764,8 +3604,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3786,8 +3625,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3809,8 +3647,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3830,8 +3667,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3850,8 +3686,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3871,8 +3706,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3893,8 +3727,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3916,8 +3749,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3937,8 +3769,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3958,8 +3789,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -3979,8 +3809,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -4001,8 +3830,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -4024,8 +3852,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -4045,8 +3872,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -4065,8 +3891,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -4086,8 +3911,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -4108,8 +3932,7 @@ proptest! {
                 witness_args.as_builder().lock(Some(Bytes::from(lock)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -4131,8 +3954,7 @@ proptest! {
                     .build()
             };
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 
@@ -4152,8 +3974,7 @@ proptest! {
                 witness_args.as_builder().input_type(Some(Bytes::from(input_type)).pack()).build()
             });
 
-            let e = context.verify_tx(&invalid_tx, 200_000_000).unwrap_err();
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            _run_invalid_tx(&context, invalid_tx);
         }
     }
 }
@@ -4170,8 +3991,38 @@ where
     tx.as_advanced_builder().set_witnesses(witnesses).build()
 }
 
+fn _save_tx_if_requested(context: &Context, tx: &TransactionView) {
+    if let Some(path) = std::env::var_os("DUMP_TXS_PATH") {
+        if let Ok(s) = std::env::var("DUMP_PROBABILITY") {
+            let prob = u16::from_str_radix(&s, 10).expect("parse dump probability");
+            if prob > 256 {
+                panic!("DUMP_PROBABILITY can only range from 0 to 256!");
+            }
+            let val = tx.hash().nth0().as_slice()[0] as u16;
+            if val < prob {
+                let directory = Path::new(&path);
+                std::fs::create_dir_all(&directory).expect("mkdir -p");
+
+                let path = directory.join(format!("0x{:x}.json", tx.hash()));
+                let mock_tx = context.dump_tx(&tx).expect("dump failed tx");
+                let json = serde_json::to_string_pretty(&mock_tx).expect("json");
+                std::fs::write(path, json).expect("write");
+            }
+        }
+    }
+}
+
+fn _run_invalid_tx(context: &Context, tx: TransactionView) {
+    _save_tx_if_requested(context, &tx);
+
+    let e = context.verify_tx(&tx, 200_000_000).unwrap_err();
+    assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+}
+
 fn _test_valid_tx<S: TxSigner, R: Rng + CryptoRngCore>(name: &'static str, signer: S, rng: R) {
     let (context, tx) = _build_valid_tx(name, signer, rng);
+
+    _save_tx_if_requested(&context, &tx);
 
     let cycles = context
         .verify_tx(&tx, 200_000_000)

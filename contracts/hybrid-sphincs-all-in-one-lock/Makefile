@@ -52,12 +52,14 @@ build: src/generated/sizes.rs src/generated/offsets.rs src/generated/params.rs
 				--root-actual build/$${binary}_root.debug \
 				--leaves $(C_BUILD_DIR)/leaves_debug \
 				--output build/$${binary}.debug \
+				--metadata-file build/$${binary}_metadata_debug.json \
 				--merge; \
 			$(TOP)/target/$(MODE)/script-merge-tool --prefix CKB_ merge \
 				--root-debug build/$${binary}_root.debug \
 				--root-actual build/$${binary}_root.stripped \
 				--leaves $(C_BUILD_DIR)/leaves_stripped \
 				--output build/$${binary} \
+				--metadata-file build/$${binary}_metadata_stripped.json \
 				--merge; \
 			cp build/$${binary}.debug $(TOP)/$(BUILD_DIR)/$${binary}.debug; \
 			cp build/$${binary} $(TOP)/$(BUILD_DIR)/$${binary}; \
