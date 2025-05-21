@@ -19,7 +19,6 @@ for HASH_NAME in ${HASH_NAMES[@]}; do
           -p precise-fuzzing-cargo-fuzz \
           --no-default-features \
           --features "${HASH_NAME}_${HASH_SIZE}${HASH_OPTION}"
-      done
     done
   done
 done
