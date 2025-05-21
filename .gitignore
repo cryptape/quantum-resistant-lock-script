@@ -3,6 +3,9 @@ build/
 /tests/failed_txs
 /test-vector*
 
+/corpus*
+/hfuzz_target
+/hfuzz_workspace
 /fuzzing/fuzzing_syscalls_all_in_one.h
 /fuzzing/dumps
 /fuzzing/corpus*

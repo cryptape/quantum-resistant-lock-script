@@ -70,6 +70,7 @@ run:
 test:
 	bash tests/sphincsplus/all_run.sh
 	bash tests/sphincsplus_rust/all_run.sh
+	bash tests/precise-fuzzing/ci.sh
 	# Generating sphincs signatures takes a long time in certain configurations,
 	# we will run the tests in release mode to speed things up
 	cargo test $(CARGO_ARGS) --release -p validation-tests
@@ -102,6 +103,7 @@ cargo:
 
 clean:
 	rm -rf build contracts/*/build
+	rm -rf hfuzz_target hfuzz_workspace corpus*
 	cargo clean
 
 TEMPLATE_TYPE := --git

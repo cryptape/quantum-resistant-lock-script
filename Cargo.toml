@@ -10,6 +10,8 @@ members = [
   "crates/script-merge-tool",
   "tests/multisig-tests",
   "tests/nist-test-vector-tests",
+  "tests/precise-fuzzing",
+  "tests/precise-fuzzing/fuzz",
   "tests/sphincsplus_rust",
   "tests/validation-tests",
   "tools/ckb-sphincs-tools",

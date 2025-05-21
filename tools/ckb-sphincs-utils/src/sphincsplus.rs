@@ -3,27 +3,30 @@ use ckb_fips205_utils::ParamId;
 #[link(name = "sphincsplus", kind = "static")]
 extern "C" {
     // uint32_t sphincs_plus_get_pk_size();
-    fn sphincs_plus_get_pk_size() -> u32;
+    pub fn sphincs_plus_get_pk_size() -> u32;
 
     // uint32_t sphincs_plus_get_sk_size();
-    fn sphincs_plus_get_sk_size() -> u32;
+    pub fn sphincs_plus_get_sk_size() -> u32;
 
     // uint32_t sphincs_plus_get_sign_size();
-    fn sphincs_plus_get_sign_size() -> u32;
+    pub fn sphincs_plus_get_sign_size() -> u32;
 
     // uint32_t sphincs_plus_get_seed_size();
-    // Only used in tests
     pub fn sphincs_plus_get_seed_size() -> u32;
 
     // int sphincs_plus_generate_keypair(uint8_t *pk, uint8_t *sk);
-    fn sphincs_plus_generate_keypair(pk: *mut u8, sk: *mut u8) -> i32;
+    pub fn sphincs_plus_generate_keypair(pk: *mut u8, sk: *mut u8) -> i32;
 
     // int sphincs_plus_generate_keypair_from_seed(uint8_t *pk, uint8_t *sk,
     //                                             const uint8_t *seed);
-    fn sphincs_plus_generate_keypair_from_seed(pk: *mut u8, sk: *mut u8, seed: *const u8) -> i32;
+    pub fn sphincs_plus_generate_keypair_from_seed(
+        pk: *mut u8,
+        sk: *mut u8,
+        seed: *const u8,
+    ) -> i32;
 
     // int sphincs_plus_sign(uint8_t *message, uint32_t message_size, uint8_t *sk, uint8_t *out_sign);
-    fn sphincs_plus_sign(
+    pub fn sphincs_plus_sign(
         message: *const u8,
         message_size: u32,
         sk: *const u8,
@@ -33,7 +36,7 @@ extern "C" {
     // int sphincs_plus_verify(uint8_t *sign, uint32_t sign_size, uint8_t *message,
     //                         uint32_t message_size, uint8_t *pubkey,
     //                         uint32_t pubkey_size);
-    fn sphincs_plus_verify(
+    pub fn sphincs_plus_verify(
         sign: *const u8,
         sign_size: u32,
         message: *const u8,
@@ -123,9 +126,7 @@ impl SphincsPlus {
     #[cfg(feature = "serialize_key")]
     pub fn serialize_key(&self) -> String {
         let buf_len = self.pk.len() + self.sk.len();
-        let mut buf = Vec::with_capacity(buf_len);
-
-        buf.resize(buf_len, 0);
+        let mut buf = vec![0; buf_len];
 
         buf[0..self.pk.len()].copy_from_slice(&self.pk);
         buf[self.pk.len()..].copy_from_slice(&self.sk);
