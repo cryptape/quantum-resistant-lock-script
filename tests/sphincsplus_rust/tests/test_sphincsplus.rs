@@ -4,14 +4,14 @@ use sphincsplus_rust_test::dummy_data_loader::DummyDataLoader;
 use sphincsplus_rust_test::utils::*;
 
 pub fn debug_printer(_script: &Byte32, msg: &str) {
-    print!("{}", msg);
+    print!("{msg}");
 }
 
 pub const MAX_CYCLES: u64 = std::u64::MAX;
 
-const C_NAME: &'static str = "c-sphincs-all-in-one-lock";
-const HYBRID_NAME: &'static str = "hybrid-sphincs-all-in-one-lock";
-const RUST_NAME: &'static str = "sphincs-all-in-one-lock";
+const C_NAME: &str = "c-sphincs-all-in-one-lock";
+const HYBRID_NAME: &str = "hybrid-sphincs-all-in-one-lock";
+const RUST_NAME: &str = "sphincs-all-in-one-lock";
 
 #[test]
 fn test_base() {

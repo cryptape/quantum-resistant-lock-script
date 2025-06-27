@@ -14,9 +14,9 @@ use proptest::{collection::vec, prelude::*};
 use rand::{Rng, SeedableRng, rngs::StdRng};
 use rand_core::CryptoRngCore;
 
-const C_NAME: &'static str = "c-sphincs-all-in-one-lock";
-const HYBRID_NAME: &'static str = "hybrid-sphincs-all-in-one-lock";
-const RUST_NAME: &'static str = "sphincs-all-in-one-lock";
+const C_NAME: &str = "c-sphincs-all-in-one-lock";
+const HYBRID_NAME: &str = "hybrid-sphincs-all-in-one-lock";
+const RUST_NAME: &str = "sphincs-all-in-one-lock";
 
 proptest! {
     #[test]
@@ -35,7 +35,7 @@ proptest! {
             &[0],
             rng,
         ).expect("pass verification");
-        println!("consume cycles: {}", cycles);
+        println!("consume cycles: {cycles}");
     }
 
     #[test]
@@ -52,7 +52,7 @@ proptest! {
             threshold,
             0,
         );
-        println!("Selected signer indices: {:?}", selected);
+        println!("Selected signer indices: {selected:?}");
 
         let cycles = _run_valid_tx(
             C_NAME,
@@ -62,7 +62,7 @@ proptest! {
             &selected,
             rng,
         ).expect("pass verification");
-        println!("consume cycles: {}", cycles);
+        println!("consume cycles: {cycles}");
     }
 
     #[test]
@@ -81,7 +81,7 @@ proptest! {
             threshold,
             first_n,
         );
-        println!("Selected signer indices: {:?}", selected);
+        println!("Selected signer indices: {selected:?}");
 
         let cycles = _run_valid_tx(
             C_NAME,
@@ -91,7 +91,7 @@ proptest! {
             &selected,
             rng,
         ).expect("pass verification");
-        println!("consume cycles: {}", cycles);
+        println!("consume cycles: {cycles}");
     }
 
     #[test]
@@ -110,7 +110,7 @@ proptest! {
             &[0],
             rng,
         ).expect("pass verification");
-        println!("consume cycles: {}", cycles);
+        println!("consume cycles: {cycles}");
     }
 
     #[test]
@@ -127,7 +127,7 @@ proptest! {
             threshold,
             0,
         );
-        println!("Selected signer indices: {:?}", selected);
+        println!("Selected signer indices: {selected:?}");
 
         let cycles = _run_valid_tx(
             HYBRID_NAME,
@@ -137,7 +137,7 @@ proptest! {
             &selected,
             rng,
         ).expect("pass verification");
-        println!("consume cycles: {}", cycles);
+        println!("consume cycles: {cycles}");
     }
 
     #[test]
@@ -156,7 +156,7 @@ proptest! {
             threshold,
             first_n,
         );
-        println!("Selected signer indices: {:?}", selected);
+        println!("Selected signer indices: {selected:?}");
 
         let cycles = _run_valid_tx(
             HYBRID_NAME,
@@ -166,7 +166,7 @@ proptest! {
             &selected,
             rng,
         ).expect("pass verification");
-        println!("consume cycles: {}", cycles);
+        println!("consume cycles: {cycles}");
     }
 
     #[test]
@@ -185,7 +185,7 @@ proptest! {
             &[0],
             rng,
         ).expect("pass verification");
-        println!("consume cycles: {}", cycles);
+        println!("consume cycles: {cycles}");
     }
 
     #[test]
@@ -202,7 +202,7 @@ proptest! {
             threshold,
             0,
         );
-        println!("Selected signer indices: {:?}", selected);
+        println!("Selected signer indices: {selected:?}");
 
         let cycles = _run_valid_tx(
             RUST_NAME,
@@ -212,7 +212,7 @@ proptest! {
             &selected,
             rng,
         ).expect("pass verification");
-        println!("consume cycles: {}", cycles);
+        println!("consume cycles: {cycles}");
     }
 
     #[test]
@@ -231,7 +231,7 @@ proptest! {
             threshold,
             first_n,
         );
-        println!("Selected signer indices: {:?}", selected);
+        println!("Selected signer indices: {selected:?}");
 
         let cycles = _run_valid_tx(
             RUST_NAME,
@@ -241,7 +241,7 @@ proptest! {
             &selected,
             rng,
         ).expect("pass verification");
-        println!("consume cycles: {}", cycles);
+        println!("consume cycles: {cycles}");
     }
 }
 
@@ -262,7 +262,7 @@ proptest! {
             threshold - 1,
             0,
         );
-        println!("Selected signer indices: {:?}", selected);
+        println!("Selected signer indices: {selected:?}");
 
         let e = _run_valid_tx(
             C_NAME,
@@ -272,7 +272,7 @@ proptest! {
             &selected,
             rng,
         ).unwrap_err();
-        assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+        assert!(!format!("{e}").contains("ExceededMaximumCycles"));
     }
 
     #[test]
@@ -291,7 +291,7 @@ proptest! {
             threshold - 1,
             0,
         );
-        println!("Selected signer indices: {:?}", selected);
+        println!("Selected signer indices: {selected:?}");
 
         let e = _run_valid_tx(
             HYBRID_NAME,
@@ -301,7 +301,7 @@ proptest! {
             &selected,
             rng,
         ).unwrap_err();
-        assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+        assert!(!format!("{e}").contains("ExceededMaximumCycles"));
     }
 
     #[test]
@@ -320,7 +320,7 @@ proptest! {
             threshold - 1,
             0,
         );
-        println!("Selected signer indices: {:?}", selected);
+        println!("Selected signer indices: {selected:?}");
 
         let e = _run_valid_tx(
             RUST_NAME,
@@ -330,7 +330,7 @@ proptest! {
             &selected,
             rng,
         ).unwrap_err();
-        assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+        assert!(!format!("{e}").contains("ExceededMaximumCycles"));
     }
 
     #[test]
@@ -351,7 +351,7 @@ proptest! {
             threshold,
             first_n - 1,
         );
-        println!("Selected signer indices: {:?}", selected);
+        println!("Selected signer indices: {selected:?}");
 
         let e = _run_valid_tx(
             C_NAME,
@@ -361,7 +361,7 @@ proptest! {
             &selected,
             rng,
         ).unwrap_err();
-        assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+        assert!(!format!("{e}").contains("ExceededMaximumCycles"));
     }
 
     #[test]
@@ -382,7 +382,7 @@ proptest! {
             threshold,
             first_n - 1,
         );
-        println!("Selected signer indices: {:?}", selected);
+        println!("Selected signer indices: {selected:?}");
 
         let e = _run_valid_tx(
             HYBRID_NAME,
@@ -392,7 +392,7 @@ proptest! {
             &selected,
             rng,
         ).unwrap_err();
-        assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+        assert!(!format!("{e}").contains("ExceededMaximumCycles"));
     }
 
     #[test]
@@ -413,7 +413,7 @@ proptest! {
             threshold,
             first_n - 1,
         );
-        println!("Selected signer indices: {:?}", selected);
+        println!("Selected signer indices: {selected:?}");
 
         let e = _run_valid_tx(
             RUST_NAME,
@@ -423,7 +423,7 @@ proptest! {
             &selected,
             rng,
         ).unwrap_err();
-        assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+        assert!(!format!("{e}").contains("ExceededMaximumCycles"));
     }
 }
 
@@ -456,7 +456,7 @@ fn _run_valid_tx<R: Rng + CryptoRngCore>(
             let val = signed_tx.hash().nth0().as_slice()[0] as u16;
             if val < prob {
                 let directory = std::path::Path::new(&path);
-                std::fs::create_dir_all(&directory).expect("mkdir -p");
+                std::fs::create_dir_all(directory).expect("mkdir -p");
 
                 let path = directory.join(format!("0x{:x}.json", signed_tx.hash()));
                 let mock_tx = context.dump_tx(&signed_tx).expect("dump failed tx");

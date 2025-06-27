@@ -22,7 +22,7 @@ CkbSphincsParams ckb_sphincs_supported_params[] = {{"#
 
     let mut min_nid = u8::MAX;
     for param_id in collect_param_ids() {
-        let name = format!("CKB_{}", param_id)
+        let name = format!("CKB_{param_id}")
             .replace("-", "_")
             .replace("SLH_DSA", "SPHINCS")
             .to_uppercase();

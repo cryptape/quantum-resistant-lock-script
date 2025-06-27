@@ -57,7 +57,7 @@ fn _get_sphincsplus_sighash(ckb_client: &mut CkbRpcClient, sp_tx_hash: H256, sp_
     };
 
     let msg = blake2b_256(data.as_bytes());
-    println!("sphincs hash: {:02x?}", msg);
+    println!("sphincs hash: {msg:02x?}");
 }
 
 fn get_sphincsplus_code_hash() -> [u8; 32] {
@@ -410,7 +410,7 @@ pub fn cc_to_def_lock_script(
 
     let capacity = input_cell.capacity.value() / 100000000;
 
-    println!("Capacity: {}, Need fee: {}", capacity, fee);
+    println!("Capacity: {capacity}, Need fee: {fee}");
     let output_capacity = Capacity::shannons(input_cell.capacity.value() - fee);
     tx_builder = tx_builder
         .output(

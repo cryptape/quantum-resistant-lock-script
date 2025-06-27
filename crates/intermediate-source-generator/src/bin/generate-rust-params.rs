@@ -26,7 +26,7 @@ pub fn lengths(param_id: ParamId) -> (usize, usize) {{
     let mut min_nid = u8::MAX;
     for param_id in collect_param_ids() {
         let symbol_name = {
-            let name = format!("{}", param_id).replace("SLH-DSA-", "");
+            let name = format!("{param_id}").replace("SLH-DSA-", "");
             let parts: Vec<_> = name.split("-").collect();
             capitalize(parts[0]) + &parts[1].to_uppercase().to_string()
         };
@@ -51,7 +51,7 @@ pub fn indices(param_id: ParamId) -> usize {{
 
     for param_id in collect_param_ids() {
         let symbol_name = {
-            let name = format!("{}", param_id).replace("SLH-DSA-", "");
+            let name = format!("{param_id}").replace("SLH-DSA-", "");
             let parts: Vec<_> = name.split("-").collect();
             capitalize(parts[0]) + &parts[1].to_uppercase().to_string()
         };
@@ -71,12 +71,12 @@ pub fn binary_infos(param_id: ParamId) -> (*const u32, *const u32) {{
     );
 
     for param_id in collect_param_ids() {
-        let name = format!("CKB_{}", param_id)
+        let name = format!("CKB_{param_id}")
             .replace("-", "_")
             .replace("SLH_DSA", "SPHINCS")
             .to_uppercase();
         let symbol_name = {
-            let name = format!("{}", param_id).replace("SLH-DSA-", "");
+            let name = format!("{param_id}").replace("SLH-DSA-", "");
             let parts: Vec<_> = name.split("-").collect();
             capitalize(parts[0]) + &parts[1].to_uppercase().to_string()
         };

@@ -226,7 +226,7 @@ fn main() {
                     root_binary[offset_symbol_offset..offset_symbol_offset + 4]
                         .copy_from_slice(&p(offset));
                 } else {
-                    println!("Symbol {} for leaf {} does not exist in root binary, maybe it is not used?", offset_symbol_name, leaf_name);
+                    println!("Symbol {offset_symbol_name} for leaf {leaf_name} does not exist in root binary, maybe it is not used?");
                 }
 
                 let length_symbol_offset =
@@ -235,11 +235,11 @@ fn main() {
                     root_binary[length_symbol_offset..length_symbol_offset + 4]
                         .copy_from_slice(&p(leaf_size));
                 } else {
-                    println!("Symbol {} for leaf {} does not exist in root binary, maybe it is not used?", length_symbol_name, leaf_name);
+                    println!("Symbol {length_symbol_name} for leaf {leaf_name} does not exist in root binary, maybe it is not used?");
                 }
 
                 if offset_symbol_offset.is_none() && length_symbol_offset.is_none() {
-                    println!("Both symbols are missing for leaf {}, we are not merging this leaf script into the final script!", leaf_name);
+                    println!("Both symbols are missing for leaf {leaf_name}, we are not merging this leaf script into the final script!");
                 } else {
                     metadata.push(Meta::new(&leaf_name, offset, leaf_binary.len()));
 
@@ -271,7 +271,7 @@ fn offset_sname(leaf_path: &str, prefix: &str) -> String {
         .expect("extract file name")
         .to_str()
         .expect("to str");
-    format!("{}{}{}OFFSET", prefix, leaf_name, SYMBOL_COMMON_PART)
+    format!("{prefix}{leaf_name}{SYMBOL_COMMON_PART}OFFSET")
         .replace("-", "_")
         .to_uppercase()
 }
@@ -282,7 +282,7 @@ fn length_sname(leaf_path: &str, prefix: &str) -> String {
         .expect("extract file name")
         .to_str()
         .expect("to str");
-    format!("{}{}{}LENGTH", prefix, leaf_name, SYMBOL_COMMON_PART)
+    format!("{prefix}{leaf_name}{SYMBOL_COMMON_PART}LENGTH")
         .replace("-", "_")
         .to_uppercase()
 }

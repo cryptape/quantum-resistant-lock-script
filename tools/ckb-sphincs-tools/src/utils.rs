@@ -63,7 +63,7 @@ fn char_to_u8(c: char) -> u8 {
     } else if ('A'..='F').contains(&c) {
         ((c as u8) - b'A') + 0xA
     } else {
-        panic!("unknow char: {}", c);
+        panic!("unknow char: {c}");
     }
 }
 

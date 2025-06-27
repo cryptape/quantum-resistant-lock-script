@@ -100,7 +100,7 @@ fn main() {
 
                 if let Some(path) = path {
                     std::fs::create_dir_all(&path).expect("mkdir -p");
-                    std::fs::copy(&trace, path.join(format!("{}.data", dump_base_name)))
+                    std::fs::copy(&trace, path.join(format!("{dump_base_name}.data")))
                         .expect("copy file");
                 }
             }
@@ -110,10 +110,10 @@ fn main() {
 }
 
 fn run_command(mut c: Command) {
-    println!("Running Command[{:?}]", c);
+    println!("Running Command[{c:?}]");
 
     let output = c.output().unwrap_or_else(|e| {
-        panic!("Error running Command[{:?}], error: {:?}", c, e);
+        panic!("Error running Command[{c:?}], error: {e:?}");
     });
 
     if !output.status.success() {

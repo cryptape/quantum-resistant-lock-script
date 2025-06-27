@@ -14,9 +14,9 @@ use rand::{rngs::StdRng, Rng, SeedableRng};
 use rand_core::CryptoRngCore;
 use std::path::Path;
 
-const C_NAME: &'static str = "c-sphincs-all-in-one-lock";
-const HYBRID_NAME: &'static str = "hybrid-sphincs-all-in-one-lock";
-const RUST_NAME: &'static str = "sphincs-all-in-one-lock";
+const C_NAME: &str = "c-sphincs-all-in-one-lock";
+const HYBRID_NAME: &str = "hybrid-sphincs-all-in-one-lock";
+const RUST_NAME: &str = "sphincs-all-in-one-lock";
 
 proptest! {
     #![proptest_config(ProptestConfig {
@@ -4001,10 +4001,10 @@ fn _save_tx_if_requested(context: &Context, tx: &TransactionView) {
             let val = tx.hash().nth0().as_slice()[0] as u16;
             if val < prob {
                 let directory = Path::new(&path);
-                std::fs::create_dir_all(&directory).expect("mkdir -p");
+                std::fs::create_dir_all(directory).expect("mkdir -p");
 
                 let path = directory.join(format!("0x{:x}.json", tx.hash()));
-                let mock_tx = context.dump_tx(&tx).expect("dump failed tx");
+                let mock_tx = context.dump_tx(tx).expect("dump failed tx");
                 let json = serde_json::to_string_pretty(&mock_tx).expect("json");
                 std::fs::write(path, json).expect("write");
             }
@@ -4016,7 +4016,7 @@ fn _run_invalid_tx(context: &Context, tx: TransactionView) {
     _save_tx_if_requested(context, &tx);
 
     let e = context.verify_tx(&tx, 200_000_000).unwrap_err();
-    assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+    assert!(!format!("{e}").contains("ExceededMaximumCycles"));
 }
 
 fn _test_valid_tx<S: TxSigner, R: Rng + CryptoRngCore>(name: &'static str, signer: S, rng: R) {
@@ -4027,7 +4027,7 @@ fn _test_valid_tx<S: TxSigner, R: Rng + CryptoRngCore>(name: &'static str, signe
     let cycles = context
         .verify_tx(&tx, 200_000_000)
         .expect("pass verification");
-    println!("consume cycles: {}", cycles);
+    println!("consume cycles: {cycles}");
 }
 
 fn _build_valid_tx<S: TxSigner, R: Rng + CryptoRngCore>(

@@ -24,7 +24,7 @@ fn main() {
             .unwrap()
             .as_nanos() as u64,
     };
-    println!("Seed: {}", seed);
+    println!("Seed: {seed}");
 
     let mut rng = StdRng::seed_from_u64(seed);
 
@@ -40,7 +40,7 @@ fn main() {
         assert!(fips205_run(&corpus));
         assert!(sphincsplus_run(&corpus));
 
-        let valid_path = output_dir.join(format!("valid_{}", i));
+        let valid_path = output_dir.join(format!("valid_{i}"));
         std::fs::write(valid_path, &corpus).expect("write");
 
         for j in 0..3 {

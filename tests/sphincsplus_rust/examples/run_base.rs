@@ -4,7 +4,7 @@ use sphincsplus_rust_test::dummy_data_loader::DummyDataLoader;
 use sphincsplus_rust_test::utils::*;
 
 pub fn debug_printer(_script: &Byte32, msg: &str) {
-    print!("{}", msg);
+    print!("{msg}");
 }
 
 pub const MAX_CYCLES: u64 = std::u64::MAX;

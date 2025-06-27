@@ -90,7 +90,7 @@ impl Loader {
         path.push(name);
         let result = fs::read(&path);
         if result.is_err() {
-            panic!("Binary {:?} is missing!", path);
+            panic!("Binary {path:?} is missing!");
         }
         result.unwrap().into()
     }

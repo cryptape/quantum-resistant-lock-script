@@ -113,7 +113,7 @@ fn main() {
 
         builder.file(&full_path);
         if let Some(s) = full_path.to_str() {
-            println!("cargo:rerun-if-changed={}", s);
+            println!("cargo:rerun-if-changed={s}");
         }
     }
     builder.compile("sphincsplus");

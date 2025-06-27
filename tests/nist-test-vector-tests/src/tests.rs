@@ -105,16 +105,14 @@ fn _run_nist_vector(
         Ok(_cycles) => {
             assert!(
                 test_passed,
-                "Tc ID: {} should fail but passed in CKB-VM",
-                tc_id
+                "Tc ID: {tc_id} should fail but passed in CKB-VM"
             );
         }
         Err(e) => {
-            assert!(!format!("{}", e).contains("ExceededMaximumCycles"));
+            assert!(!format!("{e}").contains("ExceededMaximumCycles"));
             assert!(
                 !test_passed,
-                "Tc ID: {} should pass but failed in CKB-VM, error: {:?}",
-                tc_id, e,
+                "Tc ID: {tc_id} should pass but failed in CKB-VM, error: {e:?}",
             );
         }
     }
