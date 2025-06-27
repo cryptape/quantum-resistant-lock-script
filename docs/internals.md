@@ -2,6 +2,16 @@
 
 This document explains important points of `c-sphincs-all-in-one-lock` internals.
 
+## Combination of different specs
+
+Note that the `c-sphincs-all-in-one-lock`, or in fact this repository, combines 3 different piece to build a CKB lock script:
+
+* Quantum resistant signature algorithm powered by [SPHINCS+](https://github.com/sphincs/sphincsplus).
+* The new `CKB_TX_MESSAGE_ALL` message signing algorithm described in [this RFC](https://github.com/nervosnetwork/rfcs/pull/446).
+* A new multisig format described in [this RFC](https://github.com/nervosnetwork/rfcs/pull/448).
+
+So if you are puzzled by one particular point in the implementation, chances are one of the RFCs could give you a little hint.
+
 ## Umbrella of Scripts
 
 The reference implementation of [SPHINCS+](https://github.com/sphincs/sphincsplus) has one quirk: it sets the parameter set of SPHINCS+ at build time, not at runtime. This means when we compile a binary using the reference implementation, only one parameter set will be available to use.
