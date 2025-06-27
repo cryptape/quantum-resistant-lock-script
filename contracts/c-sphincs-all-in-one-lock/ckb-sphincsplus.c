@@ -25,6 +25,7 @@ enum SphincsPlusError {
   SphincsPlusError_Params = 200,
   SphincsPlusError_Verify,
   SphincsPlusError_OutputSignLength,
+  SphincsPlusError_SignSignature,
 };
 
 #ifndef CKB_VM
@@ -47,12 +48,12 @@ int sphincs_plus_sign(const uint8_t *message, uint32_t message_size,
   int ret =
       crypto_sign_signature(out_sign, &out_sign_len, message, message_size, sk);
   if (ret != 0) {
-    return ret;
+    return SphincsPlusError_SignSignature;
   }
   if ((uint32_t)out_sign_len != SPHINCS_PLUS_SIGN_SIZE) {
     return SphincsPlusError_OutputSignLength;
   }
-  return ret;
+  return 0;
 }
 
 /* Defined for Rust FFI usage, script code would only require the macros */

@@ -41,8 +41,7 @@
 int fetch_params(uint8_t id, const CkbSphincsParams **params) {
   int err = CKB_SUCCESS;
   uint8_t index = MULTISIG_PARAM_ID_TO_INDEX(id);
-  CHECK2(index >= 0 && index < CKB_SPHINCS_SUPPORTED_PARAMS_COUNT,
-         ERROR_SPHINCSPLUS_WITNESS);
+  CHECK2(index < CKB_SPHINCS_SUPPORTED_PARAMS_COUNT, ERROR_SPHINCSPLUS_WITNESS);
   *params = &ckb_sphincs_supported_params[index];
 
 exit:

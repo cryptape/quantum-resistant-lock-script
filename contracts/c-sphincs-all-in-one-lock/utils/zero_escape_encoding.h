@@ -1,6 +1,10 @@
 #ifndef CKB_ZERO_ESCAPE_ENCODING_H_
 #define CKB_ZERO_ESCAPE_ENCODING_H_
 
+#ifndef CKB_ZERO_ESCAPE_ERROR_CODE
+#define CKB_ZERO_ESCAPE_ERROR_CODE 90
+#endif
+
 /*
  * A simple escape encoder that:
  *
@@ -26,19 +30,19 @@ int zero_escape_encode(const uint8_t *src, size_t src_length, uint8_t *dst,
   for (size_t i = 0; i < src_length; i++) {
     if (src[i] == '\0' || src[i] == (uint8_t)'\xFE') {
       if (wrote + 2 > limit) {
-        return 90;
+        return CKB_ZERO_ESCAPE_ERROR_CODE;
       }
       dst[wrote++] = '\xFE';
       dst[wrote++] = src[i] - 1;
     } else {
       if (wrote + 1 > limit) {
-        return 90;
+        return CKB_ZERO_ESCAPE_ERROR_CODE;
       }
       dst[wrote++] = src[i];
     }
   }
   if (wrote + 1 > limit) {
-    return 90;
+    return CKB_ZERO_ESCAPE_ERROR_CODE;
   }
   dst[wrote++] = '\0';
 
@@ -53,7 +57,7 @@ int zero_escape_decode_in_place(uint8_t *buffer, size_t *length) {
   for (size_t i = 0; i < limit;) {
     if (buffer[i] == (uint8_t)'\xFE') {
       if (i + 1 >= limit) {
-        return 90;
+        return CKB_ZERO_ESCAPE_ERROR_CODE;
       }
       buffer[wrote++] = buffer[i + 1] + 1;
 
