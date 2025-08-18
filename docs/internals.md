@@ -30,6 +30,10 @@ Due to this particular design, special tools are required to patch and merge bin
 
 We do hope this `umbrella` design can help inspire more different kinds of CKB scripts in the future.
 
+### Callee of Spawn or Exec
+
+There is one side effect of the `umbrella` design: when you use spawn or exec syscalls to call the `c-sphincs-all-in-one-lock` as a callee, you must provide the cell dep index of the `c-sphincs-all-in-one-lock` script in current transaction in `argv[0]` of spawn or exec's arguments. The cell dep index must first be put in 64-bit little endian format, then be encoded via `zero escaping`. See [spawn-exec-test-runner](../contracts/spawn-exec-test-runner) as an example that calls `c-sphincs-all-in-one-lock` as a callee script.
+
 ## Invocation Mode
 
 Due to the above mentioned design in the C script, 2 different invocation modes exist. One leverages [exec](https://github.com/nervosnetwork/rfcs/blob/bd5d3ff73969bdd2571f804260a538781b45e996/rfcs/0034-vm-syscalls-2/0034-vm-syscalls-2.md#exec) syscall, while the other leverages [spawn](https://github.com/nervosnetwork/rfcs/blob/bd5d3ff73969bdd2571f804260a538781b45e996/rfcs/0050-vm-syscalls-3/0050-vm-syscalls-3.md#spawn) syscalls. The actual invocation mode to use depends on param IDs included in the multisig configuration:

@@ -27,6 +27,7 @@ use ckb_std::{
     assert_eq,
     asserts::{expect_result, unwrap_option},
     ckb_constants::Source,
+    env::argv,
     high_level, syscalls,
 };
 use core::ffi::CStr;
@@ -49,6 +50,7 @@ pub enum Error {
     PipeCreationFailure,
     SpawnFailure,
     IOFailure,
+    Argv,
 }
 
 impl From<Error> for i8 {
@@ -113,21 +115,28 @@ pub fn program_entry() -> i8 {
         &current_script.args().raw_data(),
         &actual_script_args_hash[..]
     );
-    let cell_index = expect_result(
-        Error::Syscall,
-        high_level::look_for_dep_with_hash2(
-            &current_script.code_hash().raw_data(),
-            if current_script.hash_type().as_slice()[0]
-                == core::convert::Into::<u8>::into(ScriptHashType::Type)
-            {
-                ScriptHashType::Type
-            } else {
-                // It does not really matter which dataN is used
-                ScriptHashType::Data2
-            },
-        ),
-        "look for current script",
-    );
+    let cell_index = if let Some(argv0) = argv().first() {
+        let mut argv0 = argv0.to_bytes().to_vec();
+        let decoded = unwrap_option(Error::Argv, zero_decode_in_place(&mut argv0));
+        assert_eq!(Error::Argv, decoded.len(), 8);
+        u64::from_le_bytes(decoded.try_into().unwrap()) as usize
+    } else {
+        expect_result(
+            Error::Syscall,
+            high_level::look_for_dep_with_hash2(
+                &current_script.code_hash().raw_data(),
+                if current_script.hash_type().as_slice()[0]
+                    == core::convert::Into::<u8>::into(ScriptHashType::Type)
+                {
+                    ScriptHashType::Type
+                } else {
+                    // It does not really matter which dataN is used
+                    ScriptHashType::Data2
+                },
+            ),
+            "look for current script",
+        )
+    };
 
     match parsed_param_id {
         ParsedParamId::Single(param_id) => {
@@ -283,6 +292,28 @@ pub fn program_entry() -> i8 {
     }
 
     0
+}
+
+pub fn zero_decode_in_place(buf: &mut [u8]) -> Option<&[u8]> {
+    let mut wrote = 0;
+    let mut i = 0;
+
+    while i < buf.len() {
+        if buf[i] == 0xFE {
+            if i + 1 >= buf.len() {
+                return None;
+            }
+            buf[wrote] = buf[i + 1].wrapping_add(1);
+            wrote += 1;
+            i += 2;
+        } else {
+            buf[wrote] = buf[i];
+            wrote += 1;
+            i += 1;
+        }
+    }
+
+    Some(&buf[0..wrote])
 }
 
 pub struct ZeroEncoder<'a> {

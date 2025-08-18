@@ -223,12 +223,36 @@ exit:
 int main(int argc, char *argv[]) {
   int err = CKB_SUCCESS;
 
-  /* Extract current script's data first, so we can reclaim buffer set aside
-   for loading script to be used later */
-  uint8_t code_hash[BLAKE2B_BLOCK_SIZE];
-  uint8_t hash_type;
   uint8_t expected_multisig_hash[BLAKE2B_BLOCK_SIZE];
-  CHECK(extract_script(code_hash, &hash_type, expected_multisig_hash));
+  size_t cell_dep_index = (size_t)-1;
+  {
+    /* Extract current script's data first, so we can reclaim buffer set aside
+     for loading script to be used later */
+    uint8_t code_hash[BLAKE2B_BLOCK_SIZE];
+    uint8_t hash_type;
+    CHECK(extract_script(code_hash, &hash_type, expected_multisig_hash));
+
+    /*
+     * 2 solutions exist to locate the cell dep containing quantum resistant
+     * lock:
+     *
+     * * When current script is the entrypoint script, we will use run
+     *   ckb_look_for_dep_with_hash2 with current script's code_hash and
+     *   hash_type to figure the cell dep.
+     * * When the quantum script is invoked via spawn or exec, we will expect
+     *   that `argv[0]` contains a 64-bit little endian cell dep index in zero
+     *   escaping.
+     */
+    if (argc > 0) {
+      size_t decoded_length = 0;
+      CHECK2(zero_escape_decode_cstring_in_place(argv[0], &decoded_length) == 0,
+             ERROR_SPHINCSPLUS_ARGV);
+      CHECK2(decoded_length == 8, ERROR_SPHINCSPLUS_ARGV);
+      cell_dep_index = *((size_t *)argv[0]);
+    } else {
+      CHECK(ckb_look_for_dep_with_hash2(code_hash, hash_type, &cell_dep_index));
+    }
+  }
 
   /* The first witness in current script group contains signatures to validate
    */
@@ -337,9 +361,11 @@ int main(int argc, char *argv[]) {
               .argv = (const char **)argv,
               .process_id = &spawned_processes[param_index],
               .inherited_fds = inherited_fds};
-          CHECK(ckb_spawn_cell(
-              code_hash, hash_type, *all_params[param_index]->offset_ptr,
-              *all_params[param_index]->length_ptr, &spawn_args));
+          size_t offset = *all_params[param_index]->offset_ptr;
+          size_t length = *all_params[param_index]->length_ptr;
+          size_t bounds = (offset << 32) | length;
+          CHECK(ckb_spawn(cell_dep_index, CKB_SOURCE_CELL_DEP, 0, bounds,
+                          &spawn_args));
         }
         /* Sends data location to the leaf process */
         {
@@ -406,8 +432,11 @@ int main(int argc, char *argv[]) {
         ERROR_SPHINCSPLUS_ENCODING);
 
     char *argv[] = {(char *)escaped};
-    CHECK(ckb_exec_cell(code_hash, hash_type, *params->offset_ptr,
-                        *params->length_ptr, 1, (const char **)argv));
+    size_t offset = *params->offset_ptr;
+    size_t length = *params->length_ptr;
+    size_t bounds = (offset << 32) | length;
+    CHECK(ckb_exec(cell_dep_index, CKB_SOURCE_CELL_DEP, 0, bounds, 1,
+                   (const char **)argv));
     ckb_exit(ERROR_SPHINCSPLUS_UNEXPECTED);
   }
 

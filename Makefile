@@ -119,7 +119,7 @@ generate:
 			--destination $(DESTINATION); \
 		GENERATED_DIR=$$(ls -dt $(DESTINATION)/* | head -n 1); \
 		if [ -f "$$GENERATED_DIR/.cargo-generate/tests.rs" ]; then \
-			cat $$GENERATED_DIR/.cargo-generate/tests.rs >> tests/src/tests.rs; \
+			# cat $$GENERATED_DIR/.cargo-generate/tests.rs >> tests/src/tests.rs; \
 			rm -rf $$GENERATED_DIR/.cargo-generate/; \
 		fi; \
 		sed "s,@@INSERTION_POINT@@,@@INSERTION_POINT@@\n  \"$$GENERATED_DIR\"\,," Cargo.toml > Cargo.toml.new; \
@@ -130,7 +130,7 @@ generate:
 			--destination $(DESTINATION) \
 			--name $(CRATE); \
 		if [ -f "$(DESTINATION)/$(CRATE)/.cargo-generate/tests.rs" ]; then \
-			cat $(DESTINATION)/$(CRATE)/.cargo-generate/tests.rs >> tests/src/tests.rs; \
+			# cat $(DESTINATION)/$(CRATE)/.cargo-generate/tests.rs >> tests/src/tests.rs; \
 			rm -rf $(DESTINATION)/$(CRATE)/.cargo-generate/; \
 		fi; \
 		sed '/@@INSERTION_POINT@@/s/$$/\n  "$(DESTINATION)\/$(CRATE)",/' Cargo.toml > Cargo.toml.new; \

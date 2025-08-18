@@ -4,6 +4,7 @@ resolver = "2"
 members = [
   "contracts/hybrid-sphincs-all-in-one-lock",
   "contracts/sphincs-all-in-one-lock",
+  "contracts/spawn-exec-test-runner",
   "crates/ckb-fips205-utils",
   "crates/fuzzing-corpus-generator",
   "crates/intermediate-source-generator",
