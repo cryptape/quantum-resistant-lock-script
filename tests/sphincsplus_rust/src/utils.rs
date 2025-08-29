@@ -1,5 +1,4 @@
 use super::dummy_data_loader::DummyDataLoader;
-use ckb_hash::blake2b_256;
 use ckb_sphincs_utils::sphincsplus::*;
 use ckb_types::core::{
     cell::{CellMetaBuilder, ResolvedTransaction},
@@ -14,13 +13,87 @@ use ckb_types::{
     },
     prelude::*,
 };
-use lazy_static::lazy_static;
 use rand::prelude::{Rng, ThreadRng};
 use rand::thread_rng;
+use std::env;
+use std::fs;
+use std::path::PathBuf;
+use std::str::FromStr;
 
-lazy_static! {
-    pub static ref SPHINCSPLUS_EXAMPLE_BIN: Bytes =
-        Bytes::from(&include_bytes!("../../../build/sphincsplus_lock")[..]);
+// The exact same Loader code from capsule's template, except that
+// now we use MODE as the environment variable
+const TEST_ENV_VAR: &str = "MODE";
+
+pub enum TestEnv {
+    Debug,
+    Release,
+}
+
+impl FromStr for TestEnv {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "debug" => Ok(TestEnv::Debug),
+            "release" => Ok(TestEnv::Release),
+            _ => Err("no match"),
+        }
+    }
+}
+
+pub struct Loader(PathBuf);
+
+impl Default for Loader {
+    fn default() -> Self {
+        let test_env = match env::var(TEST_ENV_VAR) {
+            Ok(val) => val.parse().expect("test env"),
+            Err(_) => TestEnv::Release,
+        };
+        Self::with_test_env(test_env)
+    }
+}
+
+impl Loader {
+    fn with_test_env(env: TestEnv) -> Self {
+        let load_prefix = match env {
+            TestEnv::Debug => "debug",
+            TestEnv::Release => "release",
+        };
+        let mut base_path = match env::var("TOP") {
+            Ok(val) => {
+                let mut base_path: PathBuf = val.into();
+                base_path.push("build");
+                base_path
+            }
+            Err(_) => {
+                let mut base_path = PathBuf::new();
+                // cargo may use a different cwd when running tests, for example:
+                // when running debug in vscode, it will use workspace root as cwd by default,
+                // when running test by `cargo test`, it will use tests directory as cwd,
+                // so we need a fallback path
+                base_path.push("build");
+                if !base_path.exists() {
+                    base_path.pop();
+                    base_path.push("..");
+                    base_path.push("build");
+                }
+                base_path
+            }
+        };
+
+        base_path.push(load_prefix);
+        Loader(base_path)
+    }
+
+    pub fn load_binary(&self, name: &str) -> Bytes {
+        let mut path = self.0.clone();
+        path.push(name);
+        let result = fs::read(&path);
+        if result.is_err() {
+            panic!("Binary {path:?} is missing!");
+        }
+        result.unwrap().into()
+    }
 }
 
 pub struct TestConfig {
@@ -35,6 +108,12 @@ pub struct TestConfig {
     pub fixed_rand: bool,
     rng_count: usize,
     pub sign: Option<Vec<u8>>,
+}
+
+impl Default for TestConfig {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl TestConfig {
@@ -72,8 +151,7 @@ impl TestConfig {
     }
 
     pub fn gen_rand_buf(&mut self, len: usize) -> Vec<u8> {
-        let mut buf = Vec::<u8>::with_capacity(len);
-        buf.resize(len, 0);
+        let mut buf = vec![0; len];
 
         if !self.fixed_rand {
             self.rng.fill(buf.as_mut_slice());
@@ -85,22 +163,40 @@ impl TestConfig {
         }
         buf
     }
+
+    pub fn single_sign_script_args(&self) -> Vec<u8> {
+        let mut hasher = ckb_hash::Blake2bBuilder::new(32)
+            .personal(b"ckb-sphincs+-sct")
+            .build();
+        hasher.update(&single_sign_script_args_prefix().expect("prefix"));
+        hasher.update(&self.key.pk);
+        let mut result = [0u8; 32];
+        hasher.finalize(&mut result);
+        result.to_vec()
+    }
 }
 
-pub fn gen_tx(dummy: &mut DummyDataLoader, config: &mut TestConfig) -> TransactionView {
+pub fn gen_tx(
+    dummy: &mut DummyDataLoader,
+    config: &mut TestConfig,
+    name: &'static str,
+) -> TransactionView {
     let lock_args = Bytes::from(if config.pubkey_hash_error {
         config.gen_rand_buf(32)
     } else {
-        blake2b_256(&config.key.pk).to_vec()
+        config.single_sign_script_args()
     });
-    gen_tx_with_grouped_args(dummy, vec![(lock_args, 1)], config)
+    gen_tx_with_grouped_args(dummy, vec![(lock_args, 1)], config, name)
 }
 
 pub fn gen_tx_with_grouped_args(
     dummy: &mut DummyDataLoader,
     grouped_args: Vec<(Bytes, usize)>,
     config: &mut TestConfig,
+    name: &'static str,
 ) -> TransactionView {
+    let bin = Loader::default().load_binary(name);
+
     // setup sighash_all dep
     let sighash_all_out_point = {
         let contract_tx_hash = Byte32::from_slice(&config.gen_rand_buf(32)).unwrap();
@@ -108,16 +204,12 @@ pub fn gen_tx_with_grouped_args(
     };
     // dep contract code
     let sighash_all_cell = CellOutput::new_builder()
-        .capacity(
-            Capacity::bytes(SPHINCSPLUS_EXAMPLE_BIN.len())
-                .expect("script capacity")
-                .pack(),
-        )
+        .capacity(Capacity::bytes(bin.len()).expect("script capacity").pack())
         .build();
-    let sighash_all_cell_data_hash = CellOutput::calc_data_hash(&SPHINCSPLUS_EXAMPLE_BIN);
+    let sighash_all_cell_data_hash = CellOutput::calc_data_hash(&bin);
     dummy.cells.insert(
         sighash_all_out_point.clone(),
-        (sighash_all_cell, SPHINCSPLUS_EXAMPLE_BIN.clone()),
+        (sighash_all_cell, bin.clone()),
     );
 
     // setup default tx builder
@@ -176,14 +268,14 @@ pub fn sign_tx(
 }
 
 pub fn sign_tx_by_input_group(
-    _dummy: &mut DummyDataLoader,
+    dummy: &DummyDataLoader,
     tx: TransactionView,
     begin_index: usize,
     len: usize,
     config: &mut TestConfig,
 ) -> TransactionView {
     let tx_hash = tx.hash();
-    let sign_info_len = config.key.get_sign_len() + config.key.get_pk_len();
+    let sign_info_len = 5 + config.key.get_sign_len() + config.key.get_pk_len();
 
     let mut signed_witnesses: Vec<packed::Bytes> = tx
         .inputs()
@@ -191,43 +283,72 @@ pub fn sign_tx_by_input_group(
         .enumerate()
         .map(|(i, _)| {
             if i == begin_index {
-                let mut blake2b = ckb_hash::new_blake2b();
-                let mut message = [0u8; 32];
+                let mut blake2b = ckb_hash::Blake2bBuilder::new(32)
+                    .personal(b"ckb-sphincs+-msg")
+                    .build();
+                // CKB_TX_MESSAGE_ALL process, see: https://github.com/nervosnetwork/rfcs/pull/446
                 blake2b.update(&tx_hash.raw_data());
+                // digest input cells
+                for cell_input in tx.inputs() {
+                    let (cell_output, cell_data) = dummy
+                        .cells
+                        .get(&cell_input.previous_output())
+                        .expect("fetch input cell");
+
+                    blake2b.update(cell_output.as_slice());
+                    blake2b.update(&(cell_data.len() as u32).to_le_bytes());
+                    blake2b.update(cell_data);
+                }
                 // digest the first witness
                 let witness = WitnessArgs::new_unchecked(tx.witnesses().get(i).unwrap().unpack());
 
-                let zero_lock: Bytes = {
-                    let mut buf = Vec::new();
-                    buf.resize(sign_info_len, 0);
-                    buf.into()
-                };
+                let zero_lock: Bytes = vec![0; sign_info_len].into();
 
                 let witness_for_digest = witness
                     .clone()
                     .as_builder()
                     .lock(Some(zero_lock).pack())
                     .build();
+                blake2b.update(
+                    &(witness_for_digest.input_type().as_slice().len() as u32).to_le_bytes()[..],
+                );
+                blake2b.update(witness_for_digest.input_type().as_slice());
+                blake2b.update(
+                    &(witness_for_digest.output_type().as_slice().len() as u32).to_le_bytes()[..],
+                );
+                blake2b.update(witness_for_digest.output_type().as_slice());
 
-                let witness_len = witness_for_digest.as_bytes().len() as u64;
-                blake2b.update(&witness_len.to_le_bytes());
-                blake2b.update(&witness_for_digest.as_bytes());
+                // digest the remaining witnesses
                 ((i + 1)..(i + len)).for_each(|n| {
                     let witness = tx.witnesses().get(n).unwrap();
                     let witness_len = witness.raw_data().len() as u64;
                     blake2b.update(&witness_len.to_le_bytes());
                     blake2b.update(&witness.raw_data());
                 });
-                blake2b.finalize(&mut message);
+
+                // The first 2 zero bytes denote empty FIPS 205 context
+                let mut message = [0u8; 34];
+                blake2b.finalize(&mut message[2..]);
+
+                // fill in actual signature
                 let witness_lock = {
                     if config.message_error {
-                        config.rng.fill(&mut message);
+                        config.rng.fill(&mut message[..]);
                     }
                     let start = std::time::Instant::now();
-                    let mut witness_buf = Vec::new();
-                    witness_buf.resize(sign_info_len, 0);
+                    let mut witness_buf = vec![0; sign_info_len];
 
-                    witness_buf[..config.key.get_sign_len()].copy_from_slice(&if config
+                    witness_buf[0..5].copy_from_slice(&single_sign_witness_prefix().unwrap());
+
+                    witness_buf[5..config.key.get_pk_len() + 5].copy_from_slice(&if config
+                        .pubkey_error
+                    {
+                        config.gen_rand_buf(config.key.get_pk_len())
+                    } else {
+                        config.key.pk.clone()
+                    });
+
+                    witness_buf[config.key.get_pk_len() + 5..].copy_from_slice(&if config
                         .sign
                         .is_none()
                     {
@@ -245,17 +366,9 @@ pub fn sign_tx_by_input_group(
                         use base64::prelude::*;
                         print!(
                             "--sign {}",
-                            BASE64_STANDARD.encode(&witness_buf[..config.key.get_sign_len()])
+                            BASE64_STANDARD.encode(&witness_buf[config.key.get_pk_len() + 5..])
                         )
                     }
-
-                    witness_buf[config.key.get_sign_len()..].copy_from_slice(
-                        &if config.pubkey_error {
-                            config.gen_rand_buf(config.key.get_pk_len())
-                        } else {
-                            config.key.pk.clone()
-                        },
-                    );
 
                     if config.print_time {
                         println!(

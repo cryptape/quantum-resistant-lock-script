@@ -16,7 +16,7 @@ void randombytes(unsigned char *x, unsigned long long xlen) { ASSERT(0); }
 
 int main() {
   int err =
-      sphincs_plus_verify(G_TEST_DATA_SIGN, sizeof(G_TEST_DATA_SIGN),
+      sphincs_plus_verify(G_TEST_DATA_SIGN, SPHINCS_PLUS_SIGN_SIZE,
                           G_TEST_DATA_MSG, sizeof(G_TEST_DATA_MSG),
                           G_TEST_DATA_PUB_KEY, sizeof(G_TEST_DATA_PUB_KEY));
   if (err != 0) {
@@ -24,7 +24,7 @@ int main() {
   }
 
   printf("PubKey size: %d, Sign size: %d\n", sizeof(G_TEST_DATA_PUB_KEY),
-         sizeof(G_TEST_DATA_SIGN));
+         SPHINCS_PLUS_SIGN_SIZE);
   // printf("Done");
   return 0;
 }

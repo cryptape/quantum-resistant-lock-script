@@ -1,0 +1,56 @@
+[package]
+name = "ckb-fips205-utils"
+version = "0.1.0"
+description = "A utility crate gluing CKB with FIPS 205"
+edition = "2021"
+
+[dependencies]
+int-enum = "1.1.2"
+ckb-std = "0.17.1"
+ckb-rust-std = "1.0.0"
+ckb-gen-types = { version = "0.200.0-rc1", default-features = false }
+ckb-hash = { version = "0.200.0-rc1", default-features = false, features = ["ckb-contract"] }
+molecule = { version = "0.8", default-features = false }
+
+# Signing only crates
+ckb-mock-tx-types = { version = "0.200.0-rc1", optional = true }
+rand_core = { version = "0.6.4", optional = true }
+
+# Message only crates
+sha2 = { version = "0.10.8", optional = true }
+sha3 = { version = "0.10.8", optional = true }
+
+# Serde crates
+serde = { version = "1.0", features = ["derive"], optional = true }
+serde_string_enum = { version = "0.2.1", optional = true }
+unicase = { version = "2.6.0", optional = true }
+
+[dependencies.fips205]
+version = "0.4.1"
+default-features = false
+optional = true
+features = [
+  "slh_dsa_sha2_128s",
+  "slh_dsa_shake_128s",
+  "slh_dsa_sha2_128f",
+  "slh_dsa_shake_128f",
+  "slh_dsa_sha2_192s",
+  "slh_dsa_shake_192s",
+  "slh_dsa_sha2_192f",
+  "slh_dsa_shake_192f",
+  "slh_dsa_sha2_256s",
+  "slh_dsa_shake_256s",
+  "slh_dsa_sha2_256f",
+  "slh_dsa_shake_256f"
+]
+
+[features]
+default = ["verifying"]
+std = []
+verifying = ["fips205"]
+signing = [
+  "std", "verifying",
+  "fips205/default-rng", "ckb-mock-tx-types", "rand_core",
+]
+message = ["std", "sha2", "sha3"]
+serde = ["std", "dep:serde", "serde_string_enum", "unicase"]

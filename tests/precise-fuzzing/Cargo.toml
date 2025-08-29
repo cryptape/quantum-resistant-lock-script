@@ -1,0 +1,107 @@
+[package]
+name = "precise-fuzzing"
+version = "0.1.0"
+edition = "2024"
+autobins = false
+
+[[bin]]
+name = "corpus-generator"
+
+[[bin]]
+name = "hfuzz-target"
+
+[[bin]]
+name = "afl-target"
+
+[features]
+default = ["sha2_128s"]
+
+sha2_128f = [
+  "ckb_sphincs_utils/sha2",
+  "ckb_sphincs_utils/hash_128",
+  "ckb_sphincs_utils/hash_options_f",
+  "ckb_sphincs_utils/thashes_simple"
+]
+sha2_128s = [
+  "ckb_sphincs_utils/sha2",
+  "ckb_sphincs_utils/hash_128",
+  "ckb_sphincs_utils/hash_options_s",
+  "ckb_sphincs_utils/thashes_simple"
+]
+sha2_192f = [
+  "ckb_sphincs_utils/sha2",
+  "ckb_sphincs_utils/hash_192",
+  "ckb_sphincs_utils/hash_options_f",
+  "ckb_sphincs_utils/thashes_simple"
+]
+sha2_192s = [
+  "ckb_sphincs_utils/sha2",
+  "ckb_sphincs_utils/hash_192",
+  "ckb_sphincs_utils/hash_options_s",
+  "ckb_sphincs_utils/thashes_simple"
+]
+sha2_256f = [
+  "ckb_sphincs_utils/sha2",
+  "ckb_sphincs_utils/hash_256",
+  "ckb_sphincs_utils/hash_options_f",
+  "ckb_sphincs_utils/thashes_simple"
+]
+sha2_256s = [
+  "ckb_sphincs_utils/sha2",
+  "ckb_sphincs_utils/hash_256",
+  "ckb_sphincs_utils/hash_options_s",
+  "ckb_sphincs_utils/thashes_simple"
+]
+shake_128f = [
+  "ckb_sphincs_utils/shake",
+  "ckb_sphincs_utils/hash_128",
+  "ckb_sphincs_utils/hash_options_f",
+  "ckb_sphincs_utils/thashes_simple"
+]
+shake_128s = [
+  "ckb_sphincs_utils/shake",
+  "ckb_sphincs_utils/hash_128",
+  "ckb_sphincs_utils/hash_options_s",
+  "ckb_sphincs_utils/thashes_simple"
+]
+shake_192f = [
+  "ckb_sphincs_utils/shake",
+  "ckb_sphincs_utils/hash_192",
+  "ckb_sphincs_utils/hash_options_f",
+  "ckb_sphincs_utils/thashes_simple"
+]
+shake_192s = [
+  "ckb_sphincs_utils/shake",
+  "ckb_sphincs_utils/hash_192",
+  "ckb_sphincs_utils/hash_options_s",
+  "ckb_sphincs_utils/thashes_simple"
+]
+shake_256f = [
+  "ckb_sphincs_utils/shake",
+  "ckb_sphincs_utils/hash_256",
+  "ckb_sphincs_utils/hash_options_f",
+  "ckb_sphincs_utils/thashes_simple"
+]
+shake_256s = [
+  "ckb_sphincs_utils/shake",
+  "ckb_sphincs_utils/hash_256",
+  "ckb_sphincs_utils/hash_options_s",
+  "ckb_sphincs_utils/thashes_simple"
+]
+
+[dependencies.ckb_sphincs_utils]
+path = "../../tools/ckb-sphincs-utils"
+default-features = false
+features = ["serialize_key"]
+
+[dependencies.ckb-fips205-utils]
+path = "../../crates/ckb-fips205-utils"
+default-features = false
+features = ["message"]
+
+[dependencies]
+fips205 = "0.4.1"
+clap = { version = "4.5.28", features = ["cargo", "derive"] }
+rand = "0.8.5"
+honggfuzz = "0.5"
+afl = "0.15.18"

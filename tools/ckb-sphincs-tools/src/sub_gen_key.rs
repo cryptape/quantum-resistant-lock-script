@@ -1,5 +1,5 @@
-use serde_json::{from_str, Value};
 use ckb_sphincs_utils::SphincsPlus;
+use serde_json::{from_str, Value};
 use std::path::PathBuf;
 
 pub fn subcmd_gen_key(key_file: PathBuf) {

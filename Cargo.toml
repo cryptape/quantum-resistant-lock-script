@@ -1,0 +1,30 @@
+[workspace]
+resolver = "2"
+
+members = [
+  "contracts/hybrid-sphincs-all-in-one-lock",
+  "contracts/sphincs-all-in-one-lock",
+  "contracts/spawn-exec-test-runner",
+  "crates/ckb-fips205-utils",
+  "crates/fuzzing-corpus-generator",
+  "crates/intermediate-source-generator",
+  "crates/script-merge-tool",
+  "tests/multisig-tests",
+  "tests/nist-test-vector-tests",
+  "tests/precise-fuzzing",
+  "tests/precise-fuzzing/fuzz",
+  "tests/sphincsplus_rust",
+  "tests/validation-tests",
+  "tools/ckb-sphincs-tools",
+  "tools/ckb-sphincs-utils",
+]
+
+exclude = [
+  "fuzzing/ckb-script-fuzzing-toolkit/tools/flattener"
+]
+
+[profile.release]
+overflow-checks = true
+strip = false
+codegen-units = 1
+debug = true

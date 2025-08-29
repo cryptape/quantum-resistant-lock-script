@@ -22,10 +22,10 @@ size_t fill_buf(uint8_t *buf, size_t buf_size, uint8_t *data, size_t size) {
 int LLVMFuzzerTestOneInput(uint8_t *data, size_t size) {
   uint8_t message[SPX_MLEN];
 
-  uint32_t pubkey_size = sphincs_plus_get_pk_size();
+  uint32_t pubkey_size = SPHINCS_PLUS_PK_SIZE;
   uint8_t pubkey[pubkey_size];
 
-  uint32_t sign_size = sphincs_plus_get_sign_size();
+  uint32_t sign_size = SPHINCS_PLUS_SIGN_SIZE;
   uint8_t sign[sign_size];
 
   size_t offset = fill_buf(message, SPX_MLEN, data, size);

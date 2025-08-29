@@ -1,90 +1,148 @@
-TARGET := riscv64-unknown-linux-gnu-
-CC := $(TARGET)gcc
-LD := $(TARGET)gcc
-OBJCOPY := $(TARGET)objcopy
+# We cannot use $(shell pwd), which will return unix path format on Windows,
+# making it hard to use.
+cur_dir = $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
-PARAMS = sphincs-shake-128f
-THASH = simple
+TOP := $(cur_dir)
+# RUSTFLAGS that are likely to be tweaked by developers. For example,
+# while we enable debug logs by default here, some might want to strip them
+# for minimal code size / consumed cycles.
+CUSTOM_RUSTFLAGS := -C debug-assertions
+# Additional cargo args to append here. For example, one can use
+# make test CARGO_ARGS="-- --nocapture" so as to inspect data emitted to
+# stdout in unit tests
+CARGO_ARGS :=
+MODE := release
+# Tweak this to change the clang version to use for building C code. By default
+# we use a bash script with somes heuristics to find clang in current system.
+CLANG := $(shell $(TOP)/scripts/find_clang)
+# When this is set, a single contract will be built instead of all contracts
+CONTRACT :=
+# By default, we would clean build/{release,debug} folder first, in case old
+# contracts are mixed together with new ones, if for some reason you want to
+# revert this behavior, you can change this to anything other than true
+CLEAN_BUILD_DIR_FIRST := true
+BUILD_DIR := build/$(MODE)
 
-CFLAGS := -fPIC -O3 -fno-builtin-printf -fno-builtin-memcmp -nostdinc -nostartfiles -fvisibility=hidden -fdata-sections -ffunction-sections -nostdlib -Wno-nonnull-compare -DCKB_VM -DCKB_DECLARATION_ONLY -g
-LDFLAGS := -fdata-sections -ffunction-sections
-
-# Using a new version of gcc will have a warning of ckb-c-stdlib
-CFLAGS := $(CFLAGS) -w
-# CFLAGS := $(CFLAGS) -Wall -Werror -Wno-nonnull  -Wno-unused-function
-LDFLAGS := $(LDFLAGS) -Wl,-static -Wl,--gc-sections
-
-CFLAGS := $(CFLAGS) -I c -I deps/ckb-c-stdlib/libc -I deps/ckb-c-stdlib -I deps/ckb-c-stdlib/molecule
-CFLAGS := $(CFLAGS) -I deps/sphincsplus/ref -DPARAMS=$(PARAMS)
-
-SPHINCS_PLUS_DIR = deps/sphincsplus/ref/
-
-SOURCES = \
-	$(SPHINCS_PLUS_DIR)address.c \
-	$(SPHINCS_PLUS_DIR)merkle.c \
-	$(SPHINCS_PLUS_DIR)wots.c \
-	$(SPHINCS_PLUS_DIR)wotsx1.c \
-	$(SPHINCS_PLUS_DIR)utils.c \
-	$(SPHINCS_PLUS_DIR)utilsx1.c \
-	$(SPHINCS_PLUS_DIR)fors.c \
-	$(SPHINCS_PLUS_DIR)sign.c \
-	c/ckb-sphincsplus.c
-
-HEADERS = \
-	$(SPHINCS_PLUS_DIR)params.h \
-	$(SPHINCS_PLUS_DIR)address.h \
-	$(SPHINCS_PLUS_DIR)merkle.h \
-	$(SPHINCS_PLUS_DIR)wots.h \
-	$(SPHINCS_PLUS_DIR)wotsx1.h \
-	$(SPHINCS_PLUS_DIR)utils.h \
-	$(SPHINCS_PLUS_DIR)utilsx1.h \
-	$(SPHINCS_PLUS_DIR)fors.h \
-	$(SPHINCS_PLUS_DIR)api.h \
-	$(SPHINCS_PLUS_DIR)hash.h \
-	$(SPHINCS_PLUS_DIR)thash.h \
-	$(SPHINCS_PLUS_DIR)randombytes.h \
-	c/ckb-sphincsplus.h
-
-ifneq (,$(findstring shake,$(PARAMS)))
-	SOURCES += \
-		$(SPHINCS_PLUS_DIR)fips202.c \
-		$(SPHINCS_PLUS_DIR)hash_shake.c \
-		$(SPHINCS_PLUS_DIR)thash_shake_$(THASH).c
-	HEADERS += $(SPHINCS_PLUS_DIR)fips202.h
-endif
-ifneq (,$(findstring haraka,$(PARAMS)))
-	SOURCES += \
-		$(SPHINCS_PLUS_DIR)haraka.c \
-		$(SPHINCS_PLUS_DIR)hash_haraka.c \
-		$(SPHINCS_PLUS_DIR)thash_haraka_$(THASH).c
-	HEADERS += $(SPHINCS_PLUS_DIR)haraka.h
-endif
-ifneq (,$(findstring sha2,$(PARAMS)))
-	SOURCES += \
-		$(SPHINCS_PLUS_DIR)sha2.c \
-		$(SPHINCS_PLUS_DIR)hash_sha2.c \
-		$(SPHINCS_PLUS_DIR)thash_sha2_$(THASH).c
-	HEADERS += $(SPHINCS_PLUS_DIR)sha2.h
+ifeq (release,$(MODE))
+	MODE_ARGS := --release
 endif
 
-# CFLAGS := $(CFLAGS) -DCKB_C_STDLIB_PRINTF
+# Pass setups to child make processes
+export CUSTOM_RUSTFLAGS
+export TOP
+export CARGO_ARGS
+export MODE
+export CLANG
+export BUILD_DIR
 
-# docker pull nervos/ckb-riscv-gnu-toolchain:gnu-jammy-20230214
-BUILDER_DOCKER := nervos/ckb-riscv-gnu-toolchain@sha256:7601a814be2595ad471288fefc176356b31101837a514ddb0fc93b11c1cf5135
+default: build test
 
-all: build/sphincsplus_lock
+# Note that contract names are sorted so 'c-*' builds before 'hybrid-*'
+build:
+	@if [ "x$(CLEAN_BUILD_DIR_FIRST)" = "xtrue" ]; then \
+		echo "Cleaning $(BUILD_DIR) directory..."; \
+		rm -rf $(BUILD_DIR); \
+	fi
+	mkdir -p $(BUILD_DIR)
+	@set -eu; \
+	if [ "x$(CONTRACT)" = "x" ]; then \
+		for crate in $(wildcard crates/*); do \
+			cargo build -p $$(basename $$crate) $(MODE_ARGS) $(CARGO_ARGS); \
+		done; \
+		for contract in $(sort $(wildcard contracts/*)); do \
+			$(MAKE) -e -C $$contract build; \
+		done; \
+		for crate in $(wildcard tools/*); do \
+			cargo build -p $$(basename $$crate | tr '-' '_') $(MODE_ARGS) $(CARGO_ARGS); \
+		done; \
+	else \
+		$(MAKE) -e -C contracts/$(CONTRACT) build; \
+		cargo build -p $(CONTRACT)-sim; \
+	fi;
 
-all-via-docker:
-	docker run --rm -v `pwd`:/code ${BUILDER_DOCKER} bash -c "cd /code && make PARAMS=$(PARAMS) THASH=$(THASH)"
+# Run a single make task for a specific contract. For example:
+#
+# make run CONTRACT=stack-reorder TASK=adjust_stack_size STACK_SIZE=0x200000
+TASK :=
+run:
+	$(MAKE) -e -C contracts/$(CONTRACT) $(TASK)
 
-build/convert_asm: c/ref/fips202_asm.S
-	riscv-naive-assembler -i c/ref/fips202_asm.S > c/ref/fips202_asm_bin.S
+test:
+	bash tests/sphincsplus/all_run.sh
+	bash tests/sphincsplus_rust/all_run.sh
+	bash tests/precise-fuzzing/ci.sh
+	# Generating sphincs signatures takes a long time in certain configurations,
+	# we will run the tests in release mode to speed things up
+	cargo test $(CARGO_ARGS) --release -p validation-tests
+	cargo test $(CARGO_ARGS) --release -p nist-test-vector-tests
+	cargo test $(CARGO_ARGS) --release -p multisig-tests
 
-build/sphincsplus_lock: c/ckb-sphincsplus-lock.c $(SOURCES) $(HEADERS)
-	mkdir -p build
-	$(CC) $(CFLAGS) -o $@ $(SOURCES) $<
-	cp $@ $@.debug
-	$(OBJCOPY) --strip-debug --strip-all $@
+# check, clippy and fmt here are provided for completeness,
+# there is nothing wrong invoking cargo directly instead of make.
+check:
+	cargo check $(CARGO_ARGS)
+
+clippy:
+	cargo clippy $(CARGO_ARGS)
+
+fmt:
+	cargo fmt $(CARGO_ARGS)
+	@for contract in $(wildcard contracts/c-*); do \
+		$(MAKE) -e -C $$contract fmt; \
+	done; \
+
+# Arbitrary cargo command is supported here. For example:
+#
+# make cargo CARGO_CMD=expand CARGO_ARGS="--ugly"
+#
+# Invokes:
+# cargo expand --ugly
+CARGO_CMD :=
+cargo:
+	cargo $(CARGO_CMD) $(CARGO_ARGS)
 
 clean:
-	rm -rf build/sphincsplus_lock
+	rm -rf build contracts/*/build
+	rm -rf hfuzz_target hfuzz_workspace corpus*
+	cargo clean
+
+TEMPLATE_TYPE := --git
+TEMPLATE_REPO := https://github.com/cryptape/ckb-script-templates
+CRATE :=
+TEMPLATE := contract
+DESTINATION := contracts
+generate:
+	@set -eu; \
+	if [ "x$(CRATE)" = "x" ]; then \
+		mkdir -p $(DESTINATION); \
+		cargo generate $(TEMPLATE_TYPE) $(TEMPLATE_REPO) $(TEMPLATE) \
+			--destination $(DESTINATION); \
+		GENERATED_DIR=$$(ls -dt $(DESTINATION)/* | head -n 1); \
+		if [ -f "$$GENERATED_DIR/.cargo-generate/tests.rs" ]; then \
+			# cat $$GENERATED_DIR/.cargo-generate/tests.rs >> tests/src/tests.rs; \
+			rm -rf $$GENERATED_DIR/.cargo-generate/; \
+		fi; \
+		sed "s,@@INSERTION_POINT@@,@@INSERTION_POINT@@\n  \"$$GENERATED_DIR\"\,," Cargo.toml > Cargo.toml.new; \
+		mv Cargo.toml.new Cargo.toml; \
+	else \
+		mkdir -p $(DESTINATION); \
+		cargo generate $(TEMPLATE_TYPE) $(TEMPLATE_REPO) $(TEMPLATE) \
+			--destination $(DESTINATION) \
+			--name $(CRATE); \
+		if [ -f "$(DESTINATION)/$(CRATE)/.cargo-generate/tests.rs" ]; then \
+			# cat $(DESTINATION)/$(CRATE)/.cargo-generate/tests.rs >> tests/src/tests.rs; \
+			rm -rf $(DESTINATION)/$(CRATE)/.cargo-generate/; \
+		fi; \
+		sed '/@@INSERTION_POINT@@/s/$$/\n  "$(DESTINATION)\/$(CRATE)",/' Cargo.toml > Cargo.toml.new; \
+		mv Cargo.toml.new Cargo.toml; \
+	fi;
+
+prepare:
+	rustup target add riscv64imac-unknown-none-elf
+
+# Generate checksum info for reproducible build
+CHECKSUM_FILE := build/checksums-$(MODE).txt
+checksum: build
+	shasum -a 256 build/$(MODE)/* > $(CHECKSUM_FILE)
+
+.PHONY: build test check clippy fmt cargo clean prepare checksum
