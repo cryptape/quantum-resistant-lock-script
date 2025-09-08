@@ -25,11 +25,7 @@ jobs:
 
   reproducible-build:
 
-    strategy:
-      matrix:
-        os: [ubuntu-latest, ubuntu-24.04-arm]
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -47,7 +43,7 @@ jobs:
       with:
         submodules: true
     - name: Install latest llvm & lld
-      run: brew install llvm lld
+      run: brew install llvm@20 lld
     - uses: actions-rust-lang/setup-rust-toolchain@v1
     - name: Prepare, build, test, clippy, format
       run: make prepare build test clippy fmt
