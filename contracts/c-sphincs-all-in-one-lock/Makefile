@@ -51,9 +51,9 @@ CFLAGS += -I $(SPHINCS_PLUS_DIR) -I $(CUR_BUILD) -I $(cur_dir)/utils
 # CFLAGS += -DCKB_C_STDLIB_PRINTF
 
 OS := $(shell uname -s)
-LDFLAGS :=
-ifneq ($(OS),Darwin)
-	LDFLAGS += -static -Wl,--gc-sections
+LDFLAGS := -static -Wl,--gc-sections
+ifeq ($(OS),Darwin)
+	LDFLAGS += -fuse-ld=ld.lld
 endif
 
 default: build
