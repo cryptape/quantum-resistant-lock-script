@@ -45,5 +45,5 @@ jobs:
     - name: Install latest llvm & lld
       run: brew install llvm lld
     - uses: actions-rust-lang/setup-rust-toolchain@v1
-    - name: Prepare, build, test, clippy, format
+    - name: Prepare, build, test, clippy
       run: make prepare build test clippy
