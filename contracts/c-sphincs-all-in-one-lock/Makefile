@@ -53,7 +53,7 @@ CFLAGS += -I $(SPHINCS_PLUS_DIR) -I $(CUR_BUILD) -I $(cur_dir)/utils
 OS := $(shell uname -s)
 LDFLAGS := -static -Wl,--gc-sections
 ifeq ($(OS),Darwin)
-	LDFLAGS += -fuse-ld=ld.lld
+	LDFLAGS += -fuse-ld=lld
 endif
 
 default: build
