@@ -23,6 +23,17 @@ jobs:
     - name: git diff
       run: git diff --exit-code
 
+  reproducible-build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: "true"
+    - name: Reproducible build
+      run: ./scripts/reproducible_build_docker
+
   macos-build:
 
     runs-on: macos-latest
@@ -34,7 +45,5 @@ jobs:
     - name: Install latest llvm & lld
       run: brew install llvm lld
     - uses: actions-rust-lang/setup-rust-toolchain@v1
-    - name: Prepare, build, test, clippy, format
-      run: make prepare build test clippy fmt
-    - name: git diff
-      run: git diff --exit-code
+    - name: Prepare, build, test, clippy
+      run: make prepare build test clippy

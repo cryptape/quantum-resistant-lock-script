@@ -50,7 +50,11 @@ CFLAGS += --target=riscv64 -march=rv64imc_zba_zbb_zbc_zbs \
 CFLAGS += -I $(SPHINCS_PLUS_DIR) -I $(CUR_BUILD) -I $(cur_dir)/utils
 # CFLAGS += -DCKB_C_STDLIB_PRINTF
 
+OS := $(shell uname -s)
 LDFLAGS := -static -Wl,--gc-sections
+ifeq ($(OS),Darwin)
+	LDFLAGS += -fuse-ld=lld
+endif
 
 default: build
 
