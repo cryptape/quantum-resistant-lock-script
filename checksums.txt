@@ -1,0 +1,10 @@
+59a4c25e6185f906ba379db530fc08c1e1f8aa23db2bcb265a6ab321a0d5b527  build/release/c-sphincs-all-in-one-lock
+55fbe64ca9dfc17335ee9af56083dde6bbdf23c79a967d37805b8467b86d458e  build/release/c-sphincs-all-in-one-lock.debug
+313f3122a5ad662a9f7cf81d18d3ec4fd3ba3ea5af43fb3ac405844731d6306a  build/release/hybrid-sphincs-all-in-one-lock
+7cfd89954d36dc22381b3d5179eb7c75556abe8c576bf3551cdda3d5d60ace0d  build/release/hybrid-sphincs-all-in-one-lock.debug
+67e27355b90b19e4768ef83d771d085aaee451942eb84c88f7383e23e7ec80ac  build/release/nist-vector-tester
+a0999aac87383e8ac3191f6d9472d2e94b61e9077b1bcd00f510d6cf67e3ab7f  build/release/nist-vector-tester.debug
+fb6448fc699653474620c041b0be05b0393b612a023221010f39a61c47c9102f  build/release/spawn-exec-test-runner
+0ceeffed81973224e315953147012c3fe6a058f0f24c605fc53deefd7564d72b  build/release/spawn-exec-test-runner.debug
+45946de1491b199b2975b6c7bff7a5149e384337db1ced7a366c9ef7299f0884  build/release/sphincs-all-in-one-lock
+6dadb87af0433b1045a5271f1efca6420e1408df6668498043ca3e2a91c37c54  build/release/sphincs-all-in-one-lock.debug
