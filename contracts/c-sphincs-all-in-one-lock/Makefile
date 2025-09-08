@@ -52,7 +52,7 @@ CFLAGS += -I $(SPHINCS_PLUS_DIR) -I $(CUR_BUILD) -I $(cur_dir)/utils
 
 OS := $(shell uname -s)
 LDFLAGS :=
-ifneq($(OS),Darwin)
+ifneq ($(OS),Darwin)
 	LDFLAGS += -static -Wl,--gc-sections
 endif
 
