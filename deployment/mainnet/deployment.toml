@@ -1,0 +1,17 @@
+[[cells]]
+name = "quantum-resistant-lock-script"
+enable_type_id = true
+location = { file = "../../build/release/c-sphincs-all-in-one-lock" }
+
+
+# This is the lock script in output. Check it very carefully.
+# 1. xxuejie@gmail.com       ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqw8jqfpfe9lwsvs74j3a27aalhqshrslps8hlplq
+# 2. quake.wang@gmail.com    ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq2u7q5rqr3nam68g2wfel9365l855m7fcg58j52a
+# 3. hanssen0@hanssen0.com   ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq2hvk2yvt998w799ra8t73gunvrjrlw4agv2t7np
+# 4. rink1969@gmail.com      ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqt4q36wdxa34k89g5snyw694jy0nxht8yshfyw55
+# 5. copperheart05@gmail.com ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq0jyvhms76lphfm56dmd2s06k9yxwkxy4gqzah69
+
+[lock]
+code_hash = "0x5c5069eb0857efc65e1bca0c07df34c31663b3622fd3876c876320fc9634e2a8"
+args = "0xb9f04d55adb7b0fa0b56a752c72f201003115907"
+hash_type = "type"
