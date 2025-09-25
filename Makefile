@@ -83,7 +83,7 @@ check:
 	cargo check $(CARGO_ARGS)
 
 clippy:
-	cargo clippy $(CARGO_ARGS)
+	cargo clippy $(CARGO_ARGS) -- -A clippy::manual-is-multiple-of
 
 fmt:
 	cargo fmt $(CARGO_ARGS)
