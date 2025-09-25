@@ -18,6 +18,8 @@ jobs:
     - name: Install llvm
       run: sudo apt update && sudo apt install -y clang llvm clang-format lld
     - uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        components: rustfmt, clippy
     - name: Prepare, build, test, clippy, format
       run: make prepare build test clippy fmt
     - name: git diff
@@ -45,5 +47,7 @@ jobs:
     - name: Install latest llvm & lld
       run: brew install llvm lld
     - uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        components: rustfmt, clippy
     - name: Prepare, build, test, clippy
       run: make prepare build test clippy
