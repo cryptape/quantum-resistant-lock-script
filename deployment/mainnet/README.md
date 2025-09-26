@@ -23,13 +23,21 @@ This step is very important, otherwise subsequent signing will fail. This settin
 ## How to upgrade
 It is locked by 3-of-5 multisig with following people:
 
-| # | Email | CKB Address |
+| # | Contact Information | CKB Address |
 |---|-------|-------------|
 | 1 | xxuejie@gmail.com | ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqw8jqfpfe9lwsvs74j3a27aalhqshrslps8hlplq |
 | 2 | quake.wang@gmail.com | ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq2u7q5rqr3nam68g2wfel9365l855m7fcg58j52a |
 | 3 | hanssen0@hanssen0.com | ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq2hvk2yvt998w799ra8t73gunvrjrlw4agv2t7np |
 | 4 | rink1969@gmail.com | ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqt4q36wdxa34k89g5snyw694jy0nxht8yshfyw55 |
 | 5 | copperheart05@gmail.com | ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq0jyvhms76lphfm56dmd2s06k9yxwkxy4gqzah69 |
+
+Any one can reach these people by contact information to verify the CKB address. The contact information can be:
+
+- email
+- GitHub account
+- X (Twitter) account
+- Discord account
+- Well-known nickname in the CKB community
 
 
 ## Process
