@@ -25,6 +25,9 @@ Each field here serves a different purpose:
 * `M`: `M` represents the threshold, meaning how many signatures must be provided to unlock the cell. For instance, in a 3-of-5 setup, `M` must be 3.
 * `N`: `N` represents the avialble public keys, in a 3-of-5 setup, `N` must be 5.
 
+If any signature fails verification, the entire process fails, even when the remaining signatures (more than `M`) are valid. In the UTXO model, transactions can be validated off-chain by SDKs or tools, allowing invalid signatures to be removed before broadcasting to the P2P network.
+
+
 `N` also denotes how many pairs of `param flag` and `public key` will follow. Each `param id` will be 1 byte, the higher 7 bit represents `param ID`, denoting the parameter set to use, the lowest bit is a signature flag, for multisig configuration, this bit is always 0. A public key can range from 48 to 64 depending on the parameter set. The exact of value in `param id` indicates the length of public key followed.
 
 ## Multisig ID, Param ID
