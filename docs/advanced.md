@@ -26,7 +26,7 @@ Each field here serves a different purpose:
 * `N`: `N` represents the avialble public keys, in a 3-of-5 setup, `N` must be 5.
 
 If any signature fails verification, the entire process fails, even when the remaining signatures (more than `M`) are valid. 
-In the UTXO model, transactions can be validated off-chain by SDKs or tools, allowing invalid signatures to be removed before broadcasting to the P2P network.
+In the UTXO model, transactions can be validated off-chain by SDKs or tools, allowing invalid signatures to be removed before broadcasting to the P2P network. Therefore, the design enforces a strict limit: provide exactly $M$ signatures (no more, no less).
 Therefore, the design only allows exactly `M` signatures to be provided—do not provide more than `M` signatures.
 
 
