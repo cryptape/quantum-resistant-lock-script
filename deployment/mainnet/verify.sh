@@ -28,9 +28,9 @@ function verify_lock_script() {
     hash_type=$(jq -r '.cell_tx.outputs[0].lock.hash_type' info.json)
     args=$(jq -r '.cell_tx.outputs[0].lock.args' info.json)
 
-    # https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0024-ckb-genesis-script-list/0024-ckb-genesis-script-list.md#secp256k1multisig
-    expected_code_hash="0x5c5069eb0857efc65e1bca0c07df34c31663b3622fd3876c876320fc9634e2a8"
-    expected_hash_type="type"
+    # https://github.com/nervosnetwork/ckb-system-scripts/pull/99#issuecomment-2814285588
+    expected_code_hash="0x36c971b8d41fbd94aabca77dc75e826729ac98447b46f91e00796155dddb0d29"
+    expected_hash_type="data1"
 
     if [ "$code_hash" != "$expected_code_hash" ]; then
         echo "✗ code_hash verification failed!"
@@ -51,7 +51,7 @@ function verify_lock_script() {
     --sighash-address ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq0jyvhms76lphfm56dmd2s06k9yxwkxy4gqzah69 \
     --threshold 3 \
     --require-first-n 0 \
-    --multisig-code-hash legacy)
+    --multisig-code-hash v2)
    
     expected_args=$(echo "$multisig_output" | grep "lock-arg:" | awk '{print $2}')
 

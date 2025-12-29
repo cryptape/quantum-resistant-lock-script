@@ -12,6 +12,6 @@ location = { file = "../../build/release/c-sphincs-all-in-one-lock" }
 # 5. copperheart05@gmail.com ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq0jyvhms76lphfm56dmd2s06k9yxwkxy4gqzah69
 
 [lock]
-code_hash = "0x5c5069eb0857efc65e1bca0c07df34c31663b3622fd3876c876320fc9634e2a8"
+code_hash = "0x36c971b8d41fbd94aabca77dc75e826729ac98447b46f91e00796155dddb0d29"
 args = "0xb9f04d55adb7b0fa0b56a752c72f201003115907"
-hash_type = "type"
+hash_type = "data1"
