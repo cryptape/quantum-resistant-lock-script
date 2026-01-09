@@ -46,7 +46,7 @@ function verify_lock_script() {
     multisig_output=$(ckb-cli tx build-multisig-address \
     --sighash-address ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqw8jqfpfe9lwsvs74j3a27aalhqshrslps8hlplq \
     --sighash-address ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq2u7q5rqr3nam68g2wfel9365l855m7fcg58j52a \
-    --sighash-address ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq2hvk2yvt998w799ra8t73gunvrjrlw4agv2t7np \
+    --sighash-address ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq0m2fr3ygwszxa77l5r7utgku85wyqvjac5wppfj \
     --sighash-address ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqt4q36wdxa34k89g5snyw694jy0nxht8yshfyw55 \
     --sighash-address ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq0jyvhms76lphfm56dmd2s06k9yxwkxy4gqzah69 \
     --threshold 3 \
