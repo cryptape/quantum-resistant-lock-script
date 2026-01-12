@@ -48,7 +48,7 @@ function verify_lock_script() {
     --sighash-address ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq2u7q5rqr3nam68g2wfel9365l855m7fcg58j52a \
     --sighash-address ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq0m2fr3ygwszxa77l5r7utgku85wyqvjac5wppfj \
     --sighash-address ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqt4q36wdxa34k89g5snyw694jy0nxht8yshfyw55 \
-    --sighash-address ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsq0jyvhms76lphfm56dmd2s06k9yxwkxy4gqzah69 \
+    --sighash-address ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqf4wq9qpe3pk5c0cy0g40mymrf26cqg4qctwdqge \
     --threshold 3 \
     --require-first-n 0 \
     --multisig-code-hash v2)
