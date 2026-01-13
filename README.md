@@ -46,3 +46,16 @@ In general, the `s` variants take longer to generate a signature, but takes less
 
 ### Security Notes
 This project has been audited by [ScaleBit](https://scalebit.xyz/reports/20251216-Quantum-Resistant-Lock-Script-Final-Audit-Report.pdf).
+
+
+## Deployment
+
+### Mainnet
+
+| Parameter   | Value                                                                |
+| ----------- | -------------------------------------------------------------------- |
+| `code_hash` | `0x302d35982f865ebcbedb9a9360e40530ed32adb8e10b42fbbe70d8312ff7cedf` |
+| `hash_type` | `type`                                                               |
+| `tx_hash`   | `0x4598d00df2f3dc8bc40eee38689a539c94f6cc3720b7a2a6746736daa60f500a` |
+| `index`     | `0x0`                                                                |
+| `dep_type`  | `code`                                                               |
