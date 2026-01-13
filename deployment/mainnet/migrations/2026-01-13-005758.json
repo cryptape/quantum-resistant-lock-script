@@ -1,0 +1,13 @@
+{
+  "cell_recipes": [
+    {
+      "name": "quantum-resistant-lock-script",
+      "tx_hash": "0x4598d00df2f3dc8bc40eee38689a539c94f6cc3720b7a2a6746736daa60f500a",
+      "index": 0,
+      "occupied_capacity": 21142200000000,
+      "data_hash": "0x49417a0ed39196e8d90d0088ca98bf6b881966ba1c2ea12160ca42141787565e",
+      "type_id": "0x302d35982f865ebcbedb9a9360e40530ed32adb8e10b42fbbe70d8312ff7cedf"
+    }
+  ],
+  "dep_group_recipes": []
+}
