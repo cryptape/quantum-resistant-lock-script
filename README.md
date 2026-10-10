@@ -65,7 +65,7 @@ This project has been audited by [ScaleBit](https://scalebit.xyz/reports/2025121
 | Parameter   | Value                                                                |
 | ----------- | -------------------------------------------------------------------- |
 | `code_hash` | `0x147ecbb5c5127d982ee1362d2c2bb4267803da2eb006d150e88af6caaa0a7eaf` |
-| `hash_type` | `data1`                                                               |
+| `hash_type` | `data2`                                                               |
 | `tx_hash`   | `0x631d9a6049fb1fc3790e89d9daf35abe535b5e754cd8c3404319319710f0b106` |
 | `index`     | `0x0`                                                                |
 | `dep_type`  | `code`                                                               |
